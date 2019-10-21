@@ -13,6 +13,8 @@ import javax.swing.ImageIcon;
  * @author usuario
  */
 public class ParametrosDeInterfaz {
-    public static final Color colorFondo = new Color(155, 255, 155);
+    public static final Color colorFondo = new Color(119, 221, 119);
+    //Verde pastel: new Color(119, 221, 119);
+    //Verde oscuro: new Color(5, 68, 23);
     public static final String rutaIcono = "../InterfazGrafica/Assets/Icono.png";
 }

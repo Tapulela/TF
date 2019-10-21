@@ -74,12 +74,16 @@ public class Proveedor {
     public void agregarOrdenDeCompra(OrdenDeCompra unaOrdenDeCompra){
         this.ordenesDeCompraAsociadas.add(unaOrdenDeCompra);
     }
+    
+    public boolean seEncuentraActivo(){
+        return this.estado.equals("Activo");
+    }
 
-    boolean poseeCuit(String unCuit) {
+    public boolean poseeCuit(String unCuit) {
         return this.cuit.equals(unCuit);
     }
 
-    boolean poseeRazonSocial(String unaRazonSocial) {
+    public boolean poseeRazonSocial(String unaRazonSocial) {
         return this.razonSocial.toUpperCase().equals(unaRazonSocial.toUpperCase());
     }
 

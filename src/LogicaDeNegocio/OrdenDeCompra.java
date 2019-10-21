@@ -6,14 +6,18 @@
 package LogicaDeNegocio;
 
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
 
 /**
  *
  * @author usuario
  */
 public class OrdenDeCompra {
+    private static final String ESTADO_REGULAR = "Regular";
+    private static final String ESTADO_ANULADO = "Anulado";
     private int id;
     private Calendar fechaOrigen;
     private float cantidadComprada;
@@ -37,6 +41,19 @@ public class OrdenDeCompra {
         this.ordenDeProduccionAsociada = unaOrdenDeProduccion;
         this.lotesAsociados = new ArrayList();
     }
+    
+    public OrdenDeCompra(float cantidadComprada, String unidadDeMedida, float costoPorUnidad, Proveedor proveedorAsociado, OrdenDeProduccion ordenDeProduccionAsociada) {
+        this.fechaOrigen = Calendar.getInstance();
+        this.cantidadComprada = cantidadComprada;
+        this.unidadDeMedida = unidadDeMedida;
+        this.costoPorUnidad = costoPorUnidad;
+        this.proveedorAsociado = proveedorAsociado;
+        this.estado = ESTADO_REGULAR;
+        this.ordenDeProduccionAsociada = ordenDeProduccionAsociada;
+        this.lotesAsociados = new ArrayList();
+
+    }
+        
 
     public int getId() {
         return id;
@@ -116,6 +133,52 @@ public class OrdenDeCompra {
 
     public boolean poseeProveedorAsociado() {
         return (this.proveedorAsociado!=null);
+    }
+    public boolean poseeLotesAsociados(){
+        return (!this.lotesAsociados.isEmpty());
+    }
+    public boolean poseeLotesRegularesAsociados(){
+        boolean retorno = false;
+        Iterator recorredorLotes = this.lotesAsociados.iterator();
+        while (!retorno && recorredorLotes.hasNext()){
+            Lote unLote = (Lote) recorredorLotes.next();
+            retorno = !unLote.estaAnulado();
+        }
+        return retorno;
+    }
+    
+    
+    boolean seEncuentraRegular(){
+        return this.estado.equals(ESTADO_REGULAR);
+    }
+    
+    boolean seEncuentraAnulada() {
+        return this.estado.equals(ESTADO_ANULADO);
+    }
+    
+    public void anular(){
+        this.estado = ESTADO_ANULADO;
+    }
+
+    public Calendar getFechaOrigenC() {
+        return this.fechaOrigen;
+    }
+
+    Boolean poseeOrdenDeProduccionAsociada(OrdenDeProduccion unaOrdenDeProduccion) {
+        return this.ordenDeProduccionAsociada==unaOrdenDeProduccion;
+    }
+
+    Boolean origenEstaEntre(Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior) {
+        return (this.fechaOrigen.after(fechaOrigenInferior) && this.fechaOrigen.before(fechaOrigenSuperior));
+    }
+    
+    public Object[] devolverVector() {
+        String unProveedor = "No posee";
+        if (this.proveedorAsociado != null){
+            unProveedor = this.proveedorAsociado.getRazonSocial();
+        }
+        Object[] vec ={this.getId(), ( new SimpleDateFormat( "dd-MM-yyyy" ) ).format( this.fechaOrigen.getTime() ), this.getCantidadComprada(), this.getUnidadDeMedida(), this.getCostoPorUnidad(),this.getEstado(), this.getOrdenDeProduccionAsociada().getId(), unProveedor};
+        return vec;
     }
     
     

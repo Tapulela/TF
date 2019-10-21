@@ -44,6 +44,7 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
         this.organizacion = organizacion;
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
+        
         trayectoriaActual = trayectoriaAnterior+" - Gestion de ALGUN CONCEPTO";
         cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestion de ALGUN CONCEPTO", this.trayectoriaActual);
         
@@ -584,7 +585,7 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
     }//GEN-LAST:event_jCBOperacionItemStateChanged
 
     private void jBBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBBuscarActionPerformed
-        BuscarProveedor unaVentana = new BuscarProveedor(this.organizacion, this, this.trayectoriaActual);
+        BuscarGenerico unaVentana = new BuscarGenerico(this.organizacion, this, this.trayectoriaActual);
         this.dispose();
     }//GEN-LAST:event_jBBuscarActionPerformed
 
@@ -962,6 +963,7 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
     private void habilitarCamposIniciales() {
         jLabel12.setEnabled(true);
         jCBOperacion.setEnabled(true);
+        this.jCBOperacion.setSelectedItem("Seleccionar");
     }
     
 

@@ -66,6 +66,14 @@ public class BuscarProveedor extends javax.swing.JFrame {
                 jComboBox2.setSelectedItem("Activo");
                 jComboBox2.setEnabled(false);
             }
+        }
+        
+        if (ventanaAnterior instanceof GestionOrdenesCompra){
+                //Si elijo un proveedor para una orden de compra, solo puedo elegir activos.
+                jCBEstado.doClick();
+                jCBEstado.setEnabled(false);
+                jComboBox2.setSelectedItem("Activo");
+                jComboBox2.setEnabled(false);            
             
         }
     }

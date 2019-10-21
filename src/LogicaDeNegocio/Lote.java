@@ -33,7 +33,7 @@ public class Lote {
     
     private String estado;
 
-    public Lote(int id, String etiqueta, float cantidad, String tipo_Lote, String unidadDeMedida, String estado, OrdenDeCompra unaOrdenDeCompra, OrdenDeProduccion unaOrdenDeProduccion, Equipamiento unEquipamiento) {
+    public Lote(int id, String etiqueta, float cantidad, String tipo_Lote, String unidadDeMedida, String estado, OrdenDeCompra unaOrdenDeCompra) {
         this.id = id;
         this.etiqueta = etiqueta;
         this.cantidad = cantidad;
@@ -41,14 +41,27 @@ public class Lote {
         this.unidadDeMedida = unidadDeMedida;
         this.estado = estado;
         
-        this.equipamientoDondeReside = unEquipamiento;
+        //this.equipamientoDondeReside = unEquipamiento; //EL EQUIPAMIENTO DONDE RESIDE SE DEFINE A PARTIR DE LA RECUPERACIÓN DE MOVIMIENTOS
         this.ordenDeCompraAsociada = unaOrdenDeCompra;
-        this.ordenDeProduccionAsociada = unaOrdenDeProduccion;
+        this.ordenDeProduccionAsociada = unaOrdenDeCompra.getOrdenDeProduccionAsociada();
         
         this.movimientosAsociados = new ArrayList();
         this.transformacionesAsociadas = new ArrayList();
     }
 
+    public Lote(String etiqueta, float cantidad, String tipo_Lote, String unidadDeMedida, Calendar fechaAdquisicion, OrdenDeCompra ordenDeCompraAsociada, Equipamiento equipamientoDondeReside) {
+        this.etiqueta = etiqueta;
+        this.cantidad = cantidad;
+        this.tipo_Lote = tipo_Lote;
+        this.unidadDeMedida = unidadDeMedida;
+        this.fechaAdquisicion = fechaAdquisicion;
+        this.ordenDeCompraAsociada = ordenDeCompraAsociada;
+        this.ordenDeProduccionAsociada = ordenDeCompraAsociada.getOrdenDeProduccionAsociada();
+        this.movimientosAsociados = new ArrayList();
+        this.transformacionesAsociadas = new ArrayList();
+    }
+
+    
     public Calendar getFechaAdquisicion() {
         return fechaAdquisicion;
     }
@@ -137,6 +150,10 @@ public class Lote {
 
     public boolean poseeEquipamientoAsociado() {
         return (this.equipamientoDondeReside != null);
+    }
+
+    boolean estaAnulado() {
+        return this.estado.equals("Anulado");
     }
     
     

@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 public class Validaciones {
     public static final Pattern CUIT = Pattern.compile("\\d{2}[-]\\d{8}[-]\\d");
     public static final Pattern DNI = Pattern.compile("\\d{8,9}");
+    public static final Pattern NUMERO_FRACCIONARIO = Pattern.compile("\\d+.?\\d*");
     
     
     public static boolean unCuitEsValido(String unCuit){
@@ -22,5 +23,8 @@ public class Validaciones {
     
     public static boolean unDniEsValido(String unDni){
         return Validaciones.DNI.matcher(unDni).matches();
+    }
+    public static boolean esUnNumeroFraccionarioValido(String unNumero){
+        return Validaciones.NUMERO_FRACCIONARIO.matcher(unNumero).matches();
     }
 }
