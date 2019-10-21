@@ -52,6 +52,8 @@ public class BuscarEquipamiento extends javax.swing.JFrame {
         this.trayectoriaActual = trayectoriaAnterior + " - Busqueda de Equipamiento";
         cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Busqueda de un equipamiento", this.trayectoriaActual);
         jTable1.setRowHeight(30);
+        jTable1.getColumnModel().getColumn(0).setPreferredWidth(60);
+        jTable1.getColumnModel().getColumn(0).setMaxWidth(60);
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
         
@@ -414,9 +416,7 @@ public class BuscarEquipamiento extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(jTable1);
         if (jTable1.getColumnModel().getColumnCount() > 0) {
-            jTable1.getColumnModel().getColumn(0).setResizable(false);
             jTable1.getColumnModel().getColumn(0).setPreferredWidth(10);
-            jTable1.getColumnModel().getColumn(3).setResizable(false);
             jTable1.getColumnModel().getColumn(3).setPreferredWidth(25);
         }
 
@@ -533,7 +533,12 @@ public class BuscarEquipamiento extends javax.swing.JFrame {
         Bascula unaBascula = this.organizacion.getUnaBascula((String) jCBBascula.getSelectedItem());
         ArrayList listaFiltrada = null;
         try {
-            listaFiltrada = this.organizacion.filtrarEquipamientos(this.criteriosSeleccionados, jTFNombre.getText(), (String)jCBTipoEquipamiento.getSelectedItem(), jTFDireccion.getText(), jCFechaAdquisicionInferior.getCalendar(), jCFechaAdquisicionSuperior.getCalendar(), jCFechaUltimoMantenimientoInferior.getCalendar(), jCFechaUltimoMantenimientoSuperior.getCalendar(),(String) jComboBox2.getSelectedItem(), unaBascula);
+            if (ventanaAnterior instanceof ABMEquipamiento){
+                listaFiltrada = this.organizacion.filtrarEquipamientos(this.criteriosSeleccionados, jTFNombre.getText(), (String)jCBTipoEquipamiento.getSelectedItem(), jTFDireccion.getText(), jCFechaAdquisicionInferior.getCalendar(), jCFechaAdquisicionSuperior.getCalendar(), jCFechaUltimoMantenimientoInferior.getCalendar(), jCFechaUltimoMantenimientoSuperior.getCalendar(),(String) jComboBox2.getSelectedItem(), unaBascula);
+            }else{
+                listaFiltrada = this.organizacion.filtrarEquipamientosSinBasculas(this.criteriosSeleccionados, jTFNombre.getText(), (String)jCBTipoEquipamiento.getSelectedItem(), jTFDireccion.getText(), jCFechaAdquisicionInferior.getCalendar(), jCFechaAdquisicionSuperior.getCalendar(), jCFechaUltimoMantenimientoInferior.getCalendar(), jCFechaUltimoMantenimientoSuperior.getCalendar(),(String) jComboBox2.getSelectedItem(), unaBascula);
+            }
+                
         } catch (ExcepcionCargaParametros ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage());
             return;

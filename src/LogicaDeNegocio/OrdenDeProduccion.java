@@ -9,6 +9,7 @@ import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -16,6 +17,8 @@ import java.util.Vector;
  * @author usuario
  */
 public class OrdenDeProduccion {
+    private static final String ESTADO_REGULAR = "Regular";
+    private static final String ESTADO_ANULADO = "Anulado";
     private int id;
     private Calendar fechaOrigen;
     private float cantidadAProducir;
@@ -24,8 +27,8 @@ public class OrdenDeProduccion {
     private String estado;
     private String descripcion;
     
-    private ArrayList lotesImplicados;
     private ArrayList ordenesCompraImplicadas;
+    
 
     public OrdenDeProduccion(int id, java.sql.Date fechaOrigen, float cantidadAProducir, String unidadDeMedida, java.sql.Date fechaEntregaProductoTerminado, String estado, String unaDescripcion) {
         this.id = id;
@@ -38,7 +41,6 @@ public class OrdenDeProduccion {
         this.estado = estado;
         this.descripcion = unaDescripcion;
         
-        this.lotesImplicados = new ArrayList();
         this.ordenesCompraImplicadas = new ArrayList();
     }
 
@@ -50,15 +52,11 @@ public class OrdenDeProduccion {
         this.descripcion = descripcion.toUpperCase();
         
         this.estado = "Regular";
-        this.lotesImplicados = new ArrayList();
         this.ordenesCompraImplicadas = new ArrayList();
     }
     
     
 
-    public ArrayList getLotesImplicados() {
-        return lotesImplicados;
-    }
 
 
 
@@ -138,12 +136,47 @@ public class OrdenDeProduccion {
         this.ordenesCompraImplicadas.add(unaOrdenDeCompra);
     }
 
-    public void agregarLote(Lote unLote) {
-        this.lotesImplicados.add(unLote);
+    public boolean seEncuentraRegular(){
+        return this.estado.equals(ESTADO_REGULAR);
     }
-
     public Object[] devolverVector() {
         Object[] vec ={this.getId(),this.getCantidadAProducir(), this.getUnidadDeMedida(), ( new SimpleDateFormat( "dd-MM-yyyy" ) ).format( this.getFechaOrigen().getTime() ), ( new SimpleDateFormat( "dd-MM-yyyy" ) ).format( this.getFechaEntregaProductoTerminado().getTime() ),this.getEstado()};
         return vec;
+    }
+
+    public ArrayList getOrdenesCompraImplicadasActivas(){
+        ArrayList retorno = new ArrayList();
+        Iterator ordenesC = this.ordenesCompraImplicadas.iterator();
+        while (ordenesC.hasNext()){
+            OrdenDeCompra unaOrdenCompra = (OrdenDeCompra) ordenesC.next();
+            if (!unaOrdenCompra.seEncuentraAnulada())
+                retorno.add(unaOrdenCompra);
+        }
+        return retorno;
+    }
+    
+    boolean poseeOrdenesCompraImplicadasActivas() {
+        return (!getOrdenesCompraImplicadasActivas().isEmpty());
+    }
+    
+    public ArrayList getLotesAsociados(){ //Devuelve todos los lotes no anulados.
+        ArrayList retorno = new ArrayList();
+        Iterator ordenesDeCompra = this.ordenesCompraImplicadas.iterator();
+        while (ordenesDeCompra.hasNext()){
+            OrdenDeCompra unaOrdenDeCompra = (OrdenDeCompra) ordenesDeCompra.next();
+            if (!unaOrdenDeCompra.seEncuentraAnulada()){
+                Iterator recorredorLotesOrdenesDeCompra = unaOrdenDeCompra.getLotesAsociados().iterator();
+                while (recorredorLotesOrdenesDeCompra.hasNext()){
+                    Lote unLote = (Lote) recorredorLotesOrdenesDeCompra.next();
+                    if (!unLote.estaAnulado())
+                        retorno.add(unLote);
+                }    
+            }
+        }
+        return retorno;
+    }
+
+    void anular() {
+        this.estado = ESTADO_ANULADO;
     }
 }

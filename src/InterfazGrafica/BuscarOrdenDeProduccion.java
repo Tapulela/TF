@@ -70,11 +70,25 @@ public class BuscarOrdenDeProduccion extends javax.swing.JFrame {
                 //Si voy a dar de baja, solo puedo seleccionar proveedor activo.
                 jCheckBEstado.doClick();
                 jCheckBEstado.setEnabled(false);
-                jCBEstado.setSelectedItem("Activo");
+                jCBEstado.setSelectedItem("Regular");
                 jCBEstado.setEnabled(false);
             }
             
         }
+        if (ventanaAnterior instanceof GestionOrdenesCompra){
+                //Si elijo un proveedor para una orden de compra, solo puedo elegir activos.
+                jCheckBEstado.doClick();
+                jCheckBEstado.setEnabled(false);
+                jCBEstado.setSelectedItem("Regular");
+                jCBEstado.setEnabled(false);            
+            
+        }
+        if (ventanaAnterior instanceof BuscarOrdenCompra){
+            jCheckBEstado.doClick();
+            jCheckBEstado.setEnabled(false);
+            jCBEstado.setSelectedItem("Regular");
+            jCBEstado.setEnabled(false);
+        }        
     }
 
     /**
@@ -161,7 +175,7 @@ public class BuscarOrdenDeProduccion extends javax.swing.JFrame {
         });
 
         jCBEstado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jCBEstado.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Activo", "Baja" }));
+        jCBEstado.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Regular", "Anulado" }));
         jCBEstado.setEnabled(false);
 
         jTFDescripcion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N

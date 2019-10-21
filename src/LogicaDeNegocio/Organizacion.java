@@ -278,6 +278,74 @@ public class Organizacion {
         return retorno;
     }
     
+    public ArrayList filtrarEquipamientosSinBasculas(Map<String, Boolean> criterios, String unNombre, String unTipoEquipamiento, String unaDireccion, Calendar fechaAdquisicionLimiteInferior, Calendar fechaAdquisicionLimiteSuperior, Calendar fechaUltimoMantenimientoLimiteInferior, Calendar fechaUltimoMantenimientoLimiteSuperior, String unEstado, Bascula unaBasculaAsociada) throws ExcepcionCargaParametros{
+        Boolean criterioNombre = criterios.get("Nombre");
+        Boolean criterioTipo = criterios.get("Tipo");
+        Boolean criterioDireccion = criterios.get("Direccion");
+        Boolean criteriofechaAdquisicion = criterios.get("FechaAdquisicion");
+        Boolean criteriofechaUltimoMantenimiento = criterios.get("FechaUltimoMantenimiento");
+        Boolean criterioEstado = criterios.get("Estado");
+        Boolean criterioBasculaAsociada = criterios.get("BasculaAsociada");
+        ArrayList retorno = new ArrayList();
+        Iterator equipamientos = this.equipamientos.keySet().iterator();
+        
+        if (criterioBasculaAsociada && unaBasculaAsociada==null){
+            throw new ExcepcionCargaParametros("Debe seleccionar una bascula para realizar la busqueda");
+        }
+        if (criteriofechaAdquisicion && (fechaAdquisicionLimiteInferior==null || fechaAdquisicionLimiteSuperior == null)){
+            throw new ExcepcionCargaParametros("Verifique las fechas de Adquisicion ingresadas");
+        }
+        if (criteriofechaUltimoMantenimiento && (fechaUltimoMantenimientoLimiteInferior==null || fechaUltimoMantenimientoLimiteSuperior == null)){
+            throw new ExcepcionCargaParametros("Verifique las fechas de Ultimo mantenimiento ingresadas");
+        }
+        while (equipamientos.hasNext()){
+            int unId = (int) equipamientos.next();
+            Equipamiento unEquipamiento = this.equipamientos.get(unId);
+            boolean sePuedeAgregar = true;
+            if (unEquipamiento instanceof Bascula){
+                sePuedeAgregar = false;
+            }
+            if (criterioNombre && sePuedeAgregar){
+                sePuedeAgregar = unEquipamiento.getNombre().contains(unNombre);
+            }
+            if (criterioTipo && sePuedeAgregar){
+                switch (unTipoEquipamiento){
+                    case "Molino":
+                        sePuedeAgregar = unEquipamiento instanceof Molino;
+                        break;
+                    case "Camara de estacionamiento acelerado":
+                        sePuedeAgregar = unEquipamiento instanceof CamaraEstacionamiento;
+                        break;
+                    case "Deposito":
+                        sePuedeAgregar = unEquipamiento instanceof Deposito;
+                        break;
+                }
+            }
+            if (criterioDireccion && sePuedeAgregar){
+                sePuedeAgregar = unEquipamiento.getDireccion().contains(unaDireccion);
+            }
+            if (criteriofechaAdquisicion && sePuedeAgregar){
+                sePuedeAgregar = unEquipamiento.getFechaAdquisicionC().after(fechaAdquisicionLimiteInferior);
+                if (sePuedeAgregar)
+                    sePuedeAgregar = unEquipamiento.getFechaAdquisicionC().before(fechaAdquisicionLimiteSuperior);
+            }
+            if (criteriofechaUltimoMantenimiento && sePuedeAgregar){
+                sePuedeAgregar = unEquipamiento.getFechaUltimoMantenimientoC().after(fechaUltimoMantenimientoLimiteInferior);
+                if (sePuedeAgregar)
+                    sePuedeAgregar = unEquipamiento.getFechaUltimoMantenimientoC().before(fechaUltimoMantenimientoLimiteSuperior);
+            }
+            if (criterioEstado && sePuedeAgregar){
+                sePuedeAgregar = unEquipamiento.getEstado().equals(unEstado);
+            }
+            if (criterioBasculaAsociada && sePuedeAgregar){
+                sePuedeAgregar = unEquipamiento.getBasculaAsociada() == unaBasculaAsociada;
+            }
+            if (sePuedeAgregar)
+                retorno.add(unEquipamiento);
+        }
+        return retorno;
+    }    
+    
     public void darDeBajaUnEquipamiento(Equipamiento unEquipamiento) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
         //Si se trata de una bascula, solo se podrá dar de baja si no posee ningun Equipamiento asociado
         //Solo se puede dar de baja un equipamiento si no posee ningun lote de entrada que no haya salido.
@@ -500,7 +568,7 @@ public class Organizacion {
             OrdenDeProduccion unaOrdenProduccion = this.ordenesProduccion.get(unId);
             boolean sePuedeAgregar = true;
             if (criterioDescripcion)
-                sePuedeAgregar = unaOrdenProduccion.getDescripcion().contains(unaDescripcion);
+                sePuedeAgregar = (unaOrdenProduccion.getDescripcion() != null && unaOrdenProduccion.getDescripcion().contains(unaDescripcion));
             if (sePuedeAgregar && criterioEstado)
                 sePuedeAgregar = unaOrdenProduccion.getEstado().equals(unEstado);
             if (sePuedeAgregar && criterioFechaOrigen)
@@ -512,6 +580,84 @@ public class Organizacion {
             }
         }
         return retorno;
+    }
+
+    public void anularOrdenDeProduccion(OrdenDeProduccion unaOrdenDeProduccion) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia {
+        
+        //CUESTION A RESOLVER: ¿Esta esto bien?
+        if (unaOrdenDeProduccion == null)
+            throw new ExcepcionCargaParametros("No se selecciono una orden de produccion para anular.");
+        if (unaOrdenDeProduccion.poseeOrdenesCompraImplicadasActivas())
+            throw new ExcepcionCargaParametros("No se puede anular la orden de producción porque posee ordenes de compra implicadas en estado regular.");
+        unaOrdenDeProduccion.anular();
+        this.persistencia.modificarObjeto(unaOrdenDeProduccion);
+    }
+
+    public ArrayList filtrarOrdenesDeCompra(Map<String, Boolean> criterios, OrdenDeProduccion unaOrdenProduccionSeleccionada, Proveedor unProveedorSeleccionado, String unEstado, Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior) throws ExcepcionCargaParametros {
+        ArrayList retorno = new ArrayList();
+        Boolean criterioOrdenDeProduccionAsociada = criterios.get("ordenProduccion");
+        Boolean criterioProveedor = criterios.get("proveedor");
+        Boolean criterioEstado = criterios.get("estado");
+        Boolean criterioFechaOrigen = criterios.get("fechaOrigen");
+        if (criterioOrdenDeProduccionAsociada && unaOrdenProduccionSeleccionada == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de producción.");
+        if (criterioProveedor && unProveedorSeleccionado == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un proveedor.");
+        if (criterioEstado && unEstado.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("No se ha seleccionado un estado.");
+        if (criterioFechaOrigen && (fechaOrigenInferior == null || fechaOrigenSuperior == null))
+            throw new ExcepcionCargaParametros("Verifique las fechas de Origen Inferior y Superior ingresadas");
+        Iterator ordenesDeCompra = this.ordenesCompra.keySet().iterator();
+        while (ordenesDeCompra.hasNext()){
+            Boolean sePuedeAgregar = true;
+            int unId = (int) ordenesDeCompra.next();
+            OrdenDeCompra unaOrdenDeCompra = this.ordenesCompra.get(unId);
+            if (sePuedeAgregar && criterioOrdenDeProduccionAsociada)
+                sePuedeAgregar = unaOrdenDeCompra.poseeOrdenDeProduccionAsociada(unaOrdenProduccionSeleccionada);
+            if (sePuedeAgregar && criterioProveedor)
+                sePuedeAgregar = unaOrdenDeCompra.poseeProveedorAsociado();
+            if (sePuedeAgregar && criterioFechaOrigen){
+                sePuedeAgregar = unaOrdenDeCompra.origenEstaEntre(fechaOrigenInferior, fechaOrigenSuperior);
+            }
+            if (sePuedeAgregar)
+                retorno.add(unaOrdenDeCompra);
+        }
+        return retorno;
+    }
+
+    public void registrarOrdenDeCompra(OrdenDeProduccion ordenProduccionSeleccionada, Proveedor proveedorSeleccionado, String unaUnidadMedida,String unaCantidadAComprar, String unCostoDeCompra) throws ExcepcionCargaParametros, SQLException {
+        unaCantidadAComprar = unaCantidadAComprar.replace(",", ".");
+        unCostoDeCompra = unCostoDeCompra.replace(",", ".");
+        
+        if (ordenProduccionSeleccionada == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de producción");
+        if (unaUnidadMedida.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("No se ha seleccionado una unidad de medida");
+        if (!Validaciones.esUnNumeroFraccionarioValido(unaCantidadAComprar))
+            throw new ExcepcionCargaParametros("La cantidad a comprar no posee un formato valido (solo numeros y un punto)");
+        if (!Validaciones.esUnNumeroFraccionarioValido(unCostoDeCompra))
+            throw new ExcepcionCargaParametros("El costo de compra no posee un formato valido (solo numeros y un punto)");
+        if (proveedorSeleccionado != null && !proveedorSeleccionado.seEncuentraActivo())
+            throw new ExcepcionCargaParametros("El proveedor asociado no se encuentra activo");
+        if (!ordenProduccionSeleccionada.seEncuentraRegular())
+            throw new ExcepcionCargaParametros("La orden de producción no se encuentra en estado regular.");
+        float cantidadAComprar = Float.parseFloat(unaCantidadAComprar);
+        float costoDeCompra = Float.parseFloat(unCostoDeCompra);
+        
+        OrdenDeCompra unaOrdenDeCompra = new OrdenDeCompra(cantidadAComprar, unaUnidadMedida, costoDeCompra, proveedorSeleccionado, ordenProduccionSeleccionada);
+        persistencia.persistirObjeto(unaOrdenDeCompra);
+        this.ordenesCompra.put(unaOrdenDeCompra.getId(), unaOrdenDeCompra);
+        
+    }
+
+    public void anularOrdenDeCompra(OrdenDeCompra unaOrdenDeCompra) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia {
+        if (unaOrdenDeCompra == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de compra para anular.");
+        if (unaOrdenDeCompra.poseeLotesRegularesAsociados())
+            throw new ExcepcionCargaParametros("La orden de Compra posee lotes en estado regular.");
+        unaOrdenDeCompra.anular();
+        persistencia.modificarObjeto(unaOrdenDeCompra);
+        
     }
 
 

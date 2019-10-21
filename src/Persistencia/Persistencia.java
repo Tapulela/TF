@@ -163,7 +163,8 @@ public class Persistencia {
                     Proveedor unProveedor = unaOrganizacion.getProveedores().get(resultadoDeConsulta.getInt("IdProveedor"));
                     OrdenDeProduccion unaOrdenProduccion = unaOrganizacion.getOrdenesProduccion().get(resultadoDeConsulta.getInt("IdOrdenProduccion"));
                     OrdenDeCompra unaOrdenCompra = new OrdenDeCompra(resultadoDeConsulta.getInt("ID"),resultadoDeConsulta.getDate("Fecha_Origen"),resultadoDeConsulta.getFloat("Cantidad"),resultadoDeConsulta.getString("Unidad_De_Medida"),resultadoDeConsulta.getFloat("Costo_De_Compra_PorUnidad"), resultadoDeConsulta.getString("Estado"), unProveedor, unaOrdenProduccion);
-                    unProveedor.agregarOrdenDeCompra(unaOrdenCompra);
+                    if (unProveedor != null)
+                        unProveedor.agregarOrdenDeCompra(unaOrdenCompra);
                     unaOrdenProduccion.agregarOrdenDeCompra(unaOrdenCompra);
                     unaOrganizacion.getOrdenesCompra().put(unaOrdenCompra.getId(), unaOrdenCompra);
                 }
@@ -177,15 +178,8 @@ public class Persistencia {
         try{
             resultadoDeConsulta = stmt.executeQuery(sql);
             while (resultadoDeConsulta.next()){
-                OrdenDeCompra unaOrdenCompra = unaOrganizacion.getOrdenesCompra().get(resultadoDeConsulta.getInt("IdOrdenCompra"));
-                OrdenDeProduccion unaOrdenProduccion = unaOrganizacion.getOrdenesProduccion().get(resultadoDeConsulta.getInt("IdOrdenProduccion"));
-                Equipamiento unEquipamientoAsociado = unaOrganizacion.getEquipamientos().get(resultadoDeConsulta.getInt("IdEquipamiento"));
-                Lote unLote = new Lote(resultadoDeConsulta.getInt("ID"), resultadoDeConsulta.getString("Etiqueta"),resultadoDeConsulta.getFloat("Cantidad"),  resultadoDeConsulta.getString("Tipo_Lote"), resultadoDeConsulta.getString("Unidad_De_Medida"), resultadoDeConsulta.getString("Estado"),unaOrdenCompra, unaOrdenProduccion, unEquipamientoAsociado);
-
-                
-                unaOrdenProduccion.agregarLote(unLote);
-                if (unEquipamientoAsociado != null)
-                    unEquipamientoAsociado.agregarLote(unLote);
+                OrdenDeCompra unaOrdenCompra = unaOrganizacion.getOrdenesCompra().get(resultadoDeConsulta.getInt("IdOrdenCompra"));                
+                Lote unLote = new Lote(resultadoDeConsulta.getInt("ID"), resultadoDeConsulta.getString("Etiqueta"),resultadoDeConsulta.getFloat("Cantidad"),  resultadoDeConsulta.getString("Tipo_Lote"), resultadoDeConsulta.getString("Unidad_De_Medida"), resultadoDeConsulta.getString("Estado"), unaOrdenCompra);
                 if (unaOrdenCompra != null)
                     unaOrdenCompra.agregarLote(unLote);
                 unaOrganizacion.getLotes().put(unLote.getId(), unLote);
@@ -194,6 +188,8 @@ public class Persistencia {
             System.err.println(e.getMessage());
             //No hacer nada. Si devuelve un error es porque la tabla está vacía.
         }
+        
+        //CUANDO SE RECUPERAN MOVIMIENTOS, SE PISARA SUCESIVAMENTE EL EQUIPAMIENTO DONDE RESIDE UN LOTE CON LOS DESTINOS DE LOS MOVIMIENTOS NO ANULADOS.
     }
         public void persistirObjeto(Object unObjeto) throws SQLException{
         String sql;
@@ -330,21 +326,27 @@ public class Persistencia {
                     ps.setObject(5, unaOrdenDeCompra.getEstado());   
                     ps.setObject(6, unaOrdenDeCompra.getOrdenDeProduccionAsociada().getId());   
                 }
-                
+                ps.execute();
+                sql = "SELECT max(Id) from public.ORDENES_COMPRA;";
+                resultadoDeConsulta = stmt.executeQuery(sql);
+                resultadoDeConsulta.next();
+                id = resultadoDeConsulta.getInt(1);
+                unaOrdenDeCompra.setId(id);                
                 break;                
             case "Lote":
                 Lote unLote = (Lote) unObjeto;
                 //Un lote siempre que se inserta sera en un equipamiento.
-                ps = this.conexion.prepareStatement("insert into LOTES (Tipo_Lote, Etiqueta, Estado, Cantidad, Unidad_De_Medida, Fecha_Adquisicion, IdOrdenProduccion, IdOrdenCompra, IdEquipamiento) values (?, ?, ?, ?, ?, ?, ?, ?, ?);");
+                ps = this.conexion.prepareStatement("insert into LOTES (Tipo_Lote, Etiqueta, Estado, Cantidad, Unidad_De_Medida, Fecha_Adquisicion, IdOrdenCompra) values (?, ?, ?, ?, ?, ?, ?);");
                 ps.setObject(1, unLote.getTipo_Lote());
                 ps.setObject(2, unLote.getEtiqueta());
                 ps.setObject(3, unLote.getEstado());
                 ps.setObject(4, unLote.getCantidad());
                 ps.setObject(5, unLote.getUnidadDeMedida());
                 ps.setObject(6, unLote.getFechaAdquisicion());//DEBERIA HACER PRIMERO ORDENES DE PRODUCCION Y DE COMPRA           
-                ps.setObject(7, unLote.getOrdenDeProduccionAsociada().getId());
-                ps.setObject(8, unLote.getOrdenDeCompraAsociada().getId());
-                ps.setObject(9, unLote.getEquipamientoDondeReside().getId());
+                ps.setObject(7, unLote.getOrdenDeCompraAsociada().getId());
+                //ps.setObject(7, unLote.getOrdenDeProduccionAsociada().getId());
+                
+                //ps.setObject(9, unLote.getEquipamientoDondeReside().getId());
                 ps.execute();
                 sql = "SELECT max(Id) from public.LOTES;";
                 resultadoDeConsulta = stmt.executeQuery(sql);

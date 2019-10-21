@@ -8,7 +8,10 @@ package InterfazGrafica;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.OrdenDeProduccion;
 import LogicaDeNegocio.Organizacion;
+import Persistencia.ExcepcionPersistencia;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
@@ -57,13 +60,13 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
     private void organizarElementos(){
         this.deshabilitarTodo();
         switch((String)jCBOperacion.getSelectedItem()){
-            case "Alta":
+            case "Registrar":
                 prepararAlta();
                 break;
-            case "Baja":
+            case "Anular":
                 prepararBaja();
                 break;
-            case "Modificacion":
+            case "Modificacion"://CODIGO OBSOLETO PERO SIGUE ACA POR SI TENGO QUE MODIFICAR ORDENES DE PRODUCCION ALGUN DIA
                 prepararModificacion();
                 break;
             default:
@@ -85,9 +88,8 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
 
         jLOperacion = new javax.swing.JLabel();
         jCBUnidadMedida = new javax.swing.JComboBox<>();
-        jLFechaOrigen = new javax.swing.JLabel();
+        jLEstaticoFechaOrigen = new javax.swing.JLabel();
         jLFechaEntrega = new javax.swing.JLabel();
-        jCFechaOrigen = new com.toedter.calendar.JDateChooser();
         jLCantidadAProducir = new javax.swing.JLabel();
         jTFCantidadAProducir = new javax.swing.JTextField();
         jLUnidadMedida = new javax.swing.JLabel();
@@ -98,11 +100,12 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         jCBOperacion = new javax.swing.JComboBox<>();
         jBBuscar = new javax.swing.JButton();
         jLEstado = new javax.swing.JLabel();
-        jCBEstado = new javax.swing.JComboBox<>();
         jLDescripcion = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTADescripcion = new javax.swing.JTextArea();
         cabeceraDeVentana = new InterfazGrafica.CabeceraDeVentana();
+        jCBEstado = new javax.swing.JLabel();
+        jLFechaOrigen = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(153, 255, 153));
@@ -115,16 +118,13 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         jCBUnidadMedida.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Kilogramo", "Tonelada" }));
         jCBUnidadMedida.setEnabled(false);
 
-        jLFechaOrigen.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLFechaOrigen.setText("Fecha de Origen");
-        jLFechaOrigen.setEnabled(false);
+        jLEstaticoFechaOrigen.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLEstaticoFechaOrigen.setText("Fecha de Origen");
+        jLEstaticoFechaOrigen.setEnabled(false);
 
         jLFechaEntrega.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLFechaEntrega.setText("Fecha de Entrega de producto terminado");
         jLFechaEntrega.setEnabled(false);
-
-        jCFechaOrigen.setEnabled(false);
-        jCFechaOrigen.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
         jLCantidadAProducir.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLCantidadAProducir.setText("Cantidad a Producir");
@@ -163,7 +163,7 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         jLabel12.setText("Seleccione una operacion");
 
         jCBOperacion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jCBOperacion.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Alta", "Baja", "Modificacion" }));
+        jCBOperacion.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Registrar", "Anular" }));
         jCBOperacion.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jCBOperacionItemStateChanged(evt);
@@ -183,10 +183,6 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         jLEstado.setText("Estado");
         jLEstado.setEnabled(false);
 
-        jCBEstado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jCBEstado.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Activo", "Baja" }));
-        jCBEstado.setEnabled(false);
-
         jLDescripcion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLDescripcion.setText("Descripción");
         jLDescripcion.setEnabled(false);
@@ -196,14 +192,31 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         jTADescripcion.setRows(5);
         jScrollPane1.setViewportView(jTADescripcion);
 
+        jCBEstado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCBEstado.setEnabled(false);
+
+        jLFechaOrigen.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLFechaOrigen.setText("Fecha de Origen");
+        jLFechaOrigen.setEnabled(false);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jBConcretarAccion)
+                        .addGap(18, 18, 18)
+                        .addComponent(jBCancelar))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -219,37 +232,31 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jCFechaEntrega, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLEstaticoFechaOrigen)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jLFechaOrigen)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jCFechaOrigen, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGap(37, 37, 37)
                                 .addComponent(jLEstado)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jCBEstado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 155, Short.MAX_VALUE)
-                        .addComponent(jBConcretarAccion)
-                        .addGap(18, 18, 18)
-                        .addComponent(jBCancelar))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLOperacion)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel12)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(jBBuscar))
-                            .addComponent(jLDescripcion)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 589, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                                .addComponent(jCBEstado, javax.swing.GroupLayout.PREFERRED_SIZE, 251, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(5, 5, 5))
+                    .addComponent(jLOperacion)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel12)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jBBuscar))
+                    .addComponent(jLDescripcion)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 589, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 15, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel12)
                     .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -260,31 +267,30 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
                 .addComponent(jLDescripcion)
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGap(24, 24, 24)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jBCancelar)
-                        .addComponent(jBConcretarAccion))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(6, 6, 6)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(jLFechaOrigen)
-                                    .addComponent(jCFechaOrigen, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLEstado)
-                                .addComponent(jCBEstado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(24, 24, 24)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLFechaEntrega)
-                            .addComponent(jCFechaEntrega, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLEstaticoFechaOrigen)
+                        .addComponent(jLFechaOrigen))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(2, 2, 2)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLUnidadMedida)
-                            .addComponent(jCBUnidadMedida, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLCantidadAProducir)
-                            .addComponent(jTFCantidadAProducir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(jLEstado)
+                            .addComponent(jCBEstado, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(25, 25, 25)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLFechaEntrega)
+                    .addComponent(jCFechaEntrega, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLUnidadMedida)
+                    .addComponent(jCBUnidadMedida, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLCantidadAProducir)
+                    .addComponent(jTFCantidadAProducir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jBCancelar)
+                    .addComponent(jBConcretarAccion))
                 .addContainerGap())
         );
 
@@ -294,11 +300,11 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
     private void jBConcretarAccionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBConcretarAccionActionPerformed
         try {
             switch ((String)jCBOperacion.getSelectedItem()){
-                case "Alta":
-                    this.organizacion.registrarOrdenDeProduccion(jCFechaOrigen.getCalendar(),Float.parseFloat(jTFCantidadAProducir.getText()), (String) jCBUnidadMedida.getSelectedItem(), jCFechaEntrega.getCalendar(), jTADescripcion.getText());
+                case "Registrar":
+                    this.organizacion.registrarOrdenDeProduccion(Calendar.getInstance(),Float.parseFloat(jTFCantidadAProducir.getText()), (String) jCBUnidadMedida.getSelectedItem(), jCFechaEntrega.getCalendar(), jTADescripcion.getText());
                     break;
-                case "Baja":
-                    
+                case "Anular":
+                    this.organizacion.anularOrdenDeProduccion(unaOrdenDeProduccionSeleccionada);
                     break;
                 case "Modificacion":
                     
@@ -312,7 +318,8 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
             JOptionPane.showMessageDialog(null, "Error en la base de datos: "+ex.getMessage());
         } catch (NumberFormatException e){
             JOptionPane.showMessageDialog(null, "Por favor, ingrese una Cantidad a Producir en formato valido (Solo numeros y un punto)");
-            
+        } catch (ExcepcionPersistencia ex) {
+            JOptionPane.showMessageDialog(null, "Error en la Base de datos: "+ex.getMessage());
         }
         
     }//GEN-LAST:event_jBConcretarAccionActionPerformed
@@ -381,14 +388,14 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
     private javax.swing.JButton jBBuscar;
     private javax.swing.JButton jBCancelar;
     private javax.swing.JButton jBConcretarAccion;
-    private javax.swing.JComboBox<String> jCBEstado;
+    private javax.swing.JLabel jCBEstado;
     private javax.swing.JComboBox<String> jCBOperacion;
     private javax.swing.JComboBox<String> jCBUnidadMedida;
     private com.toedter.calendar.JDateChooser jCFechaEntrega;
-    private com.toedter.calendar.JDateChooser jCFechaOrigen;
     private javax.swing.JLabel jLCantidadAProducir;
     private javax.swing.JLabel jLDescripcion;
     private javax.swing.JLabel jLEstado;
+    private javax.swing.JLabel jLEstaticoFechaOrigen;
     private javax.swing.JLabel jLFechaEntrega;
     private javax.swing.JLabel jLFechaOrigen;
     private javax.swing.JLabel jLOperacion;
@@ -404,7 +411,7 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         
         jLDescripcion.setEnabled(false);
         jLEstado.setEnabled(false);
-        jLFechaOrigen.setEnabled(false);
+        jLEstaticoFechaOrigen.setEnabled(false);
         jLFechaEntrega.setEnabled(false);
         jLCantidadAProducir.setEnabled(false);
         jLUnidadMedida.setEnabled(false);
@@ -416,7 +423,7 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         
         jCBOperacion.setEnabled(false);
         jCBEstado.setEnabled(false);
-        jCFechaOrigen.setEnabled(false);
+        jLFechaOrigen.setEnabled(false);
         jCFechaEntrega.setEnabled(false);
         jTFCantidadAProducir.setEnabled(false);
         jCBUnidadMedida.setEnabled(false);
@@ -436,8 +443,8 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
                 jLDescripcion.setEnabled(false);
                 jLOperacion.setEnabled(false);
                 jBBuscar.setVisible(false);
+                jLEstaticoFechaOrigen.setEnabled(false);
                 jLFechaOrigen.setEnabled(false);
-                jCFechaOrigen.setEnabled(false);
                 jLFechaEntrega.setEnabled(false);
                 jCFechaEntrega.setEnabled(false);
                 jLCantidadAProducir.setEnabled(false);
@@ -457,9 +464,9 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
     public void actualizarUnObjeto(Object unObjeto) {
         OrdenDeProduccion unaOrdenProduccion = (OrdenDeProduccion) unObjeto;
         this.unaOrdenDeProduccionSeleccionada = unaOrdenProduccion;
-        jCBEstado.setSelectedItem(unaOrdenProduccion.getEstado());
+        jCBEstado.setText(unaOrdenProduccion.getEstado());
         jTADescripcion.setText(unaOrdenProduccion.getDescripcion());
-        jCFechaOrigen.setCalendar(unaOrdenProduccion.getFechaOrigenC());
+        jLFechaOrigen.setText(( new SimpleDateFormat( "dd/MM/YYYY" ) ).format( unaOrdenProduccion.getFechaOrigenC().getTime()) );
         jCFechaEntrega.setCalendar(unaOrdenProduccion.getFechaEntregaProductoTerminadoC());
         jCBUnidadMedida.setSelectedItem(unaOrdenProduccion.getUnidadDeMedida());
         jTFCantidadAProducir.setText(""+unaOrdenProduccion.getCantidadAProducir());
@@ -474,7 +481,7 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         this.operacionActual = "Alta";
         
         jLEstado.setEnabled(true);
-        jLFechaOrigen.setEnabled(true);
+        jLEstaticoFechaOrigen.setEnabled(true);
         jLFechaEntrega.setEnabled(true);
         jLCantidadAProducir.setEnabled(true);
         jLUnidadMedida.setEnabled(true);
@@ -482,7 +489,7 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         
         
         jCBEstado.setEnabled(true);
-        jCFechaOrigen.setEnabled(true);
+        jLFechaOrigen.setEnabled(true);
         jCFechaEntrega.setEnabled(true);
         jTFCantidadAProducir.setEnabled(true);
         jCBUnidadMedida.setEnabled(true);
@@ -502,7 +509,7 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         jLDescripcion.setEnabled(true);
         jLOperacion.setEnabled(true);
         jLEstado.setEnabled(true);
-        jLFechaOrigen.setEnabled(true);
+        jLEstaticoFechaOrigen.setEnabled(true);
         jLFechaEntrega.setEnabled(true);
         jLCantidadAProducir.setEnabled(true);
         jLUnidadMedida.setEnabled(true);
@@ -531,7 +538,7 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
             return;
         jLOperacion.setEnabled(true);
         jLEstado.setEnabled(true);
-        jLFechaOrigen.setEnabled(true);
+        jLEstaticoFechaOrigen.setEnabled(true);
         jLFechaEntrega.setEnabled(true);
         jLCantidadAProducir.setEnabled(true);
         jLUnidadMedida.setEnabled(true);
@@ -540,7 +547,7 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         jCBEstado.setVisible(true);
 
         jCBEstado.setEnabled(true);
-        jCFechaOrigen.setEnabled(true);
+        jLFechaOrigen.setEnabled(true);
         jCFechaEntrega.setEnabled(true);
         jTFCantidadAProducir.setEnabled(true);
         jCBUnidadMedida.setEnabled(true);
