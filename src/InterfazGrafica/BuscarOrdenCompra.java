@@ -75,15 +75,19 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
         criteriosSeleccionados.put(criterio3, false);
         criteriosSeleccionados.put(criterio4, false);
         criteriosSeleccionados.put(criterio5, false);
-        if (ventanaAnterior instanceof ABMProveedor){   //EJEMPLO GENERICO, ESTO DEBERIA CAMBIARSE
+        if (ventanaAnterior instanceof ABMProveedor){   
             ABMProveedor abmProveedor = (ABMProveedor) ventanaAnterior;
             if (abmProveedor.getOperacionActual().equals("Baja")){
                 //Si voy a dar de baja, solo puedo seleccionar proveedor activo.
                 jCBCriterio3.doClick();
                 jCBCriterio3.setEnabled(false);
-            }
-            
+            } 
         }
+        if (ventanaAnterior instanceof GestionIngresoMP){   
+            //Si voy a dar registrar un ingreso, solo puedo elegir ordenes de compra activas.
+            jCBCriterio3.doClick();
+            jCBCriterio3.setEnabled(false);
+        }        
     }
 
     /**

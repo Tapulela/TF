@@ -65,19 +65,68 @@ public class Persistencia {
     }
     
     public void recuperarOrganizacion(Organizacion unaOrganizacion) throws SQLException{
-        String sql = "SELECT * from public.PROVEEDORES order by ID;";
-        Statement stmt = this.conexion.createStatement();
+        String sql;
+        Statement stmt;
         ResultSet resultadoDeConsulta;
-            try{
-                resultadoDeConsulta = stmt.executeQuery(sql);
-                while (resultadoDeConsulta.next()){
-                    Proveedor unProveedor = new Proveedor(resultadoDeConsulta.getInt("ID"), resultadoDeConsulta.getString("Razon_Social"), resultadoDeConsulta.getString("CUIT"), resultadoDeConsulta.getString("Estado"));
-                    unaOrganizacion.getProveedores().put(unProveedor.getId(), unProveedor);
-                }
-            }catch (SQLException e){
-                System.err.println(e.getMessage());
-                //No hacer nada. Si devuelve un error es porque la tabla está vacía.
+        
+        sql = "SELECT * from public.PAISES order by ID;";
+        stmt = this.conexion.createStatement();        
+        try{
+            resultadoDeConsulta = stmt.executeQuery(sql);
+            while (resultadoDeConsulta.next()){
+                Pais unPais = new Pais(resultadoDeConsulta.getInt("ID"), resultadoDeConsulta.getString("Nombre"), resultadoDeConsulta.getString("Estado"));
+                unaOrganizacion.getPaises().put(unPais.getId(), unPais);
             }
+        }catch (SQLException e){
+            System.err.println(e.getMessage());
+            //No hacer nada. Si devuelve un error es porque la tabla está vacía.
+        }
+        
+        sql = "SELECT * from public.PROVINCIAS order by ID;";
+        try{
+            resultadoDeConsulta = stmt.executeQuery(sql);
+            while (resultadoDeConsulta.next()){
+                Pais unPais = unaOrganizacion.getPaises().get(resultadoDeConsulta.getInt("IdPais"));
+                Provincia unaProvincia = new Provincia(resultadoDeConsulta.getInt("ID"), resultadoDeConsulta.getString("Nombre"), resultadoDeConsulta.getString("Estado"), unPais);
+                unaProvincia.setPaisAsociado(unPais);
+                unPais.agregarProvincia(unaProvincia);
+                unaOrganizacion.getProvincias().put(unaProvincia.getId(), unaProvincia);
+            }
+        }catch (SQLException e){
+            System.err.println(e.getMessage());
+            //No hacer nada. Si devuelve un error es porque la tabla está vacía.
+        }
+        
+        sql = "SELECT * from public.LOCALIDADES order by ID;";
+        try{
+            resultadoDeConsulta = stmt.executeQuery(sql);
+            while (resultadoDeConsulta.next()){
+                Provincia unaProvincia = unaOrganizacion.getProvincias().get(resultadoDeConsulta.getInt("IdProvincia"));
+                Localidad unaLocalidad = new Localidad(resultadoDeConsulta.getInt("ID"), resultadoDeConsulta.getString("Nombre"), resultadoDeConsulta.getString("Estado"), resultadoDeConsulta.getString("Codigo_Postal"), unaProvincia);
+                unaLocalidad.setProvinciaAsociada(unaProvincia);
+                unaProvincia.agregarLocalidad(unaLocalidad);
+                unaOrganizacion.getLocalidades().put(unaLocalidad.getId(), unaLocalidad);
+            }
+        }catch (SQLException e){
+            System.err.println(e.getMessage());
+            //No hacer nada. Si devuelve un error es porque la tabla está vacía.
+        }
+        
+        //PROVEEDORES
+        
+        sql = "SELECT * from public.PROVEEDORES order by ID;";
+        try{
+            resultadoDeConsulta = stmt.executeQuery(sql);
+            while (resultadoDeConsulta.next()){
+                Localidad unaLocalidad = unaOrganizacion.getLocalidades().get(resultadoDeConsulta.getInt("IdLocalidad"));
+                Proveedor unProveedor = new Proveedor(resultadoDeConsulta.getInt("ID"), resultadoDeConsulta.getString("Razon_Social"), resultadoDeConsulta.getString("CUIT"), resultadoDeConsulta.getString("Estado"), unaLocalidad);
+                unaLocalidad.agregarProveedor(unProveedor);
+                unaOrganizacion.getProveedores().put(unProveedor.getId(), unProveedor);
+            }
+        }catch (SQLException e){
+            System.err.println(e.getMessage());
+            //No hacer nada. Si devuelve un error es porque la tabla está vacía.
+        }
         //Recuperar los Equipamientos
         
         //Basculas
@@ -91,7 +140,7 @@ public class Persistencia {
             }catch (SQLException e){
                 System.err.println(e.getMessage());
                 //No hacer nada. Si devuelve un error es porque la tabla está vacía.
-            }        
+            }
         //Depositos
         sql = "SELECT * from public.EQUIPAMIENTOS where (EQUIPAMIENTOS.Tipo_Equipamiento = 'Deposito') order by ID;";
             try{
@@ -198,10 +247,53 @@ public class Persistencia {
         ResultSet resultadoDeConsulta;
         int id;
         switch (unObjeto.getClass().getSimpleName()){
+            case "Pais":
+                Pais unPais = (Pais) unObjeto;
+                ps = this.conexion.prepareStatement("insert into PAISES (Nombre, Estado) values (?, ?);");
+                ps.setObject(1, unPais.getNombre());
+                ps.setObject(2, unPais.getEstado());
+                ps.execute();
+                sql = "SELECT max(Id) from public.PAISES;";
+                resultadoDeConsulta = stmt.executeQuery(sql);
+                resultadoDeConsulta.next();
+                id = resultadoDeConsulta.getInt(1);
+                unPais.setId(id);
+                break;
+            case "Provincia":
+                Provincia unaProvincia = (Provincia) unObjeto;
+                ps = this.conexion.prepareStatement("insert into PROVINCIAS (Nombre, Estado, IdPais) values (?, ?, ?);");
+                ps.setObject(1, unaProvincia.getNombre());
+                ps.setObject(2, unaProvincia.getEstado());
+                ps.setObject(3, unaProvincia.getPaisAsociado().getId());
+                ps.execute();
+                sql = "SELECT max(Id) from public.PROVINCIAS;";
+                resultadoDeConsulta = stmt.executeQuery(sql);
+                resultadoDeConsulta.next();
+                id = resultadoDeConsulta.getInt(1);
+                unaProvincia.setId(id);
+                break;
+            case "Localidad":
+                Localidad unaLocalidad = (Localidad) unObjeto;
+                ps = this.conexion.prepareStatement("insert into LOCALIDADES (Nombre, Estado, Codigo_Postal, IdProvincia) values (?, ?, ?, ?);");
+                ps.setObject(1, unaLocalidad.getNombre());
+                ps.setObject(2, unaLocalidad.getEstado());
+                ps.setObject(3, unaLocalidad.getCodigoPostal());
+                ps.setObject(4, unaLocalidad.getProvinciaAsociada().getId());
+                ps.execute();
+                sql = "SELECT max(Id) from public.LOCALIDADES;";
+                resultadoDeConsulta = stmt.executeQuery(sql);
+                resultadoDeConsulta.next();
+                id = resultadoDeConsulta.getInt(1);
+                unaLocalidad.setId(id);
+                break;
             case "Proveedor":
                 Proveedor unProveedor = (Proveedor) unObjeto;
-                sql = "insert into public.PROVEEDORES (Razon_Social, CUIT, Estado) values ('"+unProveedor.getRazonSocial()+"', '"+unProveedor.getCuit()+"', '"+unProveedor.getEstado()+"');";
-                stmt.execute(sql);
+                ps = this.conexion.prepareStatement("insert into public.PROVEEDORES (Razon_Social, CUIT, Estado, IdLocalidad) values (?, ?, ?, ?);");
+                ps.setObject(1, unProveedor.getRazonSocial());
+                ps.setObject(2, unProveedor.getCuit());
+                ps.setObject(3, unProveedor.getEstado());
+                ps.setObject(4, unProveedor.getLocalidad().getId());
+                ps.execute();
                 sql = "SELECT max(Id) from public.PROVEEDORES;";
                 resultadoDeConsulta = stmt.executeQuery(sql);
                 resultadoDeConsulta.next();
@@ -311,7 +403,7 @@ public class Persistencia {
                 if (unaOrdenDeCompra.poseeProveedorAsociado()){
                     ps = this.conexion.prepareStatement("insert into ORDENES_COMPRA (Fecha_Origen, Cantidad, Unidad_De_Medida, Costo_De_Compra_PorUnidad, Estado, IdOrdenProduccion, IdProveedor) values (?, ?, ?, ?, ?, ?, ?);");
                     ps.setObject(1, unaOrdenDeCompra.getFechaOrigen());
-                    ps.setObject(2, unaOrdenDeCompra.getCantidadComprada());
+                    ps.setObject(2, unaOrdenDeCompra.getCantidadAComprar());
                     ps.setObject(3, unaOrdenDeCompra.getUnidadDeMedida());
                     ps.setObject(4, unaOrdenDeCompra.getCostoPorUnidad());
                     ps.setObject(5, unaOrdenDeCompra.getEstado());   
@@ -320,7 +412,7 @@ public class Persistencia {
                 }else{
                     ps = this.conexion.prepareStatement("insert into ORDENES_COMPRA (Fecha_Origen, Cantidad, Unidad_De_Medida, Costo_De_Compra_PorUnidad, Estado, IdOrdenProduccion) values (?, ?, ?, ?, ?, ?);");
                     ps.setObject(1, unaOrdenDeCompra.getFechaOrigen());
-                    ps.setObject(2, unaOrdenDeCompra.getCantidadComprada());
+                    ps.setObject(2, unaOrdenDeCompra.getCantidadAComprar());
                     ps.setObject(3, unaOrdenDeCompra.getUnidadDeMedida());
                     ps.setObject(4, unaOrdenDeCompra.getCostoPorUnidad());
                     ps.setObject(5, unaOrdenDeCompra.getEstado());   
@@ -363,10 +455,45 @@ public class Persistencia {
             Statement stmt = this.conexion.createStatement();
             PreparedStatement ps;
             switch (unObjeto.getClass().getSimpleName()){
+                case "Pais":
+                    Pais unPais = (Pais) unObjeto;
+                    ps = this.conexion.prepareStatement("UPDATE public.PAISES SET Nombre = ?, Estado = ? WHERE ID = ?;");
+                    ps.setObject(1, unPais.getNombre());
+                    ps.setObject(2, unPais.getEstado());
+                    ps.setObject(3, unPais.getId());
+                    ps.execute();
+                    break;
+                    
+                case "Provincia":
+                    Provincia unaProvincia = (Provincia) unObjeto;
+                    ps = this.conexion.prepareStatement("UPDATE public.PROVINCIAS SET Nombre = ?, Estado = ?, IdPais = ? WHERE ID = ?;");
+                    ps.setObject(1, unaProvincia.getNombre());
+                    ps.setObject(2, unaProvincia.getEstado());//ESTADO
+                    ps.setObject(3, unaProvincia.getPaisAsociado().getId());
+                    ps.setObject(4, unaProvincia.getId());
+                    ps.execute();
+                    break;
+                
+                case "Localidad":
+                    Localidad unaLocalidad = (Localidad) unObjeto;
+                    ps = this.conexion.prepareStatement("UPDATE public.LOCALIDADES SET Nombre = ?, Codigo_Postal = ?, Estado = ?, IdProvincia = ? WHERE ID = ?;");
+                    ps.setObject(1, unaLocalidad.getNombre());
+                    ps.setObject(2, unaLocalidad.getCodigoPostal());
+                    ps.setObject(3, unaLocalidad.getEstado());
+                    ps.setObject(4, unaLocalidad.getProvinciaAsociada().getId());
+                    ps.setObject(5, unaLocalidad.getId());
+                    ps.execute();
+                    break;
+                
                 case "Proveedor":
                     Proveedor unProveedor = (Proveedor) unObjeto;
-                    sql = "UPDATE public.PROVEEDORES SET Razon_Social = '"+unProveedor.getRazonSocial()+"', CUIT = '"+unProveedor.getCuit()+"', Estado = '"+unProveedor.getEstado()+"' WHERE ID = "+unProveedor.getId()+";";
-                    stmt.execute(sql);
+                    ps = this.conexion.prepareStatement("UPDATE public.PROVEEDORES SET Razon_Social = ?, CUIT = ?, Estado = ?, IdLocalidad = ? WHERE ID = ?;");
+                    ps.setObject(1, unProveedor.getRazonSocial());
+                    ps.setObject(2, unProveedor.getCuit());
+                    ps.setObject(3, unProveedor.getEstado());
+                    ps.setObject(4, unProveedor.getLocalidad().getId());
+                    ps.setObject(5, unProveedor.getId());
+                    ps.execute();
                     break;
                 case "Bascula":
                     Bascula unaBascula = (Bascula) unObjeto;
@@ -429,7 +556,7 @@ public class Persistencia {
                     ps.setObject(8, unaCamara.getDuracionMaximaEstacionamiento());
                     ps.setObject(9, unaCamara.getBasculaAsociada().getId());
                     ps.setObject(10, unaCamara.getId());
-
+                    ps.execute();
                     //sql = "UPDATE public.EQUIPAMIENTOS SET Nombre = '"+unaCamara.getNombre()+"', Direccion = '"+unaCamara.getDireccion()+"', Fecha_Adquisicion = '"+unaCamara.getFechaAdquisicion()+"', Fecha_Ultimo_Mantenimiento = '"+unaCamara.getFechaUltimoMantenimiento()+"', Capacidad_Maxima = "+unaCamara.getCapacidadMaxima()+", Unidad_De_Medida = '"+unaCamara.getUnidadDeMedida()+"', Estado = '"+unaCamara.getEstado()+"', Duracion_Maxima_Estacionamiento = "+unaCamara.getDuracionMaximaEstacionamiento()+" WHERE ID = "+unaCamara.getId()+";";
                     
                     break;                 
@@ -451,7 +578,7 @@ public class Persistencia {
                     if (unaOrdenDeCompra.poseeProveedorAsociado()){
                         ps = this.conexion.prepareStatement("UPDATE public.ORDENES_COMPRA SET Fecha_Origen = ?, Cantidad = ?, Unidad_De_Medida = ?, Costo_De_Compra_PorUnidad = ?, Estado = ?, IdOrdenProduccion = ?, IdProveedor = ? WHERE ID = ?;");
                         ps.setObject(1, unaOrdenDeCompra.getFechaOrigen());
-                        ps.setObject(2, unaOrdenDeCompra.getCantidadComprada());
+                        ps.setObject(2, unaOrdenDeCompra.getCantidadAComprar());
                         ps.setObject(3, unaOrdenDeCompra.getUnidadDeMedida());
                         ps.setObject(4, unaOrdenDeCompra.getCostoPorUnidad());
                         ps.setObject(5, unaOrdenDeCompra.getEstado());   
@@ -459,9 +586,9 @@ public class Persistencia {
                         ps.setObject(7, unaOrdenDeCompra.getProveedorAsociado().getId()); 
                         ps.setObject(8, unaOrdenDeCompra.getId()); 
                     }else{
-                        ps = this.conexion.prepareStatement("UPDATE public.ORDENES_COMPRA SET Fecha_Origen = ?, Cantidad = ?, Unidad_De_Medida = ?, Costo_De_Compra_PorUnidad = ?, Estado = ?, IdOrdenProduccion = ? WHERE ID = ?;");
+                        ps = this.conexion.prepareStatement("UPDATE public.ORDENES_COMPRA SET Fecha_Origen = ?, Cantidad = ?, Unidad_De_Medida = ?, Costo_De_Compra_PorUnidad = ?, Estado = ?, IdOrdenProduccion = ?, IdProveedor = NULL WHERE ID = ?;");
                         ps.setObject(1, unaOrdenDeCompra.getFechaOrigen());
-                        ps.setObject(2, unaOrdenDeCompra.getCantidadComprada());
+                        ps.setObject(2, unaOrdenDeCompra.getCantidadAComprar());
                         ps.setObject(3, unaOrdenDeCompra.getUnidadDeMedida());
                         ps.setObject(4, unaOrdenDeCompra.getCostoPorUnidad());
                         ps.setObject(5, unaOrdenDeCompra.getEstado());   

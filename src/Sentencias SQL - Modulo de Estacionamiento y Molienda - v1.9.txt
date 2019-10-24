@@ -1,0 +1,489 @@
+--V1.4:
+--	Ahora la bascula es una variante mas de equipamiento.
+--	Los equipamientos referencian una bascula.
+--	Agregada restriccion de chequeo de idBascula en Movimientos internos de Materia prima: Se verifica que se referencia a un equipamiento de tipo bascula.
+--	Agregado a ordenes de compra informacion de la cantidad a comprar, costo por unidad y unidad de medida.
+--	Agregado fecha de Origen a la tabla de Movimientos.
+-- 	Agregado estado a Movimiento. Puede ser:
+--		Listo para Transformarse: Lo que se registro en este movimiento es para una transformacion en el equipamiento asociado.
+--		Utilizado: Ya se registro una transformacion sobre ese movimiento
+--		De Almacenamiento temporal: Lo que se registro en este movimiento no sera utilizado en este equipamiento. Será trasladado posteriormente.
+--		Trasladado: El almacenamiento temporal terminó y ese lote fue trasladado.
+--	Agregado etiquetas a los lotes
+--v1.6
+--	Removido la clave foranea de lote padre de los lotes.
+--v1.7
+--	Removido la clave foranea de Orden de compra con lotes
+--	Agregado la clave foranea de lotes hacia orden de compra.
+--	Agregado la clave foranea de lotes hacia Equipamiento. (Un lote esta en un momento dado en un equipamiento)
+--	CAMBIADO CUIL POR CUIT en proveedores
+--	Ahora tambien es un campo unico la razon social en proveedores
+--	Agregado campo de descripcion a las ordenes de producción.
+
+--v1.8
+--	REMOCION DE TODAS LAS CLAVES FORANEAS REDUNDANTES.
+--	En la base de datos: La menor cantidad de referencias posibles.
+--	En la aplicación: La mayor cantidad de referencias posibles.
+--	Removido clave foranea de lote hacia orden de produccion
+-- 	Removido clave foranea de lote hacia equipamiento. (El lote reside en el equipamiento sobre el que equipamiento destino del ultimo movimiento registrado.
+
+--v1.9
+--	Agregado de tablas de Pais provincia y Localidad
+--	Agregado referencia de proveedor a localidad
+
+
+
+--Borrar toda la base de datos, para luego poder realizar todas las definiciones con los contadores incrementales en 0.
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+
+--ESTABLECER EL FORMATO DD/MM/AAAA:
+SET DATESTYLE TO 'European';
+
+--ROLES
+--CREATE ROLE ADMINISTRADOR NOLOGIN;
+--GRANT EXECUTE ON FUNCTION
+
+--FUNCION DE CONVERSION DE UNIDADES DE MEDIDA
+
+--Conversion de Peso
+CREATE OR REPLACE FUNCTION convertirUnidadPeso(unidad_De_Medida_Inicial varchar(30), unidad_De_Medida_Final varchar(30), peso float) returns float as
+$BODY$
+BEGIN
+	CASE
+		When (unidad_De_Medida_Inicial='Tonelada') AND (unidad_De_Medida_Final = 'Kilogramo') THEN	
+			RETURN peso*1000;
+		When (unidad_De_Medida_Inicial='Kilogramo') AND (unidad_De_Medida_Final = 'Tonelada') THEN	
+			RETURN peso/1000;
+		ELSE
+			RETURN peso;
+	END CASE;
+END;
+$BODY$
+language plpgsql;
+
+
+--CREAR LAS TABLAS
+
+create table PAISES (
+	ID SERIAL, 
+	Nombre varchar(100) UNIQUE NOT NULL,
+	Estado varchar(30) NOT NULL,
+	primary key(ID));
+
+create table PROVINCIAS (
+	ID SERIAL, 
+	Nombre varchar(100) NOT NULL,
+	Estado varchar(30) NOT NULL,
+	primary key(ID));
+	
+create table LOCALIDADES (
+	ID SERIAL, 
+	Nombre varchar(100) NOT NULL,
+	Codigo_Postal varchar(10) NOT NULL,
+	Estado varchar(30) NOT NULL,
+	primary key(ID));	
+
+create table ORDENES_PRODUCCION (
+	ID SERIAL, 
+	Cantidad_A_Producir float, 
+	Unidad_De_Medida varchar(30), 
+	Fecha_Origen date, 
+	Fecha_Entrega date, 
+	Estado varchar(30),
+	Descripcion varchar(250),
+	primary key(ID));
+
+create table ORDENES_COMPRA (
+	ID SERIAL,
+	Fecha_Origen date NOT NULL,
+	Cantidad float NOT NULL,
+	Unidad_De_Medida varchar(30) NOT NULL,
+	Costo_De_Compra_PorUnidad float NOT NULL,
+	Estado varchar(30) NOT NULL,
+	primary key(ID));
+
+create table PROVEEDORES (
+	ID SERIAL,
+	Razon_Social varchar(60), 
+	CUIT varchar(30) NOT NULL, 
+	Estado varchar(30), 
+	primary key (ID), 
+	UNIQUE(CUIT),
+	UNIQUE(Razon_Social));
+
+create table LOTES (
+	ID SERIAL,
+	Tipo_Lote varchar(60) NOT NULL,
+	Etiqueta varchar(60),
+	Estado varchar(30),
+	Cantidad int,
+	Unidad_De_Medida varchar(30),
+	Fecha_Adquisicion date,
+	primary key(ID));
+
+create table MOVIMIENTOS_INTERNOS_MP(
+	ID SERIAL,
+	Fecha_Origen TIMESTAMPTZ NOT NULL,
+	Fecha_Entrada TIMESTAMPTZ NOT NULL,
+	Fecha_Salida TIMESTAMPTZ NOT NULL,
+	Tipo_Unidad_Transporte varchar(60) NOT NULL,
+	cantidad_Unidades int NOT NULL,
+	Unidad_De_Medida_Peso varchar(30) NOT NULL,
+	Peso_Entrada float NOT NULL,
+	Peso_Salida float NOT NULL,
+	N_Hoja_Ruta varchar(50) NOT NULL,
+	N_Remito varchar(50) NOT NULL,
+	N_Precinto varchar(50) NOT NULL,
+	Nombre_Conductor varchar(100) NOT NULL,
+	Patente_Chasis varchar(30) NOT NULL,
+	Patente_Acoplado varchar(30) NOT NULL,
+
+	Estado varchar(30) NOT NULL,
+	primary key(ID));
+
+
+create table EQUIPAMIENTOS (
+	ID SERIAL,
+	Nombre varchar(60) UNIQUE NOT NULL,
+	Tipo_Equipamiento varchar(60) NOT NULL,
+	Direccion varchar(60) NOT NULL,
+	Fecha_Adquisicion date NOT NULL,
+	Fecha_Ultimo_Mantenimiento date,
+	Capacidad_Maxima float NOT NULL,
+	Unidad_De_Medida varchar(30) NOT NULL,
+	Duracion_Maxima_Estacionamiento float,
+	Estado varchar(30),
+	primary key(ID));
+
+--INSERCION CLAVES FORANEAS
+
+--PAIS, PROVINCIA Y LOCALIDAD
+
+alter table PROVINCIAS add column IdPais int NOT NULL;
+alter table public.PROVINCIAS add constraint FK_PAISES_ID foreign key (IdPais) references PAISES(ID) on update cascade;
+
+ alter table PROVINCIAS
+   add constraint UQ_PROVINCIA_PAIS
+   unique (Nombre, IdPais);
+
+alter table LOCALIDADES add column IdProvincia int NOT NULL;
+alter table public.LOCALIDADES add constraint FK_PROVINCIAS_ID foreign key (IdProvincia) references PROVINCIAS(ID) on update cascade;
+
+ alter table LOCALIDADES
+   add constraint UQ_LOCALIDAD_PROVINCIA
+   unique (Nombre, IdProvincia);
+--PROVEEDORES
+
+alter table PROVEEDORES add column IdLocalidad int NOT NULL;
+alter table public.PROVEEDORES add constraint FK_LOCALIDADES_ID foreign key (IdLocalidad) references LOCALIDADES(ID) on update cascade;
+
+
+--ORDENES DE COMPRA
+
+
+--alter table ORDENES_COMPRA add column IdLote int NOT NULL; --DEBERIA SER UNIQUE?
+--alter table public.ORDENES_COMPRA add constraint FK_LOTES_ID foreign key (IdLote) references LOTES(ID) on update cascade;
+
+alter table ORDENES_COMPRA add column IdProveedor int;
+alter table public.ORDENES_COMPRA add constraint FK_PROVEEDORES_ID foreign key (IdProveedor) references PROVEEDORES(ID) on update cascade;
+
+alter table ORDENES_COMPRA add column IdOrdenProduccion int NOT NULL;
+alter table public.ORDENES_COMPRA add constraint FK_ORDENES_PRODUCCION_ID foreign key (IdOrdenProduccion) references ORDENES_PRODUCCION(ID) on update cascade;
+
+--LOTES
+
+
+alter table LOTES add column IdOrdenCompra int NOT NULL; --NO PUEDE SER NULL.
+alter table public.LOTES add constraint FK_ORDENES_COMPRA_ID foreign key (IdOrdenCompra) references ORDENES_COMPRA(ID) on update cascade;
+
+
+
+--MOVIMIENTOS_INTERNOS_MP
+
+alter table MOVIMIENTOS_INTERNOS_MP add column IdLote int NOT NULL;
+alter table public.MOVIMIENTOS_INTERNOS_MP add constraint FK_LOTES_ID foreign key (IdLote) references LOTES(ID) on update cascade;
+
+alter table MOVIMIENTOS_INTERNOS_MP add column IdBascula int NOT NULL;
+alter table public.MOVIMIENTOS_INTERNOS_MP add constraint FK_BASCULAS_ID foreign key (IdBascula) references EQUIPAMIENTOS(ID) on update cascade;
+
+alter table MOVIMIENTOS_INTERNOS_MP add column IdEquipamientoOrigen int;
+alter table public.MOVIMIENTOS_INTERNOS_MP add constraint FK_ORIGEN_ID foreign key (IdEquipamientoOrigen) references EQUIPAMIENTOS(ID) on update cascade;
+
+alter table MOVIMIENTOS_INTERNOS_MP add column IdEquipamientoDestino int;
+alter table public.MOVIMIENTOS_INTERNOS_MP add constraint FK_DESTINO_ID foreign key (IdEquipamientoDestino) references EQUIPAMIENTOS(ID) on update cascade;
+--alter table public.MOVIMIENTOS_INTERNOS_MP add constraint CK_MIMP_IdBascula check (SELECT MOVIMIENTOS_INTERNOS_MP.IdBascula IN (SELECT ID from EQUIPAMIENTOS where EQUIPAMIENTOS.Tipo_Equipamiento='Bascula'));
+--NO SE PUEDEN REALIZAR SUB-CONSULTAS EN RESTRICCION CHECK. AMERITA TRIGGERS OBLIGATORIAMENTE.
+
+--INSERCION DE TUPLAS EN LA BD
+
+--ORDENES DE PRODUCCION
+
+insert into ORDENES_PRODUCCION (Cantidad_A_Producir, Unidad_De_Medida, Fecha_Origen, Fecha_Entrega, Estado) values (400, 'Tonelada', '01/09/2019', '04/01/2020', 'Regular');
+insert into ORDENES_PRODUCCION (Cantidad_A_Producir, Unidad_De_Medida, Fecha_Origen, Fecha_Entrega, Estado) values (400, 'Tonelada', '01/09/2019', '04/01/2020', 'Regular');
+
+--PAIS
+
+insert into PAISES (Nombre, Estado) values ('ARGENTINA', 'Activo');
+insert into PROVINCIAS (Nombre, Estado, IdPais) values ('MISIONES', 'Activo', 1);
+insert into LOCALIDADES (Nombre, Estado, IdProvincia, Codigo_Postal) values ('APOSTOLES', 'Activo', 1, 'N3350XAD');
+insert into LOCALIDADES (Nombre, Estado, IdProvincia, Codigo_Postal) values ('POSADAS', 'Activo', 1, '3300');
+
+--PROVEEDORES
+
+insert into PROVEEDORES (Razon_Social, CUIT, Estado, idLocalidad) values ('Cosechero Feliz', '20-54655814-02', 'Activo', 1);
+insert into PROVEEDORES (Razon_Social, CUIT, Estado, idLocalidad) values ('Siembra soleada', '20-54655815-02', 'Activo', 2);
+
+--LOTES
+
+
+--ORDENES DE COMPRA
+
+insert into ORDENES_COMPRA (Fecha_Origen, Unidad_De_Medida, Costo_De_Compra_PorUnidad, Estado, IdProveedor, IdOrdenProduccion) values ('04/09/2019', 'Tonelada',400, 'Concretado', 1, 1);
+insert into ORDENES_COMPRA (Fecha_Origen, Unidad_De_Medida, Costo_De_Compra_PorUnidad, Estado, IdProveedor, IdOrdenProduccion) values ('04/09/2019', 'Tonelada',400, 'Concretado', 1, 1);
+
+--YERBA CANCHADA VERDE
+insert into LOTES (Estado, Tipo_Lote,Cantidad, Unidad_De_Medida, IdOrdenCompra) values ('Activo', 'YCV', 180, 'Tonelada', 1);
+insert into LOTES (Estado, Tipo_Lote,Cantidad, Unidad_De_Medida, IdOrdenCompra) values ('Activo', 'YCE', 180, 'Tonelada', 1);
+
+
+--MODULO DE ESTACIONAMIENTO Y MOLIENDA
+
+--CREACIÓN DE TABLAS
+
+
+
+create table TRANSFORMACIONES (
+	ID SERIAL,
+	Estado varchar(30),
+	Fecha_Origen date,
+	primary key(ID));
+
+create table MOLIENDAS (
+	IdTransformacion int,
+	Sector varchar(30),
+	Turno varchar(30),
+	primary key (IdTransformacion));
+
+create table ESTACIONAMIENTOS (
+	IdTransformacion int,
+	Fecha_extraccion date,
+	primary key (IdTransformacion));
+
+create table DETALLES_TRANSFORMACION (
+	ID SERIAL,
+	cantidad_Utilizada int,
+	Unidad_De_Medida varchar(30),
+	primary key(ID));
+
+--CLAVES FORANEAS
+
+
+--TRANSFORMACIONES
+alter table TRANSFORMACIONES add column IdEquipamiento int NOT NULL;
+alter table public.TRANSFORMACIONES add constraint FK_EQUIPAMIENTOS_ID foreign key (IdEquipamiento) references EQUIPAMIENTOS(ID) on update cascade;
+
+
+--ESTACIONAMIENTOS
+
+	alter table public.ESTACIONAMIENTOS add constraint FK_TRANSFORMACIONES_ID foreign key (IdTransformacion) references TRANSFORMACIONES(ID) on update cascade;
+
+--MOLIENDAS
+
+	alter table public.MOLIENDAS add constraint FK_TRANSFORMACIONES_ID foreign key (IdTransformacion) references TRANSFORMACIONES(ID) on update cascade;
+
+--DETALLES DE TRANSFORMACION
+
+alter table DETALLES_TRANSFORMACION add column IdTransformacion int NOT NULL;
+alter table public.DETALLES_TRANSFORMACION add constraint FK_TRANSFORMACIONES_ID foreign key (IdTransformacion) references TRANSFORMACIONES(ID) on update cascade;
+
+alter table DETALLES_TRANSFORMACION add column IdLote int NOT NULL;
+alter table public.DETALLES_TRANSFORMACION add constraint FK_LOTES_ID foreign key (IdLote) references LOTES(ID) on update cascade;
+
+
+
+--RESTRICCIONES DE CHEQUEO
+
+--EQUIPAMIENTOS
+
+alter table public.EQUIPAMIENTOS  add column IdBascula int;
+alter table public.EQUIPAMIENTOS add constraint FK_BASCULAS_ID foreign key (IdBascula) references EQUIPAMIENTOS(ID) on update cascade;
+
+
+alter table public.EQUIPAMIENTOS 
+	add constraint CK_TIPO_EQUIPAMIENTO 
+	check (Tipo_Equipamiento = 'Molino' OR Tipo_Equipamiento = 'Deposito' OR Tipo_Equipamiento = 'Camara de Estacionamiento' OR Tipo_Equipamiento = 'Bascula');
+	
+alter table public.EQUIPAMIENTOS 
+	add constraint CK_UNIDAD_MEDIDA
+	check (Unidad_De_Medida = 'Tonelada' OR Unidad_De_Medida = 'Kilogramo');
+
+alter table public.ORDENES_COMPRA 
+	add constraint CK_UNIDAD_MEDIDA
+	check (Unidad_De_Medida = 'Tonelada' OR Unidad_De_Medida = 'Kilogramo');
+
+alter table public.LOTES
+	add constraint CK_UNIDAD_MEDIDA
+	check (Unidad_De_Medida = 'Tonelada' OR Unidad_De_Medida = 'Kilogramo');
+	
+alter table public.ORDENES_PRODUCCION 
+	add constraint CK_UNIDAD_MEDIDA
+	check (Unidad_De_Medida = 'Tonelada' OR Unidad_De_Medida = 'Kilogramo');
+
+--PROCEDIMIENTO DE ALMACENADO PARA INSERCION DE DEPOSITOS.
+
+CREATE OR REPLACE FUNCTION insertarDeposito(nombre varchar(60), direccion varchar(60), fecha_adquisicion date, fecha_ultimo_mantenimiento date, estado varchar(30), capacidad_maxima float, unidad_de_medida varchar(30)) returns void as
+$BODY$
+DECLARE aux int; --Variable para almacenar id
+BEGIN
+	insert into EQUIPAMIENTOS (Nombre, Tipo_Equipamiento, Direccion, Fecha_Adquisicion, Fecha_Ultimo_Mantenimiento, Capacidad_Maxima, Unidad_De_Medida, Estado) values (nombre, 'Deposito', direccion, fecha_adquisicion, fecha_ultimo_mantenimiento, capacidad_maxima, unidad_de_medida, estado);
+	EXCEPTION when unique_violation THEN
+		RAISE NOTICE 'Ya existe un Deposito con ese nombre';
+END;
+$BODY$
+language plpgsql;
+
+--TRIGGERS
+--Verificacion de que los Movimientos interno de materia prima referencian ids de Basculas
+
+CREATE OR REPLACE FUNCTION Funcion_Trigger_VerificarEquipamiento() returns TRIGGER as
+$BODY$
+	Begin
+		IF NOT (SELECT NEW.IdBascula IN (SELECT ID from EQUIPAMIENTOS where (EQUIPAMIENTOS.Tipo_Equipamiento='Bascula'))) THEN 
+			RAISE EXCEPTION 'Se esta referenciando un Equipamiento que no es una bascula';
+			RETURN null;
+		END IF;
+RETURN NEW;
+	End;
+$BODY$
+language plpgsql;
+
+CREATE TRIGGER insercion_MIMP BEFORE INSERT OR UPDATE ON MOVIMIENTOS_INTERNOS_MP
+	FOR EACH ROW EXECUTE PROCEDURE Funcion_Trigger_VerificarEquipamiento();
+
+
+--PROCEDIMIENTO DE ALMACENADO PARA REGISTRAR MOVIMIENTO INTERNO DE MATERIA PRIMA
+
+
+
+
+
+--PROCEDIMIENTO DE ALMACENADO PARA INSERCION DE BASCULAS.
+
+CREATE OR REPLACE FUNCTION insertarBascula(nombre varchar(60), direccion varchar(60), fecha_adquisicion date, fecha_ultimo_mantenimiento date, estado varchar(30), capacidad_maxima float, unidad_de_medida varchar(30)) returns void as
+$BODY$
+BEGIN
+	insert into EQUIPAMIENTOS (Nombre, Tipo_Equipamiento, Direccion, Fecha_Adquisicion, Fecha_Ultimo_Mantenimiento, Capacidad_Maxima, Unidad_De_Medida, Estado) values (nombre, 'Bascula', direccion, fecha_adquisicion, fecha_ultimo_mantenimiento, capacidad_maxima, unidad_de_medida, estado);
+	EXCEPTION when unique_violation THEN
+		RAISE NOTICE 'Ya existe una Bascula con ese nombre';
+END;
+$BODY$
+language plpgsql;
+
+--FUNCION para insertar MOLINOS
+
+--	Atributos necesarios:
+--	Capacidad_Maxima_Molienda float
+
+CREATE OR REPLACE FUNCTION insertarMolino(nombre varchar(60), direccion varchar(60), fecha_adquisicion date, fecha_ultimo_mantenimiento date, estado varchar(30), capacidad_maxima float, unidad_de_medida varchar(30)) returns void as
+$BODY$
+BEGIN
+	insert into EQUIPAMIENTOS (Nombre, Tipo_Equipamiento, Direccion, Fecha_Adquisicion, Fecha_Ultimo_Mantenimiento, Capacidad_Maxima, Unidad_De_Medida, Estado) values (nombre, 'Molino', direccion, fecha_adquisicion, fecha_ultimo_mantenimiento, capacidad_maxima, unidad_de_medida, estado);
+	EXCEPTION when unique_violation THEN
+		RAISE NOTICE 'Ya existe un Molino con ese nombre';
+END;
+$BODY$
+language plpgsql;
+
+--FUNCION para insertar Camaras de estacionamiento;
+--Atributos necesarios:
+--	Duracion_Maxima_Estacionamiento float,  duracion_Maxima_Estacionamiento float
+--	Capacidad_Maxima float,
+--	Unidad_De_Medida varchar(30),
+
+CREATE OR REPLACE FUNCTION insertarCamaraEstacionamiento(nombre varchar(60), direccion varchar(60), fecha_adquisicion date, fecha_ultimo_mantenimiento date, estado varchar(30), capacidad_maxima float, unidad_de_medida varchar(30), duracion_Maxima_Estacionamiento float) returns void as
+$BODY$
+BEGIN
+	insert into EQUIPAMIENTOS (Nombre, Tipo_Equipamiento, Direccion, Fecha_Adquisicion, Fecha_Ultimo_Mantenimiento, Capacidad_Maxima, Unidad_De_Medida, Duracion_Maxima_Estacionamiento, Estado) values (nombre, 'Camara de Estacionamiento', direccion, fecha_adquisicion, fecha_ultimo_mantenimiento, capacidad_maxima, unidad_de_medida, duracion_Maxima_Estacionamiento, estado);
+	EXCEPTION when unique_violation THEN
+		RAISE NOTICE 'Ya existe una Camara de estacionamiento con ese nombre';
+END;
+$BODY$
+language plpgsql;
+
+
+--PROCEDIMIENTO PARA ALMACENAR DETALLES DE TRANSFORMACIONES
+--Tiene que calcularse el remanente no utilizado de un lote para verificar que no esté volviendose a utilizar.
+--FUNCION QUE DETERMINA el peso disponible de un lote para ser utilizado
+
+CREATE OR REPLACE FUNCTION determinarPesoDisponible(unidad_De_Medida_Deseada varchar(30), idLoteADeterminar int) returns float as
+$BODY$
+DECLARE peso_Utilizado float; --Variable para acumular todo lo que se Obtenga de ese lote.
+	peso_Total_Lote float;
+	resultadoFinal float;
+	detalles CURSOR for select * from DETALLES_TRANSFORMACION where (idLote = idLoteADeterminar);
+BEGIN
+	peso_Utilizado = 0;
+	peso_Total_Lote = (SELECT LOTES.Cantidad from LOTES where (LOTES.ID = idLoteADeterminar));
+	peso_Total_Lote = (SELECT convertirUnidadPeso((SELECT (Unidad_De_Medida) from LOTES where (LOTES.ID = idLoteADeterminar)),'Tonelada', peso_Total_Lote));
+	for detalle_actual in detalles LOOP
+		peso_Utilizado = peso_Utilizado + (SELECT convertirUnidadPeso(detalle_actual.Unidad_De_Medida, 'Tonelada', detalle_actual.Cantidad_Utilizada));
+	END LOOP;
+	resultadoFinal = peso_Total_Lote - peso_Utilizado;
+	resultadoFinal = (SELECT convertirUnidadPeso('Tonelada', unidad_De_Medida_Deseada, resultadoFinal));
+	RETURN resultadoFinal;
+END;
+$BODY$
+language plpgsql;
+
+--FUNCION QUE DETERMINA SI PUEDO AGREGAR O NO UN DETALLE DE TRANSFORMACION
+
+CREATE OR REPLACE FUNCTION sePuedeAgregarUnDetalle(unidad_De_Medida varchar(30), peso float, idLoteADeterminar int) returns BOOLEAN as
+$BODY$
+DECLARE peso_Disponible float; --Variable para guardar el peso disponible del lote.
+	
+BEGIN
+	peso_Disponible = (SELECT determinarPesoDisponible(unidad_De_Medida, idLoteADeterminar));
+	RETURN (peso_Disponible>=peso);
+END;
+$BODY$
+language plpgsql;
+
+--FUNCION PARA AGREGAR UN DETALLE
+
+CREATE OR REPLACE FUNCTION agregarUnDetalle(idTransformacion int, unidad_De_Medida varchar(30), peso float, idLoteAAgregar int) returns void as
+$BODY$
+BEGIN
+	if (SELECT sePuedeAgregarUnDetalle(unidad_De_Medida, peso, idLoteAAgregar)) THEN
+		insert into DETALLES_TRANSFORMACION (cantidad_Utilizada, Unidad_De_Medida, idTransformacion, idLote) values (peso, unidad_De_Medida, idTransformacion, idLoteAAgregar);		
+	ELSE
+		Raise 'No se posee esa cantidad disponible en el lote seleccionado.';
+	END IF;
+END;
+$BODY$
+language plpgsql;
+
+--INSERCION DE EQUIPAMIENTO
+
+SELECT insertarDeposito ('Depósito E1 Camaras Estacionamiento Apostoles', 'Esta en Apostoles', '1/1/2019','22/09/2019', 'Activo', 300, 'Tonelada');
+SELECT insertarMolino ('Molino Liebig', 'Esta en Liebig', '1/1/2019','22/09/2019', 'Activo', 300, 'Tonelada');
+SELECT insertarCamaraEstacionamiento('Camara de estacionamiento N°1 de San Jose', 'Esta en San Jose', '1/1/2019','22/09/2019', 'Activo', 80, 'Tonelada', 300 );
+SELECT insertarBascula('Bascula N°1', 'Gral Paz y Pellegrini', '1/1/2019','22/09/2019', 'Activo', 80, 'Tonelada');
+
+--INSERCION de Transformacion
+
+--EN REALIDAD, PARA HACERLO BIEN DEBERIA HABER UN PROCESO DE ALMACENADO QUE EL TIPO DE LOTE Y EL EQUIPAMIENTO UTILIZADO PARA EVITAR TRANSFORMACIONES ABSURDAS.
+--PERO ESO CONCIERNE A LA APLICACION JAVA CREO.
+
+--Insercion de Lote nuevo (Debería hacerlo automáticamente un procedimiento de almacenado
+
+insert into TRANSFORMACIONES (Estado, Fecha_Origen, idEquipamiento) values ('Regular', '03/08/2019', 1);
+
+--INSERCION de Detalle de transformacion.
+
+SELECT agregarUnDetalle(1,'Tonelada', 20, 1);
+
+insert into DETALLES_TRANSFORMACION (cantidad_Utilizada, Unidad_De_Medida, idTransformacion, idLote) values (20, 'Tonelada', 1, 1);
+insert into DETALLES_TRANSFORMACION (cantidad_Utilizada, Unidad_De_Medida, idTransformacion, idLote) values (20, 'Tonelada', 1, 1);
+
+--CONSULTAS DE INTERES:

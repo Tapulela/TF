@@ -17,25 +17,33 @@ public class Proveedor {
     private String razonSocial;
     private String cuit;
     private String estado;
+    private Localidad localidad;
     
     private ArrayList ordenesDeCompraAsociadas;
     
-    public Proveedor(int id, String razonSocial, String cuil, String estado) { //Constructor para la base de datos
+    public Proveedor(int id, String razonSocial, String cuit, String estado, Localidad localidad) { //Constructor para la base de datos
         this.id = id;
         this.razonSocial = razonSocial;
-        this.cuit = cuil;
+        this.cuit = cuit;
         this.estado = estado;
+        this.localidad = localidad;
         
         this.ordenesDeCompraAsociadas = new ArrayList();
     }
 
-    public Proveedor(String razonSocial, String cuil) {
+    public Proveedor(String razonSocial, String cuit, Localidad localidad) {
         this.razonSocial = razonSocial;
-        this.cuit = cuil;
+        this.cuit = cuit;
         this.estado = "Activo";
+        this.localidad = localidad;
         
         this.ordenesDeCompraAsociadas = new ArrayList();
     }
+
+    public Localidad getLocalidad() {
+        return localidad;
+    }
+
     
     
 
@@ -88,7 +96,7 @@ public class Proveedor {
     }
 
     public Object[] devolverVector() {
-        Object[] vec ={this.getId(),this.getRazonSocial(), this.getCuit(), this.getEstado()};
+        Object[] vec ={this.getId(),this.getRazonSocial(), this.getCuit(), this.getEstado(), this.localidad.getNombre()};
         return vec;
     }
 }

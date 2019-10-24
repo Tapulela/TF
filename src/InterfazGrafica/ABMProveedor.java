@@ -6,12 +6,18 @@
 package InterfazGrafica;
 
 import LogicaDeNegocio.ExcepcionCargaParametros;
+import LogicaDeNegocio.Localidad;
 import LogicaDeNegocio.Organizacion;
 import LogicaDeNegocio.Proveedor;
 import Persistencia.ExcepcionPersistencia;
+import java.awt.Component;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 
 /**
@@ -19,7 +25,22 @@ import javax.swing.JOptionPane;
  * @author usuario
  */
 public class ABMProveedor extends javax.swing.JFrame implements TransferenciaInstancias {
-    
+
+    public class MiRenderizadorDeCeldasDeListasDeObjetos extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(
+            JList list,
+            Object value,
+            int index,
+            boolean isSelected,
+            boolean cellHasFocus) {
+            if (value instanceof Localidad) {
+                value = ((Localidad)value).getNombre();
+            }
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            return this;
+        }
+    }
     /**
      * Creates new form ABMProveedor
      */
@@ -45,7 +66,7 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
         trayectoriaActual = trayectoriaAnterior+" - Gestionar Proveedores";
         cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestion de Proveedores", this.trayectoriaActual);
         
-        
+        cargarLocalidades();
 
         this.setVisible(true); 
         jBBuscar.setVisible(false);
@@ -54,6 +75,7 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
     }
     private void organizarElementos(){
         this.deshabilitarTodo();
+        cargarLocalidades();
         switch((String)jCBOperacion.getSelectedItem()){
             case "Alta":
                 prepararAlta();
@@ -94,6 +116,8 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
         jLEstado = new javax.swing.JLabel();
         jCBEstado = new javax.swing.JComboBox<>();
         cabeceraDeVentana = new InterfazGrafica.CabeceraDeVentana();
+        jLLocalidad = new javax.swing.JLabel();
+        jCBLocalidad = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(153, 255, 153));
@@ -128,13 +152,13 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
             }
         });
 
+        jLCUIL.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLCUIL.setText("CUIT");
         jLCUIL.setEnabled(false);
-        jLCUIL.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
+        jTFCUIT.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jTFCUIT.setText("Ingrese un CUIT");
         jTFCUIT.setEnabled(false);
-        jTFCUIT.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
         jLabel12.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLabel12.setText("Seleccione una operacion");
@@ -164,6 +188,14 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
         jCBEstado.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Activo", "Baja" }));
         jCBEstado.setEnabled(false);
 
+        jLLocalidad.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLLocalidad.setText("Localidad");
+        jLLocalidad.setEnabled(false);
+
+        jCBLocalidad.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCBLocalidad.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar" }));
+        jCBLocalidad.setEnabled(false);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -171,17 +203,13 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.DEFAULT_SIZE, 1259, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLCUIL)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTFCUIT, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jBConcretarAccion)
-                        .addGap(18, 18, 18)
-                        .addComponent(jBCancelar))
+                    .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.DEFAULT_SIZE, 1444, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLCUIL)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTFCUIT, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel12)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -194,10 +222,21 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jTFRazonSocial, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(74, 74, 74)
-                                .addComponent(jLEstado)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jCBEstado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLLocalidad)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jCBLocalidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLEstado)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jCBEstado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jBConcretarAccion)
+                        .addGap(18, 18, 18)
+                        .addComponent(jBCancelar)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -219,14 +258,16 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
                     .addComponent(jLEstado)
                     .addComponent(jCBEstado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jBCancelar)
-                        .addComponent(jBConcretarAccion))
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLCUIL)
-                        .addComponent(jTFCUIT, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLCUIL)
+                    .addComponent(jTFCUIT, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLLocalidad)
+                    .addComponent(jCBLocalidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jBCancelar)
+                    .addComponent(jBConcretarAccion))
+                .addContainerGap())
         );
 
         pack();
@@ -237,7 +278,10 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
         try {
             switch ((String)jCBOperacion.getSelectedItem()){
                 case "Alta":
-                    this.organizacion.registrarProveedor(jTFRazonSocial.getText(), jTFCUIT.getText());
+                    Localidad unaLocalidad = null;
+                    if (!jCBLocalidad.getSelectedItem().equals("Seleccionar"))
+                        unaLocalidad = (Localidad)jCBLocalidad.getSelectedItem();
+                    this.organizacion.registrarProveedor(jTFRazonSocial.getText(), jTFCUIT.getText(), unaLocalidad);
                     break;
                 case "Baja":
                     this.organizacion.darDeBajaUnProveedor(unProveedorSeleccionado);
@@ -322,9 +366,11 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
     private javax.swing.JButton jBCancelar;
     private javax.swing.JButton jBConcretarAccion;
     private javax.swing.JComboBox<String> jCBEstado;
+    private javax.swing.JComboBox<Object> jCBLocalidad;
     private javax.swing.JComboBox<String> jCBOperacion;
     private javax.swing.JLabel jLCUIL;
     private javax.swing.JLabel jLEstado;
+    private javax.swing.JLabel jLLocalidad;
     private javax.swing.JLabel jLOperacion;
     private javax.swing.JLabel jLRazonSocial;
     private javax.swing.JLabel jLabel12;
@@ -336,6 +382,8 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
         jLOperacion.setEnabled(false);
         jLRazonSocial.setEnabled(false);
         jLCUIL.setEnabled(false);
+        jLLocalidad.setEnabled(false);
+        jCBLocalidad.setEnabled(false);
         jLEstado.setEnabled(false);
         jLEstado.setVisible(false);
         
@@ -371,6 +419,9 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
                 jCBOperacion.setSelectedItem("Seleccionar");
                 jLEstado.setEnabled(false);
                 jCBEstado.setEnabled(false);
+                jLLocalidad.setEnabled(false);
+                jCBLocalidad.setSelectedItem("Seleccionar");
+                jCBLocalidad.setEnabled(false);
                 this.jCBOperacion.setEnabled(true);
                 this.unProveedorSeleccionado = null;
     }
@@ -383,7 +434,10 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
         jTFCUIT.setText(unProveedor.getCuit());
         jCBEstado.setSelectedItem(unProveedor.getEstado());
         
+        
         organizarElementos();
+                jCBLocalidad.setSelectedItem(unProveedor.getLocalidad());//ARREGLAR
+
         jBConcretarAccion.setEnabled(true);
         jBCancelar.setEnabled(true);
         this.pack();
@@ -394,9 +448,12 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
         jLRazonSocial.setEnabled(true);
         jLCUIL.setEnabled(true);
         jLEstado.setEnabled(true);
+        jLLocalidad.setEnabled(true);
+        
         
         jTFRazonSocial.setEnabled(true);
         jCBEstado.setEnabled(true);
+        jCBLocalidad.setEnabled(true);
         jTFCUIT.setEnabled(true);
         
         jBConcretarAccion.setEnabled(true);
@@ -415,6 +472,7 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
         jLRazonSocial.setEnabled(true);
         jLCUIL.setEnabled(true);
         jLEstado.setEnabled(true);
+        jLLocalidad.setEnabled(true);
         
         jLEstado.setVisible(true);
         jCBEstado.setVisible(true);
@@ -438,6 +496,9 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
         if (unProveedorSeleccionado == null)
             return;
         jBConcretarAccion.setText("Guardar cambios");
+        
+        jLLocalidad.setEnabled(true);
+        jCBLocalidad.setEnabled(true);
         jLOperacion.setEnabled(true);
         jLRazonSocial.setEnabled(true);
         jLCUIL.setEnabled(true);
@@ -457,6 +518,17 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
 
     public String getOperacionActual() {
         return operacionActual;
+    }
+
+    private void cargarLocalidades() {
+        jCBLocalidad.removeAllItems();
+        jCBLocalidad.addItem("Seleccionar");
+        Iterator recorredorLocalidadesActivas = organizacion.getLocalidadesActivas().iterator();
+        while (recorredorLocalidadesActivas.hasNext()){
+            Localidad unaLocalidad = (Localidad) recorredorLocalidadesActivas.next();
+            jCBLocalidad.addItem(unaLocalidad);
+        }
+        jCBLocalidad.setRenderer(new MiRenderizadorDeCeldasDeListasDeObjetos());
     }
     
 
