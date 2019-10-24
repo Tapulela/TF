@@ -29,6 +29,9 @@ public class Organizacion {
     private Map<Integer, Lote> lotes;
     private Map<Integer, OrdenDeProduccion> ordenesProduccion;
     private Map<Integer, OrdenDeCompra> ordenesCompra;
+    private Map<Integer, Pais> paises;
+    private Map<Integer, Provincia> provincias;
+    private Map<Integer, Localidad> localidades;
 
     public Organizacion(Persistencia persistencia) throws SQLException {
         this.persistencia = persistencia;
@@ -38,6 +41,9 @@ public class Organizacion {
         this.ordenesProduccion = new HashMap <Integer, OrdenDeProduccion>();
         this.lotes = new HashMap <Integer, Lote>();
         this.ordenesCompra = new HashMap <Integer, OrdenDeCompra>();
+        this.paises = new HashMap <Integer, Pais>();        
+        this.provincias = new HashMap <Integer, Provincia>();
+        this.localidades = new HashMap <Integer, Localidad>();
         this.persistencia.recuperarOrganizacion(this);
     }
 
@@ -74,11 +80,24 @@ public class Organizacion {
         return lotes;
     }
 
+    public Map<Integer, Pais> getPaises() {
+        return paises;
+    }
+
+    public Map<Integer, Provincia> getProvincias() {
+        return provincias;
+    }
+
+    public Map<Integer, Localidad> getLocalidades() {
+        return localidades;
+    }
+    
+
     public void registrarOrdenDeProduccion(Calendar unaFechaOrigen, float cantidadAProducir, String unidadDeMedida, Calendar fechaEntregaProductoTerminado, String unaDescripcion) throws ExcepcionCargaParametros, SQLException {
         if (unaFechaOrigen == null)
             throw new ExcepcionCargaParametros("Se requiere especificar una fecha de origen.");
         if (fechaEntregaProductoTerminado == null)
-            throw new ExcepcionCargaParametros("Se requiere especificar una fecha de origen.");
+            throw new ExcepcionCargaParametros("Se requiere especificar una fecha de entrega de producto terminado.");
         if (cantidadAProducir <= 0)
             throw new ExcepcionCargaParametros("Por favor, ingrese una cantidad a Producir positiva.");
         OrdenDeProduccion unaOrdenDeProduccion = new OrdenDeProduccion(unaFechaOrigen, cantidadAProducir, unidadDeMedida, fechaEntregaProductoTerminado, unaDescripcion);
@@ -346,6 +365,28 @@ public class Organizacion {
         return retorno;
     }    
     
+    
+    public void darDeBajaUnPais(Pais unPais) throws ExcepcionCargaParametros, ExcepcionPersistencia, SQLException{
+        if (unPais.poseeProvinciasActivas())
+            throw new ExcepcionCargaParametros("No se puede dar de baja un país con provincias activas.");
+        unPais.darDeBaja();
+        persistencia.modificarObjeto(unPais);
+    }
+    
+    public void darDeBajaUnaProvincia(Provincia unaProvincia) throws ExcepcionCargaParametros, ExcepcionPersistencia, SQLException{
+        if (unaProvincia.poseeLocalidadesActivas())
+            throw new ExcepcionCargaParametros("No se puede dar de baja una provincia con localidades activas.");
+        unaProvincia.darDeBaja();
+        persistencia.modificarObjeto(unaProvincia);
+    }
+    
+    public void darDeBajaUnaLocalidad(Localidad unaLocalidad) throws ExcepcionCargaParametros, ExcepcionPersistencia, SQLException{
+        if (unaLocalidad.poseeProveedoresActivos())
+            throw new ExcepcionCargaParametros("No se puede dar de baja una localidad con proveedores activos.");
+        unaLocalidad.darDeBaja();
+        persistencia.modificarObjeto(unaLocalidad);
+    }
+    
     public void darDeBajaUnEquipamiento(Equipamiento unEquipamiento) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
         //Si se trata de una bascula, solo se podrá dar de baja si no posee ningun Equipamiento asociado
         //Solo se puede dar de baja un equipamiento si no posee ningun lote de entrada que no haya salido.
@@ -472,17 +513,134 @@ public class Organizacion {
         return retorno;
     }
     
+    public void registrarPais(String unNombre) throws ExcepcionCargaParametros, SQLException{
+        if (unNombre == null)
+            throw new ExcepcionCargaParametros("No puede registrarse un nombre vacío.");
+        if (existePais(unNombre))
+            throw new ExcepcionCargaParametros("Ya existe un pais con ese nombre.");
+        Pais unPais = new Pais(unNombre.toUpperCase());
+        persistencia.persistirObjeto(unPais);
+        this.paises.put(unPais.getId(), unPais);
+    }
     
-    public void registrarProveedor(String unaRazonSocial, String unCuit) throws ExcepcionCargaParametros, SQLException{
+    public void registrarProvincia(Pais unPais, String unNombre) throws ExcepcionCargaParametros, SQLException{
+        if (unNombre == null)
+            throw new ExcepcionCargaParametros("No puede registrarse un nombre vacío.");
+        if (existeProvincia(unPais, unNombre))
+            throw new ExcepcionCargaParametros("Ya existe una provincia con ese nombre en ese país.");
+        Provincia unaProvincia = new Provincia(unNombre.toUpperCase(), unPais);
+        persistencia.persistirObjeto(unaProvincia);
+        this.provincias.put(unaProvincia.getId(), unaProvincia);
+        unPais.agregarProvincia(unaProvincia);
+    }
+    public void registrarLocalidad(Provincia unaProvincia, String unNombre, String unCodigoPostal) throws ExcepcionCargaParametros, SQLException{
+        if (unNombre == null)
+            throw new ExcepcionCargaParametros("No puede registrarse un nombre vacío.");
+        if (unCodigoPostal == null)
+            throw new ExcepcionCargaParametros("No puede registrarse un codigo postal vacío.");
+        if(!Validaciones.esUnCodigoPostalValido(unCodigoPostal))
+            throw new ExcepcionCargaParametros("El código postal no es valido (Debe ser el formato viejo (4 digitos) o el formato nuevo (Normas IRAM))");
+        if (existeLocalidad(unaProvincia, unNombre))
+            throw new ExcepcionCargaParametros("Ya existe una localidad con ese nombre en esa provincia.");
+        Localidad unaLocalidad = new Localidad(unNombre.toUpperCase(), unCodigoPostal, unaProvincia);
+        persistencia.persistirObjeto(unaLocalidad);
+        this.localidades.put(unaLocalidad.getId(), unaLocalidad);
+        unaProvincia.agregarLocalidad(unaLocalidad);
+    }    
+    public void registrarProveedor(String unaRazonSocial, String unCuit, Localidad unaLocalidad) throws ExcepcionCargaParametros, SQLException{
         if (!Validaciones.unCuitEsValido(unCuit))
             throw new ExcepcionCargaParametros("El cuit debe estar en formato XX-XXXXXXXX-X.");
         if (unaRazonSocial.isEmpty())
             throw new ExcepcionCargaParametros("Debe ingresar una razon social para realizar el alta.");
         if (existeProveedor(unaRazonSocial, unCuit))
             throw new ExcepcionCargaParametros("Ya existe un proveedor con esa razon social o ese cuit.");
-        Proveedor unProveedor = new Proveedor(unaRazonSocial.toUpperCase(), unCuit);
+        if (unaLocalidad == null)
+            throw new ExcepcionCargaParametros("No se especifico una localidad.");
+        if (!unaLocalidad.seEncuentraActiva())
+            throw new ExcepcionCargaParametros("La localidad especificada no se encuentra activa.");
+        Proveedor unProveedor = new Proveedor(unaRazonSocial.toUpperCase(), unCuit, unaLocalidad);
         persistencia.persistirObjeto(unProveedor);
         this.proveedores.put(unProveedor.getId(), unProveedor);
+        unaLocalidad.agregarProveedor(unProveedor);
+    }
+    
+    public void modificarPais (Pais unPais, String unNombre, String unEstado) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+        if (unNombre == null || unNombre.equals(""))
+            throw new ExcepcionCargaParametros("El nuevo nombre no puede ser vacío.");
+        if (existePais(unPais, unNombre))
+            throw new ExcepcionCargaParametros("Ya existe un pais con ese nombre.");
+        if (unEstado.equals(unPais.ESTADO_BAJA) && unPais.poseeProvinciasActivas())
+            throw new ExcepcionCargaParametros("No se puede dar de baja un país con provincias activas.");
+        unPais.setNombre(unNombre.toUpperCase());
+        unPais.setEstado(unEstado);
+        persistencia.modificarObjeto(unPais);
+    }
+    
+    public void modificarProvincia (Provincia unaProvincia, String unNombre, String unEstado) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+        if (unNombre == null || unNombre.equals(""))
+            throw new ExcepcionCargaParametros("El nuevo nombre no puede ser vacío.");
+        if (existeProvincia(unaProvincia.getPaisAsociado(), unaProvincia, unNombre))
+            throw new ExcepcionCargaParametros("Ya existe una provincia con ese nombre en ese pais.");
+        if (unEstado.equals(unaProvincia.ESTADO_BAJA) && unaProvincia.poseeLocalidadesActivas())
+            throw new ExcepcionCargaParametros("No se puede dar de baja una provincia con localidades activas.");
+        unaProvincia.setNombre(unNombre.toUpperCase());
+        unaProvincia.setEstado(unEstado);
+        persistencia.modificarObjeto(unaProvincia);
+    }
+    
+    public void modificarLocalidad (Provincia unaProvincia, Localidad unaLocalidad, String unNombre, String unCodigoPostal, String unEstado) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+        if (unNombre == null || unNombre.equals(""))
+            throw new ExcepcionCargaParametros("El nuevo nombre no puede ser vacío.");
+        if (!Validaciones.esUnCodigoPostalValido(unCodigoPostal))
+            throw new ExcepcionCargaParametros("El código postal no es valido (Debe ser el formato viejo (4 digitos) o el formato nuevo (Normas IRAM))");
+        if (existeLocalidad(unaLocalidad.getProvinciaAsociada(), unaLocalidad, unNombre))
+            throw new ExcepcionCargaParametros("Ya existe una localidad con ese nombre en esa provincia.");
+        if (unEstado.equals(unaLocalidad.ESTADO_BAJA) && unaLocalidad.poseeProveedoresActivos())
+            throw new ExcepcionCargaParametros("No se puede dar de baja una localidad con proveedores activos.");
+        unaLocalidad.setNombre(unNombre.toUpperCase());
+        unaLocalidad.setEstado(unEstado);
+        unaLocalidad.setCodigoPostal(unCodigoPostal);
+        persistencia.modificarObjeto(unaLocalidad);
+    }
+    
+    public void modificarOrdenDeCompra(OrdenDeCompra unaOrdenDeCompra, String unaUnidadMedida, String unCostoDeCompra, String unEstado, String unaCantidadAComprar, Proveedor proveedorSeleccionado, OrdenDeProduccion ordenProduccionSeleccionada) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+        unaCantidadAComprar = unaCantidadAComprar.replace(",", ".");
+        unCostoDeCompra = unCostoDeCompra.replace(",", ".");
+        
+        
+        if (unaOrdenDeCompra == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de Compra");
+        if (ordenProduccionSeleccionada == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de producción");
+        if (unEstado.equals(OrdenDeCompra.ESTADO_ANULADO) && unaOrdenDeCompra.poseeLotesRegularesAsociados())
+            throw new ExcepcionCargaParametros("No se puede anular una orden de Compra que posee lotes en estado regular.");
+        if (unaUnidadMedida.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("No se ha seleccionado una unidad de medida");
+        if (!Validaciones.esUnNumeroFraccionarioValido(unaCantidadAComprar))
+            throw new ExcepcionCargaParametros("La cantidad a comprar no posee un formato valido (solo numeros y un punto)");
+        if (!Validaciones.esUnNumeroFraccionarioValido(unCostoDeCompra))
+            throw new ExcepcionCargaParametros("El costo de compra no posee un formato valido (solo numeros y un punto)");
+        if (proveedorSeleccionado != null && !proveedorSeleccionado.seEncuentraActivo())
+            throw new ExcepcionCargaParametros("El proveedor asociado no se encuentra activo");
+        if (!ordenProduccionSeleccionada.seEncuentraRegular())
+            throw new ExcepcionCargaParametros("La orden de producción no se encuentra en estado regular.");
+        float cantidadAComprar = Float.parseFloat(unaCantidadAComprar);
+        float costoDeCompra = Float.parseFloat(unCostoDeCompra);       
+        if (cantidadAComprar <=0)
+            throw new ExcepcionCargaParametros("La orden de compra no puede poseer una cantidad negativa.");
+        if (costoDeCompra <=0)
+            throw new ExcepcionCargaParametros("La orden de compra no puede poseer un costo de compra negativo.");
+        if (unaOrdenDeCompra.getCantidadComprada(unaUnidadMedida) > cantidadAComprar)
+            throw new ExcepcionCargaParametros("La orden de compra no puede tener una cantidad a comprar menor a la cantidad ya comprada.");
+        
+        unaOrdenDeCompra.setUnidadDeMedida(unaUnidadMedida);
+        unaOrdenDeCompra.setCostoPorUnidad(costoDeCompra);
+        unaOrdenDeCompra.setCantidadAComprar(cantidadAComprar);
+        unaOrdenDeCompra.setProveedorAsociado(proveedorSeleccionado);
+        unaOrdenDeCompra.setOrdenDeProduccionAsociada(ordenProduccionSeleccionada);
+        unaOrdenDeCompra.setEstado(unEstado);
+        persistencia.modificarObjeto(unaOrdenDeCompra);
+        
     }
     
     public void modificarProveedor(Proveedor unProveedorAModificar, String unaRazonSocial, String unCuit, String unEstado) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
@@ -641,12 +799,22 @@ public class Organizacion {
             throw new ExcepcionCargaParametros("El proveedor asociado no se encuentra activo");
         if (!ordenProduccionSeleccionada.seEncuentraRegular())
             throw new ExcepcionCargaParametros("La orden de producción no se encuentra en estado regular.");
+        
         float cantidadAComprar = Float.parseFloat(unaCantidadAComprar);
         float costoDeCompra = Float.parseFloat(unCostoDeCompra);
+        
+        
+        if (cantidadAComprar <=0)
+            throw new ExcepcionCargaParametros("La orden de compra no puede poseer una cantidad negativa.");
+        if (cantidadAComprar <=0)
+            throw new ExcepcionCargaParametros("La orden de compra no puede poseer un costo de compra negativo.");        
+        if (Organizacion.convertirUnidadPeso(ordenProduccionSeleccionada.getUnidadDeMedida(), ordenProduccionSeleccionada.getCantidadAProducir(), unaUnidadMedida)< cantidadAComprar)
+            throw new ExcepcionCargaParametros("No se puede registrar una compra por una cantidad de peso mayor a la indicada en la orden de producción.");
         
         OrdenDeCompra unaOrdenDeCompra = new OrdenDeCompra(cantidadAComprar, unaUnidadMedida, costoDeCompra, proveedorSeleccionado, ordenProduccionSeleccionada);
         persistencia.persistirObjeto(unaOrdenDeCompra);
         this.ordenesCompra.put(unaOrdenDeCompra.getId(), unaOrdenDeCompra);
+        ordenProduccionSeleccionada.agregarOrdenDeCompra(unaOrdenDeCompra);
         
     }
 
@@ -654,11 +822,88 @@ public class Organizacion {
         if (unaOrdenDeCompra == null)
             throw new ExcepcionCargaParametros("No se ha seleccionado una orden de compra para anular.");
         if (unaOrdenDeCompra.poseeLotesRegularesAsociados())
-            throw new ExcepcionCargaParametros("La orden de Compra posee lotes en estado regular.");
+            throw new ExcepcionCargaParametros("No se puede anular una orden de Compra que posee lotes en estado regular.");
         unaOrdenDeCompra.anular();
         persistencia.modificarObjeto(unaOrdenDeCompra);
         
     }
+
+    public ArrayList getLocalidadesActivas() {
+        ArrayList retorno = new ArrayList();
+        Iterator recorredorLocalidades = this.localidades.keySet().iterator();
+        while (recorredorLocalidades.hasNext()){
+            int unId = (int)recorredorLocalidades.next();
+            Localidad unaLocalidad = this.localidades.get(unId);
+            if (unaLocalidad.seEncuentraActiva())
+                retorno.add(unaLocalidad);
+        }
+        return retorno;
+    }
+
+    private boolean existePais(String unNombre) {
+        boolean retorno = false;
+        Iterator paises = this.paises.keySet().iterator();
+        while (paises.hasNext() && !retorno){
+            int unId = (int) paises.next();
+            Pais unPais = this.paises.get(unId);
+            retorno = unPais.seLlama(unNombre);
+        }
+        return retorno;
+    }
+
+    private boolean existeProvincia(Pais unPais, String unNombre) {
+        boolean retorno = false;
+        Iterator provincias = unPais.getProvincias().iterator();
+        while (provincias.hasNext() && !retorno){
+            Provincia unaProvincia = (Provincia) provincias.next();
+            retorno = unaProvincia.seLlama(unNombre);
+        }
+        return retorno;
+    }
+
+    private boolean existeLocalidad(Provincia unaProvincia, String unNombre) {
+        //POR LO QUE LEI, PUEDE REPETIRSE EL CODIGO POSTAL. POR ESO NO LO VALIDO.
+        boolean retorno = false;
+        Iterator localidades = unaProvincia.getLocalidades().iterator();
+        while (localidades.hasNext() && !retorno){
+            Localidad unaLocalidad = (Localidad) localidades.next();
+            retorno = unaLocalidad.seLlama(unNombre);
+        }
+        return retorno;
+    }
+
+    private boolean existePais(Pais unPaisAVerificar, String unNombre) {
+        Iterator recorredorPaises = this.paises.keySet().iterator();
+        boolean existe = false;
+        while (recorredorPaises.hasNext() && !existe){
+            Pais unPais = (Pais) this.paises.get(recorredorPaises.next());
+            if (unPais.seLlama(unNombre) && !unPais.equals(unPaisAVerificar))
+                existe = true;
+        }
+        return existe;
+    }
+    
+    private boolean existeProvincia(Pais unPaisAVerificar, Provincia unaProvinciaAVerificar, String unNombre) {
+        Iterator recorredorProvincias = unPaisAVerificar.getProvincias().iterator();
+        boolean existe = false;
+        while (recorredorProvincias.hasNext() && !existe){
+            Provincia unaProvincia = (Provincia) recorredorProvincias.next();
+            if (unaProvincia.seLlama(unNombre) && !unaProvincia.equals(unaProvinciaAVerificar))
+                existe = true;
+        }
+        return existe;
+    }    
+    
+    private boolean existeLocalidad(Provincia unaProvinciaAVerificar, Localidad unaLocalidadAVerificar,String unNombre) {
+        Iterator recorredorLocalidades = unaProvinciaAVerificar.getLocalidades().iterator();
+        boolean existe = false;
+        while (recorredorLocalidades.hasNext() && !existe){
+            Localidad unaLocalidad = (Localidad) recorredorLocalidades.next();
+            if (unaLocalidad.seLlama(unNombre) && !unaLocalidad.equals(unaLocalidadAVerificar))
+                existe = true;
+        }
+        return existe;
+    }        
 
 
 

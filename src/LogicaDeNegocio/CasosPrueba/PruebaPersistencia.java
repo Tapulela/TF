@@ -34,18 +34,7 @@ public class PruebaPersistencia {
     
     
     
-    public static void probarInsercionProveedores(Organizacion unaOrganizacion) {
-        try {
-            Calendar unaFechaAdquisicion = Calendar.getInstance();
-            unaFechaAdquisicion.set(2013, 8, 3);
-            Calendar unaFechaUltimoMantenimiento = Calendar.getInstance();
-            unaFechaUltimoMantenimiento.set(2015, 7, 4);
-            Proveedor unProveedor = new Proveedor("Familia Rodriguez", "13-12316456465-08");        
-            unaOrganizacion.getPersistencia().persistirObjeto(unProveedor);
-        } catch (Exception ex) {
-            System.err.println("Ocurrio un error en la prueba de carga de tuplas de proveedores: "+ex.getMessage());
-        }
-    }
+
     
     public static void probarActualizarProveedores(Organizacion unaOrganizacion){
         try {

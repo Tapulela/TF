@@ -498,6 +498,7 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         jBConcretarAccion.setEnabled(true);
         jBCancelar.setEnabled(true);
         
+        jLFechaOrigen.setText(( new SimpleDateFormat( "dd-MM-yyyy" ) ).format( Calendar.getInstance().getTime() ));
         
         jBConcretarAccion.setText("Dar de Alta una Orden de Producción");
         jLOperacion.setText("Alta de una Orden de Producción.");

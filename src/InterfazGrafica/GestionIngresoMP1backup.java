@@ -15,7 +15,7 @@ import javax.swing.JOptionPane;
  *
  * @author usuario
  */
-public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInstancias {
+public class GestionIngresoMP1backup extends javax.swing.JFrame implements TransferenciaInstancias {
     
     /**
      * Creates new form ABMProveedor
@@ -26,20 +26,20 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
     private String trayectoriaActual;
     private String operacionActual;
     
-    private final String textoAlta = "Dar de alta un CONCEPTO";
-    private final String textoBaja = "Dar de baja un CONCEPTO";
+    private final String textoAlta = "Registrar ingreso de un Lote";
+    private final String textoBaja = "Anular ingreso de un lote";
     private final String textoModificacion = "Modificar un CONCEPTO";
     
     public void setUnObjetoSeleccionado(Proveedor unObjetoSeleccionado) {
         this.unObjetoSeleccionado = unObjetoSeleccionado;
     }
-    public ABMGenerico() {
+    public GestionIngresoMP1backup() {
         initComponents();
     }
 
 
 
-    ABMGenerico(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
+    GestionIngresoMP1backup(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
         initComponents();
         this.organizacion = organizacion;
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
@@ -86,46 +86,23 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLStaticCampo1 = new javax.swing.JLabel();
-        jTFCampo1 = new javax.swing.JTextField();
         jLStaticEtiqueta7 = new javax.swing.JLabel();
         jBConcretarAccion = new javax.swing.JButton();
         jBCancelar = new javax.swing.JButton();
-        jLStaticCampo2 = new javax.swing.JLabel();
-        jTFCampo2 = new javax.swing.JTextField();
         jLabel12 = new javax.swing.JLabel();
         jCBOperacion = new javax.swing.JComboBox<>();
         jBBuscar = new javax.swing.JButton();
         jLEstado = new javax.swing.JLabel();
         jCBEstado = new javax.swing.JComboBox<>();
         cabeceraDeVentana = new InterfazGrafica.CabeceraDeVentana();
-        jLStaticCampo3 = new javax.swing.JLabel();
-        jTFCampo3 = new javax.swing.JTextField();
-        jCB1 = new javax.swing.JComboBox<>();
-        jLStaticCB1 = new javax.swing.JLabel();
-        jCB2 = new javax.swing.JComboBox<>();
-        jLStaticCB2 = new javax.swing.JLabel();
-        jLStaticCampo4 = new javax.swing.JLabel();
-        jTFCampo4 = new javax.swing.JTextField();
         jLStaticCB3 = new javax.swing.JLabel();
         jCB3 = new javax.swing.JComboBox<>();
-        jLStaticCalendar1 = new javax.swing.JLabel();
-        jC1 = new com.toedter.calendar.JDateChooser();
-        jLStaticCalendar2 = new javax.swing.JLabel();
-        jC2 = new com.toedter.calendar.JDateChooser();
-        jLStaticCalendar3 = new javax.swing.JLabel();
-        jC3 = new com.toedter.calendar.JDateChooser();
         jC4 = new com.toedter.calendar.JDateChooser();
         jLStaticCalendar4 = new javax.swing.JLabel();
         jLStaticCampo7 = new javax.swing.JLabel();
         jTFCampo7 = new javax.swing.JTextField();
-        jTFCampo6 = new javax.swing.JTextField();
-        jLStaticCampo6 = new javax.swing.JLabel();
-        jLStaticCampo5 = new javax.swing.JLabel();
-        jTFCampo5 = new javax.swing.JTextField();
         jLOperacionSeleccionada = new javax.swing.JLabel();
         jLStaticEtiqueta2 = new javax.swing.JLabel();
-        jLStaticEtiqueta6 = new javax.swing.JLabel();
         jLStaticEtiqueta1 = new javax.swing.JLabel();
         jLStaticEtiqueta4 = new javax.swing.JLabel();
         jLStaticEtiqueta3 = new javax.swing.JLabel();
@@ -133,16 +110,34 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
         jLStaticEtiqueta9 = new javax.swing.JLabel();
         jLStaticEtiqueta5 = new javax.swing.JLabel();
         jLStaticEtiqueta10 = new javax.swing.JLabel();
+        jBBuscarOrigen = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
+        jLStaticEtiqueta6 = new javax.swing.JLabel();
+        jLStaticCB1 = new javax.swing.JLabel();
+        jCB1 = new javax.swing.JComboBox<>();
+        jTFCampo1 = new javax.swing.JTextField();
+        jLStaticCampo1 = new javax.swing.JLabel();
+        jLStaticCalendar1 = new javax.swing.JLabel();
+        jC1 = new com.toedter.calendar.JDateChooser();
+        jC2 = new com.github.lgooddatepicker.components.TimePicker();
+        jLStaticCalendar2 = new javax.swing.JLabel();
+        jLStaticCalendar3 = new javax.swing.JLabel();
+        jC3 = new com.github.lgooddatepicker.components.TimePicker();
+        jLStaticCB2 = new javax.swing.JLabel();
+        jCB2 = new javax.swing.JComboBox<>();
+        jLStaticCampo2 = new javax.swing.JLabel();
+        jTFCampo2 = new javax.swing.JTextField();
+        jLStaticCampo3 = new javax.swing.JLabel();
+        jTFCampo3 = new javax.swing.JTextField();
+        jLStaticCampo4 = new javax.swing.JLabel();
+        jTFCampo4 = new javax.swing.JTextField();
+        jLStaticCampo5 = new javax.swing.JLabel();
+        jTFCampo5 = new javax.swing.JTextField();
+        jLStaticCampo6 = new javax.swing.JLabel();
+        jTFCampo6 = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(153, 255, 153));
-
-        jLStaticCampo1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticCampo1.setText("Campo 1");
-        jLStaticCampo1.setEnabled(false);
-
-        jTFCampo1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jTFCampo1.setEnabled(false);
 
         jLStaticEtiqueta7.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLStaticEtiqueta7.setText("Etiqueta 7");
@@ -166,18 +161,11 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
             }
         });
 
-        jLStaticCampo2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticCampo2.setText("Campo 2");
-        jLStaticCampo2.setEnabled(false);
-
-        jTFCampo2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jTFCampo2.setEnabled(false);
-
         jLabel12.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLabel12.setText("Seleccione una operacion");
 
         jCBOperacion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jCBOperacion.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Alta", "Baja", "Modificacion" }));
+        jCBOperacion.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Alta", "Baja" }));
         jCBOperacion.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jCBOperacionItemStateChanged(evt);
@@ -201,36 +189,6 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
         jCBEstado.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Activo", "Baja" }));
         jCBEstado.setEnabled(false);
 
-        jLStaticCampo3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticCampo3.setText("Campo 3");
-        jLStaticCampo3.setEnabled(false);
-
-        jTFCampo3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jTFCampo3.setEnabled(false);
-
-        jCB1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jCB1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar" }));
-        jCB1.setEnabled(false);
-
-        jLStaticCB1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticCB1.setText("CB1");
-        jLStaticCB1.setEnabled(false);
-
-        jCB2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jCB2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar" }));
-        jCB2.setEnabled(false);
-
-        jLStaticCB2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticCB2.setText("CB2");
-        jLStaticCB2.setEnabled(false);
-
-        jLStaticCampo4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticCampo4.setText("Campo 4");
-        jLStaticCampo4.setEnabled(false);
-
-        jTFCampo4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jTFCampo4.setEnabled(false);
-
         jLStaticCB3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLStaticCB3.setText("CB3");
         jLStaticCB3.setEnabled(false);
@@ -238,27 +196,6 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
         jCB3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jCB3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar" }));
         jCB3.setEnabled(false);
-
-        jLStaticCalendar1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticCalendar1.setText("jC1");
-        jLStaticCalendar1.setEnabled(false);
-
-        jC1.setEnabled(false);
-        jC1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
-        jLStaticCalendar2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticCalendar2.setText("jC2");
-        jLStaticCalendar2.setEnabled(false);
-
-        jC2.setEnabled(false);
-        jC2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
-        jLStaticCalendar3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticCalendar3.setText("jC3");
-        jLStaticCalendar3.setEnabled(false);
-
-        jC3.setEnabled(false);
-        jC3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
         jC4.setEnabled(false);
         jC4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
@@ -274,42 +211,24 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
         jTFCampo7.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jTFCampo7.setEnabled(false);
 
-        jTFCampo6.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jTFCampo6.setEnabled(false);
-
-        jLStaticCampo6.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticCampo6.setText("Campo 6");
-        jLStaticCampo6.setEnabled(false);
-
-        jLStaticCampo5.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticCampo5.setText("Campo 5");
-        jLStaticCampo5.setEnabled(false);
-
-        jTFCampo5.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jTFCampo5.setEnabled(false);
-
         jLOperacionSeleccionada.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLOperacionSeleccionada.setText("Operación sobre un Concepto");
         jLOperacionSeleccionada.setEnabled(false);
 
         jLStaticEtiqueta2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticEtiqueta2.setText("Etiqueta 2");
+        jLStaticEtiqueta2.setText("Equipamiento seleccionado");
         jLStaticEtiqueta2.setEnabled(false);
 
-        jLStaticEtiqueta6.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticEtiqueta6.setText("Etiqueta 6");
-        jLStaticEtiqueta6.setEnabled(false);
-
         jLStaticEtiqueta1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticEtiqueta1.setText("Etiqueta 1");
+        jLStaticEtiqueta1.setText("Equipamiento donde se registra el ingreso");
         jLStaticEtiqueta1.setEnabled(false);
 
         jLStaticEtiqueta4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticEtiqueta4.setText("Etiqueta 4");
+        jLStaticEtiqueta4.setText("Báscula asociada");
         jLStaticEtiqueta4.setEnabled(false);
 
         jLStaticEtiqueta3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticEtiqueta3.setText("Etiqueta 3");
+        jLStaticEtiqueta3.setText("un equipamiento");
         jLStaticEtiqueta3.setEnabled(false);
 
         jLStaticEtiqueta8.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
@@ -321,12 +240,212 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
         jLStaticEtiqueta9.setEnabled(false);
 
         jLStaticEtiqueta5.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticEtiqueta5.setText("Etiqueta 5");
+        jLStaticEtiqueta5.setText("una báscula");
         jLStaticEtiqueta5.setEnabled(false);
 
         jLStaticEtiqueta10.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLStaticEtiqueta10.setText("Etiqueta 10");
         jLStaticEtiqueta10.setEnabled(false);
+
+        jBBuscarOrigen.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jBBuscarOrigen.setText("Buscar un Equipamiento");
+        jBBuscarOrigen.setEnabled(false);
+        jBBuscarOrigen.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jBBuscarOrigenActionPerformed(evt);
+            }
+        });
+
+        jLStaticEtiqueta6.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticEtiqueta6.setText("Detalles de Ticket asociado");
+        jLStaticEtiqueta6.setEnabled(false);
+
+        jLStaticCB1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCB1.setText("Tipo de unidad de transporte asociado");
+        jLStaticCB1.setEnabled(false);
+
+        jCB1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCB1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Bolsa" }));
+        jCB1.setEnabled(false);
+
+        jTFCampo1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jTFCampo1.setEnabled(false);
+
+        jLStaticCampo1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCampo1.setText("Cantidad");
+        jLStaticCampo1.setEnabled(false);
+
+        jLStaticCalendar1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCalendar1.setText("Fecha de Origen del movimiento");
+        jLStaticCalendar1.setEnabled(false);
+
+        jC1.setEnabled(false);
+        jC1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jC2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticCalendar2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCalendar2.setText("Hora de entrada");
+        jLStaticCalendar2.setEnabled(false);
+
+        jLStaticCalendar3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCalendar3.setText("Hora de salida");
+        jLStaticCalendar3.setEnabled(false);
+
+        jC3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticCB2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCB2.setText("Unidad de medida");
+        jLStaticCB2.setEnabled(false);
+
+        jCB2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCB2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Kilogramo", "Tonelada" }));
+        jCB2.setEnabled(false);
+
+        jLStaticCampo2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCampo2.setText("Peso de entrada");
+        jLStaticCampo2.setEnabled(false);
+
+        jTFCampo2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jTFCampo2.setEnabled(false);
+
+        jLStaticCampo3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCampo3.setText("Peso de salida");
+        jLStaticCampo3.setEnabled(false);
+
+        jTFCampo3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jTFCampo3.setEnabled(false);
+
+        jLStaticCampo4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCampo4.setText("Nombre del conductor");
+        jLStaticCampo4.setEnabled(false);
+
+        jTFCampo4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jTFCampo4.setEnabled(false);
+
+        jLStaticCampo5.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCampo5.setText("Patente del chasis");
+        jLStaticCampo5.setEnabled(false);
+
+        jTFCampo5.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jTFCampo5.setEnabled(false);
+
+        jLStaticCampo6.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCampo6.setText("Patente de acoplado");
+        jLStaticCampo6.setEnabled(false);
+
+        jTFCampo6.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jTFCampo6.setEnabled(false);
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLStaticCB1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jCB1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLStaticCampo1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTFCampo1, javax.swing.GroupLayout.DEFAULT_SIZE, 139, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLStaticCampo5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jTFCampo5)
+                        .addGap(223, 223, 223))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLStaticEtiqueta6)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLStaticCalendar1)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLStaticCalendar2)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jC2, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jC1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLStaticCalendar3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jC3, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLStaticCB2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jCB2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLStaticCampo2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTFCampo2, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLStaticCampo3)
+                                .addGap(31, 31, 31)
+                                .addComponent(jTFCampo3, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLStaticCampo4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jTFCampo4, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLStaticCampo6)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jTFCampo6)
+                                .addGap(11, 11, 11)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLStaticEtiqueta6)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticCB1)
+                    .addComponent(jCB1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLStaticCampo1)
+                    .addComponent(jTFCampo1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLStaticCalendar1)
+                    .addComponent(jC1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jC2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLStaticCalendar2))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLStaticCalendar3)
+                    .addComponent(jC3, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticCB2)
+                    .addComponent(jCB2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticCampo2)
+                    .addComponent(jTFCampo2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticCampo3)
+                    .addComponent(jTFCampo3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticCampo4)
+                    .addComponent(jTFCampo4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticCampo5)
+                    .addComponent(jTFCampo5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticCampo6)
+                    .addComponent(jTFCampo6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(25, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -335,218 +454,131 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jBConcretarAccion)
+                        .addGap(18, 18, 18)
+                        .addComponent(jBCancelar))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(87, 87, 87)
+                                .addComponent(jLEstado)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jCBEstado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(533, 533, 533)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
-                                        .addComponent(jLStaticCampo7)
+                                        .addComponent(jLStaticCB3)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jTFCampo7, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addComponent(jCB3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addGroup(layout.createSequentialGroup()
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addComponent(jLStaticCampo5)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(jTFCampo5, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addComponent(jLStaticCampo6)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(jTFCampo6, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                        .addGap(266, 266, 266)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jLStaticEtiqueta3)
-                                            .addComponent(jLStaticEtiqueta8))
-                                        .addGap(18, 18, 18)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jLStaticEtiqueta4)
-                                            .addComponent(jLStaticEtiqueta9))
-                                        .addGap(0, 0, Short.MAX_VALUE)))
-                                .addGap(424, 424, 424)
-                                .addComponent(jBConcretarAccion)
+                                        .addGap(217, 217, 217)
+                                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel12)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addComponent(jBCancelar)))
-                        .addContainerGap())
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                    .addComponent(jLabel12)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                    .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(jBBuscar))
-                                .addGroup(layout.createSequentialGroup()
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(layout.createSequentialGroup()
-                                            .addComponent(jLStaticCampo1)
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(jTFCampo1, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(layout.createSequentialGroup()
-                                            .addComponent(jLStaticCampo2)
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(jTFCampo2, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(layout.createSequentialGroup()
-                                            .addComponent(jLStaticCampo4)
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(jTFCampo4, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(layout.createSequentialGroup()
-                                            .addComponent(jLStaticCB3)
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(jCB3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(layout.createSequentialGroup()
-                                            .addComponent(jLEstado)
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(jCBEstado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addComponent(jLStaticCB2)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(jCB2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addComponent(jLStaticCB1)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(jCB1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                        .addGroup(layout.createSequentialGroup()
-                                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addComponent(jLStaticEtiqueta1)
-                                                .addComponent(jLStaticEtiqueta6))
-                                            .addGap(18, 18, 18)
-                                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addComponent(jLStaticEtiqueta2)
-                                                .addComponent(jLStaticEtiqueta7))))))
+                                .addComponent(jBBuscar))
+                            .addComponent(jLOperacionSeleccionada)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticCampo3)
+                                .addComponent(jLStaticEtiqueta4)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLStaticEtiqueta5))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLStaticEtiqueta1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jBBuscarOrigen))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLStaticEtiqueta2)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLStaticEtiqueta3))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(25, 25, 25)
+                                .addComponent(jLStaticCampo7)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTFCampo3, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticCalendar2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jC2, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticCalendar1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jC1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticCalendar3)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jC3, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jTFCampo7, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(115, 115, 115)
                                 .addComponent(jLStaticCalendar4)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLStaticEtiqueta5)
-                                    .addComponent(jC4, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLStaticEtiqueta10))))
-                        .addGap(458, 458, 458))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLOperacionSeleccionada)
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                                .addComponent(jC4, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLStaticEtiqueta8)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLStaticEtiqueta10)
+                                .addGap(260, 260, 260)
+                                .addComponent(jLStaticEtiqueta7)
+                                .addGap(59, 59, 59)
+                                .addComponent(jLStaticEtiqueta9)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jBCancelar)
-                            .addComponent(jBConcretarAccion))
-                        .addContainerGap())
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel12)
                             .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jBBuscar))
                         .addGap(24, 24, 24)
                         .addComponent(jLOperacionSeleccionada)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(26, 26, 26)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLStaticEtiqueta1)
+                            .addComponent(jBBuscarOrigen))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLStaticEtiqueta2)
+                            .addComponent(jLStaticEtiqueta3))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLStaticEtiqueta4)
+                            .addComponent(jLStaticEtiqueta5))
+                        .addGap(35, 35, 35)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLEstado)
+                            .addComponent(jCBEstado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jCB3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLStaticCB3)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(50, 50, 50)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jLStaticCampo1)
-                                    .addComponent(jTFCampo1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLEstado)
-                                    .addComponent(jCBEstado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jLStaticCampo2)
-                                    .addComponent(jTFCampo2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLStaticCB1)
-                                    .addComponent(jCB1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(13, 13, 13)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jLStaticCampo3)
-                                    .addComponent(jTFCampo3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLStaticCB2)
-                                    .addComponent(jCB2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jLStaticCampo4)
-                                    .addComponent(jTFCampo4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jCB3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLStaticCB3)))
-                            .addGroup(layout.createSequentialGroup()
+                                .addGap(53, 53, 53)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLStaticCalendar1)
-                                    .addComponent(jC1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLStaticCalendar2)
-                                    .addComponent(jC2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(13, 13, 13)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLStaticCalendar3)
-                                    .addComponent(jC3, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLStaticCalendar4)
-                                    .addComponent(jC4, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jLStaticCampo5)
-                                    .addComponent(jTFCampo5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(13, 13, 13)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jLStaticCampo6)
-                                    .addComponent(jTFCampo6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addComponent(jLStaticEtiqueta2)
-                                    .addGap(18, 18, 18)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(jLStaticEtiqueta8)
+                                        .addComponent(jLStaticEtiqueta10))
                                     .addComponent(jLStaticEtiqueta7))
-                                .addGroup(layout.createSequentialGroup()
-                                    .addComponent(jLStaticEtiqueta1)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(jLStaticEtiqueta6))
-                                .addGroup(layout.createSequentialGroup()
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jLStaticEtiqueta4)
-                                        .addComponent(jLStaticEtiqueta5))
-                                    .addGap(18, 18, 18)
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jLStaticEtiqueta9)
-                                        .addComponent(jLStaticEtiqueta10)))
-                                .addGroup(layout.createSequentialGroup()
-                                    .addComponent(jLStaticEtiqueta3)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(jLStaticEtiqueta8))))
-                        .addGap(14, 14, 14)
+                                .addGap(14, 14, 14))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jLStaticEtiqueta9)
+                                .addGap(4, 4, 4)))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLStaticCampo7)
                             .addComponent(jTFCampo7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap(41, Short.MAX_VALUE))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jBCancelar)
+                            .addComponent(jBConcretarAccion)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(145, 145, 145)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLStaticCalendar4)
+                            .addComponent(jC4, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap())
         );
 
         pack();
@@ -592,6 +624,13 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
         this.dispose();
     }//GEN-LAST:event_jBBuscarActionPerformed
 
+    private void jBBuscarOrigenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBBuscarOrigenActionPerformed
+        //this.ObjetoABuscar = "Equipamiento Origen";
+        BuscarEquipamiento unaVentana = new BuscarEquipamiento(this.organizacion, this, this.trayectoriaActual);
+
+        this.dispose();
+    }//GEN-LAST:event_jBBuscarOrigenActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -609,14 +648,62 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ABMGenerico.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(GestionIngresoMP1backup.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ABMGenerico.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(GestionIngresoMP1backup.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ABMGenerico.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(GestionIngresoMP1backup.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ABMGenerico.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(GestionIngresoMP1backup.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
         //</editor-fold>
         //</editor-fold>
         //</editor-fold>
@@ -637,7 +724,7 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ABMGenerico().setVisible(true);
+                new GestionIngresoMP1backup().setVisible(true);
             }
         });
     }
@@ -645,11 +732,12 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private InterfazGrafica.CabeceraDeVentana cabeceraDeVentana;
     private javax.swing.JButton jBBuscar;
+    private javax.swing.JButton jBBuscarOrigen;
     private javax.swing.JButton jBCancelar;
     private javax.swing.JButton jBConcretarAccion;
     private com.toedter.calendar.JDateChooser jC1;
-    private com.toedter.calendar.JDateChooser jC2;
-    private com.toedter.calendar.JDateChooser jC3;
+    private com.github.lgooddatepicker.components.TimePicker jC2;
+    private com.github.lgooddatepicker.components.TimePicker jC3;
     private com.toedter.calendar.JDateChooser jC4;
     private javax.swing.JComboBox<String> jCB1;
     private javax.swing.JComboBox<String> jCB2;
@@ -683,6 +771,7 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
     private javax.swing.JLabel jLStaticEtiqueta8;
     private javax.swing.JLabel jLStaticEtiqueta9;
     private javax.swing.JLabel jLabel12;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField jTFCampo1;
     private javax.swing.JTextField jTFCampo2;
     private javax.swing.JTextField jTFCampo3;
@@ -771,8 +860,8 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
     }
 
     @Override
-    public void actualizarUnObjeto(Object unObjeto) {
-        Proveedor unProveedor = (Proveedor) unObjeto;
+    public void actualizarUnObjeto(Object UnObjeto) {
+        Proveedor unProveedor = (Proveedor) UnObjeto;
         this.unObjetoSeleccionado = unProveedor;
         jTFCampo1.setText(unProveedor.getRazonSocial());
         jTFCampo2.setText(unProveedor.getCuit());

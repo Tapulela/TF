@@ -7,7 +7,7 @@ package LogicaDeNegocio;
 
 import LogicaDeNegocio.Lote;
 import LogicaDeNegocio.Equipamiento;
-import LogicaDeNegocio.GestionUsuariosYRoles.Operador;
+import LogicaDeNegocio.GestionUsuariosYRoles.OperadorPlantaProduccion;
 import LogicaDeNegocio.Organizacion;
 import java.util.Calendar;
 
@@ -17,7 +17,7 @@ import java.util.Calendar;
  */
 public class MovimientoInternoMateriaPrima {
     private int id;
-    private Operador unOperador;
+    private OperadorPlantaProduccion unOperador;
     private Calendar fechaOrigen;
     private Calendar fechaEntrada;
     private Calendar fechaSalida;
@@ -39,7 +39,7 @@ public class MovimientoInternoMateriaPrima {
     private Equipamiento equipamientoOrigen;
     private Equipamiento equipamientoDestino;
 
-    public MovimientoInternoMateriaPrima(Operador unOperador, Calendar fechaEntrada, Calendar fechaSalida, String unidadTransporte, int cantidadUnidades, String unidadDeMedidaPeso, float pesoEntrada, float pesoSalida, String nHojaRuta, String nRemito, String precinto, String nombreConductor, String patenteChasis, String patenteAcoplado, Lote loteAMover, Equipamiento origen,Equipamiento destino) {
+    public MovimientoInternoMateriaPrima(OperadorPlantaProduccion unOperador, Calendar fechaEntrada, Calendar fechaSalida, String unidadTransporte, int cantidadUnidades, String unidadDeMedidaPeso, float pesoEntrada, float pesoSalida, String nHojaRuta, String nRemito, String precinto, String nombreConductor, String patenteChasis, String patenteAcoplado, Lote loteAMover, Equipamiento origen,Equipamiento destino) {
         this.unOperador = unOperador;
         this.fechaOrigen = Calendar.getInstance();
         this.fechaEntrada = fechaEntrada;
@@ -70,11 +70,11 @@ public class MovimientoInternoMateriaPrima {
         this.id = id;
     }
 
-    public Operador getUnOperador() {
+    public OperadorPlantaProduccion getUnOperador() {
         return unOperador;
     }
 
-    public void setUnOperador(Operador unOperador) {
+    public void setUnOperador(OperadorPlantaProduccion unOperador) {
         this.unOperador = unOperador;
     }
 
