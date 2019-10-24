@@ -557,11 +557,14 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
 
         JOptionPane.showMessageDialog(null, "Operacion realizada con exito.");
         limpiarCampos();
+        deshabilitarTodo();
+        habilitarCamposIniciales();
     }//GEN-LAST:event_jBConcretarAccionActionPerformed
 
     private void jBCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBCancelarActionPerformed
         this.deshabilitarTodo();
         this.limpiarCampos();
+        this.habilitarCamposIniciales();
     }//GEN-LAST:event_jBCancelarActionPerformed
 
     private void jCBTipoEquipamientoItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBTipoEquipamientoItemStateChanged
@@ -945,6 +948,11 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
         jTFPatenteChasis.setEnabled(true);
         jLStaticPatenteAcoplado.setEnabled(true);
         jTFPatenteAcoplado.setEnabled(true);
+    }
+
+    private void habilitarCamposIniciales() {
+        jLabel12.setEnabled(true);
+        jCBOperacion.setEnabled(true);
     }
     
 }

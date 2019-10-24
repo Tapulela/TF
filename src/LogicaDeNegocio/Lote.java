@@ -16,6 +16,9 @@ import java.util.Map;
  * @author usuario
  */
 public class Lote {
+    public static final String ESTADO_ANULADO = "Anulado";
+    
+    
     private int id;
     private String etiqueta;
     private float cantidad;
@@ -153,7 +156,7 @@ public class Lote {
     }
 
     boolean estaAnulado() {
-        return this.estado.equals("Anulado");
+        return this.estado.equals(ESTADO_ANULADO);
     }
     
     

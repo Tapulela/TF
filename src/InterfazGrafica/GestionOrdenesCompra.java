@@ -431,7 +431,11 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
                     this.organizacion.anularOrdenDeCompra(this.unObjetoSeleccionado);
                     break;
                 case "Modificacion":
-                    //Se va a modificar
+                    if (jCBoxProveedorAsociado.isSelected() && proveedorSeleccionado == null)
+                        throw new ExcepcionCargaParametros("Debe seleccionar el proveedor que posee la orden de compra.");
+                    if (!jCBoxProveedorAsociado.isSelected())
+                        proveedorSeleccionado = null;
+                    this.organizacion.modificarOrdenDeCompra(unObjetoSeleccionado, (String) jCB1.getSelectedItem(), jTFCampo2.getText(), unObjetoSeleccionado.getEstado(), jTFCampo1.getText(), proveedorSeleccionado, ordenProduccionSeleccionada);
                     break;
             }
             JOptionPane.showMessageDialog(null, "Operacion realizada con exito.");
@@ -440,9 +444,9 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
         } catch (ExcepcionCargaParametros ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage());
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Error en la Persistencia: "+ ex.getMessage());
+            JOptionPane.showMessageDialog(null, "Error en la Base de datos: "+ ex.getMessage());
         } catch (ExcepcionPersistencia ex) {
-            Logger.getLogger(GestionOrdenesCompra.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(null, "Error en la Persistencia: "+ ex.getMessage());
         }
         
     }//GEN-LAST:event_jBConcretarAccionActionPerformed
@@ -694,7 +698,6 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
         
         jLOperacionSeleccionada.setText(textoBaja);
         
-        
         jLOperacionSeleccionada.setEnabled(true);
         jBCancelar.setEnabled(true);
         if (this.unObjetoSeleccionado == null)
@@ -706,6 +709,7 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
         
         if (proveedorSeleccionado != null){
             jCBoxProveedorAsociado.setSelected(true);
+            deshabilitarSeleccionProveedor();
         }
         jLStaticCampo1.setEnabled(true);
         jLStaticCampo2.setEnabled(true);
@@ -737,7 +741,7 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
         
         
         jLOperacionSeleccionada.setText(this.textoModificacion);
-        
+        jLOperacionSeleccionada.setEnabled(true);
         jBBuscar.setVisible(true);
         jBBuscar.setEnabled(true);
         jBCancelar.setEnabled(true);
@@ -755,7 +759,6 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
         if (unObjetoSeleccionado.poseeProveedorAsociado() && !jCBoxProveedorAsociado.isSelected())
             jCBoxProveedorAsociado.doClick();
         jBBuscarOrdenProduccion.setEnabled(true);
-        jLOperacionSeleccionada.setEnabled(false);
         
         jLStaticCampo1.setEnabled(true);
         jLStaticCampo2.setEnabled(true);
@@ -809,13 +812,15 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
         jLStaticEtiqueta1.setEnabled(false);
         jLStaticEtiqueta2.setEnabled(false);
         jLProveedorSeleccionado.setEnabled(false);
+        jBBuscarProveedor.setEnabled(false);
+
     }
 
     private void cargarOrdenDeCompra() {
         if (unObjetoSeleccionado==null)
             return;
         jCB1.setSelectedItem(unObjetoSeleccionado.getUnidadDeMedida());
-        jTFCampo1.setText(""+unObjetoSeleccionado.getCantidadComprada());
+        jTFCampo1.setText(""+unObjetoSeleccionado.getCantidadAComprar());
         jTFCampo2.setText(""+unObjetoSeleccionado.getCostoPorUnidad());
         jLFechaOrigen.setText(( new SimpleDateFormat( "dd/MM/YYYY" ) ).format( unObjetoSeleccionado.getFechaOrigenC().getTime()) );
         jLEstado.setText(unObjetoSeleccionado.getEstado());

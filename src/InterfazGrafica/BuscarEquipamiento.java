@@ -78,9 +78,8 @@ public class BuscarEquipamiento extends javax.swing.JFrame {
                 jComboBox2.setSelectedItem("Activo");
                 jComboBox2.setEnabled(false);
             }
-            
         }
-        if (ventanaAnterior instanceof GestionMovimientos){
+        if (ventanaAnterior instanceof GestionMovimientos || ventanaAnterior instanceof GestionIngresoMP){
             //Solo voy a poder seleccionar equipamiento en estado activo.
             jCBTipoEquipamiento.removeItem("Bascula");
             jCBEstado.doClick();
