@@ -16,11 +16,11 @@ import java.util.Iterator;
  * @author usuario
  */
 public class OrdenDeCompra {
-    private static final String ESTADO_REGULAR = "Regular";
-    private static final String ESTADO_ANULADO = "Anulado";
+    public static final String ESTADO_REGULAR = "Regular";
+    public static final String ESTADO_ANULADO = "Anulado";
     private int id;
     private Calendar fechaOrigen;
-    private float cantidadComprada;
+    private float cantidadAComprar;
     private String unidadDeMedida;
     private float costoPorUnidad;
     private String estado;
@@ -29,11 +29,11 @@ public class OrdenDeCompra {
     private Proveedor proveedorAsociado;
     private OrdenDeProduccion ordenDeProduccionAsociada;
 
-    public OrdenDeCompra(int id, java.sql.Date fechaOrigen, float cantidadComprada, String unidadDeMedida, float costoPorUnidad, String estado, Proveedor proveedorAsociado, OrdenDeProduccion unaOrdenDeProduccion) {
+    public OrdenDeCompra(int id, java.sql.Date fechaOrigen, float cantidadAComprar, String unidadDeMedida, float costoPorUnidad, String estado, Proveedor proveedorAsociado, OrdenDeProduccion unaOrdenDeProduccion) {
         this.id = id;
         this.fechaOrigen = Calendar.getInstance();
         this.fechaOrigen.setTime(fechaOrigen);
-        this.cantidadComprada = cantidadComprada;
+        this.cantidadAComprar = cantidadAComprar;
         this.unidadDeMedida = unidadDeMedida;
         this.costoPorUnidad = costoPorUnidad;
         this.estado = estado;
@@ -44,7 +44,7 @@ public class OrdenDeCompra {
     
     public OrdenDeCompra(float cantidadComprada, String unidadDeMedida, float costoPorUnidad, Proveedor proveedorAsociado, OrdenDeProduccion ordenDeProduccionAsociada) {
         this.fechaOrigen = Calendar.getInstance();
-        this.cantidadComprada = cantidadComprada;
+        this.cantidadAComprar = cantidadComprada;
         this.unidadDeMedida = unidadDeMedida;
         this.costoPorUnidad = costoPorUnidad;
         this.proveedorAsociado = proveedorAsociado;
@@ -71,12 +71,12 @@ public class OrdenDeCompra {
         this.fechaOrigen = fechaOrigen;
     }
 
-    public float getCantidadComprada() {
-        return cantidadComprada;
+    public float getCantidadAComprar() {
+        return cantidadAComprar;
     }
 
-    public void setCantidadComprada(float cantidadComprada) {
-        this.cantidadComprada = cantidadComprada;
+    public void setCantidadAComprar(float cantidadAComprar) {
+        this.cantidadAComprar = cantidadAComprar;
     }
 
     public String getUnidadDeMedida() {
@@ -177,8 +177,35 @@ public class OrdenDeCompra {
         if (this.proveedorAsociado != null){
             unProveedor = this.proveedorAsociado.getRazonSocial();
         }
-        Object[] vec ={this.getId(), ( new SimpleDateFormat( "dd-MM-yyyy" ) ).format( this.fechaOrigen.getTime() ), this.getCantidadComprada(), this.getUnidadDeMedida(), this.getCostoPorUnidad(),this.getEstado(), this.getOrdenDeProduccionAsociada().getId(), unProveedor};
+        Object[] vec ={this.getId(), ( new SimpleDateFormat( "dd-MM-yyyy" ) ).format( this.fechaOrigen.getTime() ), this.getCantidadAComprar(), this.getUnidadDeMedida(), this.getCostoPorUnidad(),this.getEstado(), this.getOrdenDeProduccionAsociada().getId(), unProveedor};
         return vec;
+    }
+    
+    private ArrayList getLotesAsociadosNoAnulados() {
+        ArrayList retorno = new ArrayList();
+        Iterator lotes = this.lotesAsociados.iterator();
+        while (lotes.hasNext()){
+            Lote unLote = (Lote) lotes.next();
+            if (!unLote.estaAnulado())
+                retorno.add(unLote);
+        }
+        return retorno;
+    }
+
+    float getCantidadComprada(String unaUnidadMedida) throws ExcepcionCargaParametros {
+        float retorno = 0;
+        Iterator lotesNoAnulados = getLotesAsociadosNoAnulados().iterator();
+        while (lotesNoAnulados.hasNext()){
+            Lote unLote = (Lote) lotesNoAnulados.next();
+            retorno = retorno + Organizacion.convertirUnidadPeso(unLote.getUnidadDeMedida(), unLote.getCantidad(), unaUnidadMedida);
+        }
+        return retorno;
+    }
+
+    public float getCantidadRestanteARecibir() throws ExcepcionCargaParametros {
+        float retorno = this.cantidadAComprar - this.getCantidadComprada(this.unidadDeMedida);
+        
+        return retorno;
     }
     
     

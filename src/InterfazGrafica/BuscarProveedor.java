@@ -76,6 +76,14 @@ public class BuscarProveedor extends javax.swing.JFrame {
                 jComboBox2.setEnabled(false);            
             
         }
+        if (ventanaAnterior instanceof GestionIngresoMP){
+                //Si elijo un proveedor de servicio de transporte para un ingreso, solo puedo elegir activos.
+                jCBEstado.doClick();
+                jCBEstado.setEnabled(false);
+                jComboBox2.setSelectedItem("Activo");
+                jComboBox2.setEnabled(false);            
+            
+        }        
     }
 
     /**
@@ -231,14 +239,14 @@ public class BuscarProveedor extends javax.swing.JFrame {
 
             },
             new String [] {
-                "ID", "Razon Social", "CUIL", "Estado"
+                "ID", "Razon Social", "CUIL", "Estado", "Localidad"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class
+                java.lang.Integer.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -258,7 +266,6 @@ public class BuscarProveedor extends javax.swing.JFrame {
         if (jTable1.getColumnModel().getColumnCount() > 0) {
             jTable1.getColumnModel().getColumn(0).setResizable(false);
             jTable1.getColumnModel().getColumn(0).setPreferredWidth(10);
-            jTable1.getColumnModel().getColumn(3).setResizable(false);
             jTable1.getColumnModel().getColumn(3).setPreferredWidth(25);
         }
 

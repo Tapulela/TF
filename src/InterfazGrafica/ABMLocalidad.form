@@ -29,82 +29,108 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="cabeceraDeVentana" pref="1444" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
-                              <Component id="jLCUIL" min="-2" max="-2" attributes="0"/>
+                              <Component id="jLStaticCB2" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="jTFCUIT" min="-2" pref="384" max="-2" attributes="0"/>
+                              <Component id="jCB2" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
-                          <Group type="102" alignment="0" attributes="0">
-                              <Component id="jLabel12" min="-2" max="-2" attributes="0"/>
+                          <Component id="cabeceraDeVentana" pref="1683" max="32767" attributes="0"/>
+                          <Group type="102" alignment="1" attributes="0">
+                              <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="jLStaticCampo2" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="jTFCampo2" max="32767" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="jLStaticCampo1" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="jTFCampo1" min="-2" pref="384" max="-2" attributes="0"/>
+                                  </Group>
+                              </Group>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="jCBOperacion" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="separate" max="-2" attributes="0"/>
-                              <Component id="jBBuscar" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <Component id="jLOperacion" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Group type="102" alignment="0" attributes="0">
-                              <Component id="jLRazonSocial" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="jTFRazonSocial" min="-2" pref="384" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="74" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" attributes="0">
-                                      <Component id="jLLocalidad" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="jCBLocalidad" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                      <Component id="jBConcretarAccion" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                      <Component id="jBCancelar" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <Group type="102" attributes="0">
+                                  <Group type="102" alignment="0" attributes="0">
                                       <Component id="jLEstado" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="jCBEstado" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                           </Group>
                       </Group>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                   </Group>
-                  <Group type="102" alignment="1" attributes="0">
+                  <Group type="102" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jLOperacionSeleccionada" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="jLabel12" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="jCBOperacion" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="jLStaticCB1" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="jCB1" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="jLStaticCB3" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="jCB3" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                      <Component id="jBConcretarAccion" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="jBCancelar" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="0" attributes="0">
+          <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Component id="cabeceraDeVentana" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jLabel12" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jCBOperacion" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jBBuscar" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLStaticCB1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jCB1" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Component id="jLOperacion" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
+              <Component id="jLOperacionSeleccionada" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jLRazonSocial" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jTFRazonSocial" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLStaticCB2" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jCB2" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="jCB3" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLStaticCB3" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="jLStaticCampo1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jTFCampo1" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jLEstado" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jCBEstado" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jLCUIL" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jTFCUIT" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jLLocalidad" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jCBLocalidad" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLStaticCampo2" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jTFCampo2" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace pref="124" max="32767" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jBCancelar" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jBConcretarAccion" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -115,30 +141,20 @@
     </DimensionLayout>
   </Layout>
   <SubComponents>
-    <Component class="javax.swing.JLabel" name="jLRazonSocial">
+    <Component class="javax.swing.JLabel" name="jLStaticCampo1">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="24" style="0"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Razon Social"/>
+        <Property name="text" type="java.lang.String" value="Nombre"/>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="jTFRazonSocial">
+    <Component class="javax.swing.JTextField" name="jTFCampo1">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="24" style="0"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Ingrese un Nombre"/>
-        <Property name="enabled" type="boolean" value="false"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JLabel" name="jLOperacion">
-      <Properties>
-        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="24" style="0"/>
-        </Property>
-        <Property name="text" type="java.lang.String" value="Carga de Proveedor"/>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>
     </Component>
@@ -166,21 +182,20 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jBCancelarActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JLabel" name="jLCUIL">
+    <Component class="javax.swing.JLabel" name="jLStaticCampo2">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="24" style="0"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="CUIT"/>
+        <Property name="text" type="java.lang.String" value="Codigo postal"/>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="jTFCUIT">
+    <Component class="javax.swing.JTextField" name="jTFCampo2">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="24" style="0"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Ingrese un CUIT"/>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>
     </Component>
@@ -213,18 +228,6 @@
         <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
       </AuxValues>
     </Component>
-    <Component class="javax.swing.JButton" name="jBBuscar">
-      <Properties>
-        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="24" style="0"/>
-        </Property>
-        <Property name="text" type="java.lang.String" value="Buscar un Proveedor"/>
-        <Property name="enabled" type="boolean" value="false"/>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jBBuscarActionPerformed"/>
-      </Events>
-    </Component>
     <Component class="javax.swing.JLabel" name="jLEstado">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
@@ -253,16 +256,7 @@
     </Component>
     <Component class="InterfazGrafica.CabeceraDeVentana" name="cabeceraDeVentana">
     </Component>
-    <Component class="javax.swing.JLabel" name="jLLocalidad">
-      <Properties>
-        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="24" style="0"/>
-        </Property>
-        <Property name="text" type="java.lang.String" value="Localidad"/>
-        <Property name="enabled" type="boolean" value="false"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JComboBox" name="jCBLocalidad">
+    <Component class="javax.swing.JComboBox" name="jCB1">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="24" style="0"/>
@@ -274,9 +268,86 @@
         </Property>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>
+      <Events>
+        <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="jCB1ItemStateChanged"/>
+      </Events>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;Object&gt;"/>
       </AuxValues>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLStaticCB1">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name="Dialog" size="24" style="0"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Seleccione una localidad"/>
+        <Property name="enabled" type="boolean" value="false"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JComboBox" name="jCB2">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name="Dialog" size="24" style="0"/>
+        </Property>
+        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+          <StringArray count="1">
+            <StringItem index="0" value="Seleccionar"/>
+          </StringArray>
+        </Property>
+        <Property name="enabled" type="boolean" value="false"/>
+      </Properties>
+      <Events>
+        <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="jCB2ItemStateChanged"/>
+      </Events>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;Object&gt;"/>
+      </AuxValues>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLStaticCB2">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name="Dialog" size="24" style="0"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Pais asociado"/>
+        <Property name="enabled" type="boolean" value="false"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLStaticCB3">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name="Dialog" size="24" style="0"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Provincia asociada"/>
+        <Property name="enabled" type="boolean" value="false"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JComboBox" name="jCB3">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name="Dialog" size="24" style="0"/>
+        </Property>
+        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+          <StringArray count="1">
+            <StringItem index="0" value="Seleccionar"/>
+          </StringArray>
+        </Property>
+        <Property name="enabled" type="boolean" value="false"/>
+      </Properties>
+      <Events>
+        <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="jCB3ItemStateChanged"/>
+      </Events>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;Object&gt;"/>
+      </AuxValues>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLOperacionSeleccionada">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name="Dialog" size="24" style="0"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Operaci&#xf3;n sobre un Concepto"/>
+        <Property name="enabled" type="boolean" value="false"/>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

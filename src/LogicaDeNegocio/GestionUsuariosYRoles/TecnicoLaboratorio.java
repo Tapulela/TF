@@ -5,13 +5,12 @@
  */
 package LogicaDeNegocio.GestionUsuariosYRoles;
 
-import java.util.ArrayList;
+import LogicaDeNegocio.Empleado;
 
 /**
  *
  * @author usuario
  */
-public class Rol {
-    private int id;
-    ArrayList permisos;
+public class TecnicoLaboratorio extends Empleado{
+    
 }
