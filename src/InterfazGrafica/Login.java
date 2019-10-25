@@ -167,15 +167,12 @@ public class Login extends javax.swing.JFrame {
         Persistencia persistencia = new Persistencia();
         
         try {    
-            persistencia.iniciarSesion(tBUsuario.getText(), jPFPass.getText());
+            //persistencia.iniciarSesion(tBUsuario.getText(), jPFPass.getText());
             Organizacion unaOrganizacion = null;
-            try {
-                unaOrganizacion = new Organizacion(persistencia);
-                MenuPrincipal unMenuPrincipal = new MenuPrincipal(unaOrganizacion);
-                this.dispose();
-            } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(null, "Error en la recuperación del sistema: "+ex.getMessage());
-            }
+            unaOrganizacion = new Organizacion(persistencia);
+            persistencia.iniciarSesion(tBUsuario.getText(), jPFPass.getText());
+            MenuPrincipal unMenuPrincipal = new MenuPrincipal(unaOrganizacion);
+            this.dispose();
         } catch (ClassNotFoundException ex) {
             JOptionPane.showMessageDialog(null, "Error con el driver: "+ex.getMessage());
         } catch (SQLException ex) {

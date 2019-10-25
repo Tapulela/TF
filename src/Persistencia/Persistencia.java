@@ -15,6 +15,7 @@ import LogicaDeNegocio.*;
 import LogicaDeNegocio.CamaraEstacionamiento;
 import LogicaDeNegocio.Molino;
 import LogicaDeNegocio.Deposito;
+import LogicaDeNegocio.GestionUsuariosYRoles.Usuario;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -64,10 +65,24 @@ public class Persistencia {
         this.conexion = conexion;
     }
     
-    public void recuperarOrganizacion(Organizacion unaOrganizacion) throws SQLException{
+    public void recuperarOrganizacion(Organizacion unaOrganizacion) throws SQLException, ClassNotFoundException{
+        this.iniciarSesion("recuperador", "recuperador");
         String sql;
         Statement stmt;
         ResultSet resultadoDeConsulta;
+        
+        sql = "SELECT * from public.USUARIOS order by ID;";
+        stmt = this.conexion.createStatement();        
+        try{
+            resultadoDeConsulta = stmt.executeQuery(sql);
+            while (resultadoDeConsulta.next()){
+                Usuario unUsuario  = new Usuario(resultadoDeConsulta.getInt("ID"), resultadoDeConsulta.getString("Nombre"), resultadoDeConsulta.getString("Apellido") ,resultadoDeConsulta.getString("Estado"), resultadoDeConsulta.getString("DNI"),resultadoDeConsulta.getString("Rol"));
+                unaOrganizacion.getUsuarios().put(unUsuario.getId(), unUsuario);
+            }
+        }catch (SQLException e){
+            System.err.println(e.getMessage());
+            //No hacer nada. Si devuelve un error es porque la tabla está vacía.
+        }
         
         sql = "SELECT * from public.PAISES order by ID;";
         stmt = this.conexion.createStatement();        
@@ -239,6 +254,7 @@ public class Persistencia {
         }
         
         //CUANDO SE RECUPERAN MOVIMIENTOS, SE PISARA SUCESIVAMENTE EL EQUIPAMIENTO DONDE RESIDE UN LOTE CON LOS DESTINOS DE LOS MOVIMIENTOS NO ANULADOS.
+        this.cerrarSesion();
     }
         public void persistirObjeto(Object unObjeto) throws SQLException{
         String sql;
@@ -446,6 +462,22 @@ public class Persistencia {
                 id = resultadoDeConsulta.getInt(1);
                 unLote.setId(id);
                 break;
+            case "Usuario":
+                Usuario unUsuario = (Usuario) unObjeto;
+                //Un lote siempre que se inserta sera en un equipamiento.
+                ps = this.conexion.prepareStatement("insert into USUARIOS (Nombre, Apellido, DNI, Rol, Estado) values (?, ?, ?, ?, ?);");
+                ps.setObject(1, unUsuario.getNombre());
+                ps.setObject(2, unUsuario.getApellido());
+                ps.setObject(3, unUsuario.getDni());
+                ps.setObject(4, unUsuario.getRol());
+                ps.setObject(5, unUsuario.getEstado());
+                ps.execute();
+                sql = "SELECT max(Id) from public.USUARIOS;";
+                resultadoDeConsulta = stmt.executeQuery(sql);
+                resultadoDeConsulta.next();
+                id = resultadoDeConsulta.getInt(1);
+                unUsuario.setId(id);
+                break;
             }         
         
         }
@@ -630,6 +662,21 @@ public class Persistencia {
                     }
                     ps.execute();
                     break;
+                case "Usuario":
+                    Usuario unUsuario = (Usuario) unObjeto;
+                    ps = this.conexion.prepareStatement("UPDATE public.USUARIOS SET Nombre = ?, Apellido = ?, DNI = ?, Rol = ?, Estado = ? WHERE ID = ?;");
+                    ps.setObject(1, unUsuario.getNombre());
+                    ps.setObject(2, unUsuario.getApellido());
+                    ps.setObject(3, unUsuario.getDni());
+                    ps.setObject(4, unUsuario.getRol());
+                    ps.setObject(5, unUsuario.getEstado());
+                    ps.setObject(6, unUsuario.getId());
+
+                        
+                       
+                    ps.execute();
+                    break;                    
+                    
                 default:
                     throw new ExcepcionPersistencia("La clase "+unObjeto.getClass().getSimpleName()+" no es valida para realizar una modificación.");
             }

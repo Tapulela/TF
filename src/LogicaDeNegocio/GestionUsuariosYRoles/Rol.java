@@ -12,6 +12,9 @@ import java.util.ArrayList;
  * @author usuario
  */
 public class Rol {
+    public static final String ROL_GerenteAreaCompras = "GerenteAreaProduccion";
+    public static final String ROL_OperadorBalanza = "OperadorBalanza";
     private int id;
+    private String nombre;
     ArrayList permisos;
 }

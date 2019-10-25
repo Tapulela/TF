@@ -5,6 +5,7 @@
  */
 package LogicaDeNegocio;
 
+import LogicaDeNegocio.GestionUsuariosYRoles.Usuario;
 import Persistencia.ExcepcionPersistencia;
 import Persistencia.Persistencia;
 import java.sql.SQLException;
@@ -32,8 +33,9 @@ public class Organizacion {
     private Map<Integer, Pais> paises;
     private Map<Integer, Provincia> provincias;
     private Map<Integer, Localidad> localidades;
+    private Map<Integer, Usuario> usuarios;
 
-    public Organizacion(Persistencia persistencia) throws SQLException {
+    public Organizacion(Persistencia persistencia) throws SQLException, ClassNotFoundException {
         this.persistencia = persistencia;
         this.proveedores = new HashMap<Integer, Proveedor>();
         this.equipamientos = new HashMap<Integer, Equipamiento>();
@@ -44,9 +46,17 @@ public class Organizacion {
         this.paises = new HashMap <Integer, Pais>();        
         this.provincias = new HashMap <Integer, Provincia>();
         this.localidades = new HashMap <Integer, Localidad>();
+        this.usuarios = new HashMap <Integer, Usuario>();
         this.persistencia.recuperarOrganizacion(this);
     }
 
+    public Map<Integer, Usuario> getUsuarios() {
+        return usuarios;
+    }
+
+    public void setUsuarios(Map<Integer, Usuario> usuarios) {
+        this.usuarios = usuarios;
+    }
     public Map<Integer, OrdenDeCompra> getOrdenesCompra() {
         return ordenesCompra;
     }
