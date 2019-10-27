@@ -7,7 +7,14 @@ package LogicaDeNegocio;
 
 import LogicaDeNegocio.Lote;
 import LogicaDeNegocio.Equipamiento;
+import LogicaDeNegocio.GestionUsuariosYRoles.Usuario;
 import LogicaDeNegocio.Organizacion;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Calendar;
 
 /**
@@ -18,8 +25,8 @@ public class MovimientoInternoMateriaPrima {
     private int id;
     private Usuario unOperador;
     private Calendar fechaOrigen;
-    private Calendar fechaEntrada;
-    private Calendar fechaSalida;
+    private LocalTime horaEntrada;
+    private LocalTime horaSalida;
     private String unidadTransporte;
     private int cantidadUnidades;
     private String unidadDeMedidaPeso;
@@ -34,15 +41,44 @@ public class MovimientoInternoMateriaPrima {
     private String estado;
     
     private Lote loteAsociado;
+    private Bascula basculaAsociada;
     
     private Equipamiento equipamientoOrigen;
     private Equipamiento equipamientoDestino;
 
-    public MovimientoInternoMateriaPrima(Usuario unOperador, Calendar fechaEntrada, Calendar fechaSalida, String unidadTransporte, int cantidadUnidades, String unidadDeMedidaPeso, float pesoEntrada, float pesoSalida, String nHojaRuta, String nRemito, String precinto, String nombreConductor, String patenteChasis, String patenteAcoplado, Lote loteAMover, Equipamiento origen,Equipamiento destino) {
+    public MovimientoInternoMateriaPrima(int id, Usuario unOperador, java.sql.Date fechaOrigen, java.sql.Time horaEntrada, java.sql.Time horaSalida, String unidadTransporte, int cantidadUnidades, String unidadDeMedidaPeso, float pesoEntrada, float pesoSalida, String nHojaRuta, String nRemito, String precinto, String nombreConductor, String patenteChasis, String patenteAcoplado, String unEstado,Lote loteAMover, Equipamiento origen,Equipamiento destino, Bascula unaBasculaAsociada) {
+        this.id = id;
+        this.unOperador = unOperador;
+        
+        this.fechaOrigen = Calendar.getInstance();
+        this.fechaOrigen.setTime(fechaOrigen);
+        this.horaEntrada = horaEntrada.toLocalTime();
+        this.horaSalida = horaSalida.toLocalTime();
+
+        this.unidadTransporte = unidadTransporte;
+        this.cantidadUnidades = cantidadUnidades;
+        this.unidadDeMedidaPeso = unidadDeMedidaPeso;
+        this.pesoEntrada = pesoEntrada;
+        this.pesoSalida = pesoSalida;
+        this.nHojaRuta = nHojaRuta;
+        this.nRemito = nRemito;
+        this.precinto = precinto;
+        this.nombreConductor = nombreConductor;
+        this.patenteChasis = patenteChasis;
+        this.patenteAcoplado = patenteAcoplado;
+        this.estado = unEstado;
+        
+        this.loteAsociado = loteAMover;
+        this.equipamientoOrigen = origen;
+        this.equipamientoDestino = destino;
+        this.basculaAsociada = unaBasculaAsociada;
+    }
+    
+    public MovimientoInternoMateriaPrima(Usuario unOperador, LocalTime horaEntrada, LocalTime horaSalida, String unidadTransporte, int cantidadUnidades, String unidadDeMedidaPeso, float pesoEntrada, float pesoSalida, String nHojaRuta, String nRemito, String precinto, String nombreConductor, String patenteChasis, String patenteAcoplado, Lote loteAMover, Equipamiento origen,Equipamiento destino) {
         this.unOperador = unOperador;
         this.fechaOrigen = Calendar.getInstance();
-        this.fechaEntrada = fechaEntrada;
-        this.fechaSalida = fechaSalida;
+        this.horaEntrada = horaEntrada;
+        this.horaSalida = horaSalida;
         this.unidadTransporte = unidadTransporte;
         this.cantidadUnidades = cantidadUnidades;
         this.unidadDeMedidaPeso = unidadDeMedidaPeso;
@@ -59,6 +95,7 @@ public class MovimientoInternoMateriaPrima {
         this.loteAsociado = loteAMover;
         this.equipamientoOrigen = origen;
         this.equipamientoDestino = destino;
+        this.basculaAsociada = this.equipamientoDestino.getBasculaAsociada();
     }
 
     public int getId() {
@@ -77,28 +114,30 @@ public class MovimientoInternoMateriaPrima {
         this.unOperador = unOperador;
     }
 
-    public Calendar getFechaOrigen() {
-        return fechaOrigen;
+    public java.sql.Date getFechaOrigen() {
+        return new Date(this.fechaOrigen.getTimeInMillis());
     }
 
     public void setFechaOrigen(Calendar fechaOrigen) {
         this.fechaOrigen = fechaOrigen;
     }
 
-    public Calendar getFechaEntrada() {
-        return fechaEntrada;
+    public java.sql.Timestamp getHoraEntrada() {
+        LocalDate localDate = LocalDateTime.ofInstant(this.fechaOrigen.toInstant(), fechaOrigen.getTimeZone().toZoneId()).toLocalDate();
+        return Timestamp.valueOf(horaEntrada.atDate(localDate));
     }
 
-    public void setFechaEntrada(Calendar fechaEntrada) {
-        this.fechaEntrada = fechaEntrada;
+    public void setHoraEntrada(LocalTime horaEntrada) {
+        this.horaEntrada = horaEntrada;
     }
 
-    public Calendar getFechaSalida() {
-        return fechaSalida;
+    public java.sql.Timestamp getHoraSalida() {
+        LocalDate localDate = LocalDateTime.ofInstant(this.fechaOrigen.toInstant(), fechaOrigen.getTimeZone().toZoneId()).toLocalDate();
+        return Timestamp.valueOf(horaSalida.atDate(localDate));
     }
 
-    public void setFechaSalida(Calendar fechaSalida) {
-        this.fechaSalida = fechaSalida;
+    public void setHoraSalida(LocalTime horaSalida) {
+        this.horaSalida = horaSalida;
     }
 
     public String getUnidadTransporte() {
@@ -232,6 +271,10 @@ public class MovimientoInternoMateriaPrima {
 
     public float getPesoNeto(String unidadDeMedida) throws Exception {
         return Organizacion.convertirUnidadPeso(this.unidadDeMedidaPeso, this.pesoEntrada-this.pesoSalida, unidadDeMedida);
+    }
+
+    public boolean poseeEquipamientoOrigen() {
+        return this.equipamientoOrigen != null;
     }
     
     

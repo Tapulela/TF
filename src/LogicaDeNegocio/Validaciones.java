@@ -17,7 +17,9 @@ public class Validaciones {
     public static final Pattern NUMERO_FRACCIONARIO = Pattern.compile("\\d+.?\\d*");
     public static final Pattern CODIGO_POSTAL_NUEVO = Pattern.compile("[A-Z]\\d{4}[A-Z]{3}");
     public static final Pattern CODIGO_POSTAL_VIEJO = Pattern.compile("\\d{4}");
-    
+    public static final Pattern PATENTE_VIEJA = Pattern.compile("[A-Z]{3}-\\d{3}");
+    public static final Pattern PATENTE_NUEVA = Pattern.compile("[A-Z]{2}-\\d{3}-[A-Z]{2}");
+    public static final Pattern NUMERO_ENTERO = Pattern.compile("\\d+");
     
     public static boolean unCuitEsValido(String unCuit){
         return Validaciones.CUIT.matcher(unCuit).matches();
@@ -32,5 +34,13 @@ public class Validaciones {
     
     public static boolean esUnCodigoPostalValido(String unCodigoPostal){ //VALIDA POR SI CUMPLE CUALQUIERA DE LOS DOS FORMATOS.
         return (Validaciones.CODIGO_POSTAL_NUEVO.matcher(unCodigoPostal).matches() || Validaciones.CODIGO_POSTAL_VIEJO.matcher(unCodigoPostal).matches());
+    }
+    
+    public static boolean esUnaPatenteValida(String unaPatente){
+        return (Validaciones.PATENTE_VIEJA.matcher(unaPatente).matches() || Validaciones.PATENTE_NUEVA.matcher(unaPatente).matches());
+    }
+    
+    public static boolean esUnNumeroEnteroValido(String unEntero){
+        return (Validaciones.NUMERO_ENTERO.matcher(unEntero).matches());
     }
 }

@@ -44,7 +44,7 @@ public class ReportesEquipamiento extends javax.swing.JFrame {
     public ReportesEquipamiento(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
         initComponents();
         this.trayectoriaActual = trayectoriaAnterior + " - Reportes de Equipamiento";
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Reporte de Equipamientos", this.trayectoriaActual);
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Reporte de Equipamientos", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         setIconImage(new ImageIcon(getClass().getResource("../InterfazGrafica/Assets/Icono.png")).getImage());
         
         this.setVisible(true); 

@@ -56,7 +56,7 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
         this.organizacion = organizacion;
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
         this.trayectoriaActual = trayectoriaAnterior + " - Gestion de Movimientos";
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestion de Movimientos", this.trayectoriaActual);
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestion de Movimientos", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
         

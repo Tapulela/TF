@@ -55,7 +55,7 @@ public class ABMLocalidad extends javax.swing.JFrame implements TransferenciaIns
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
         
         trayectoriaActual = trayectoriaAnterior+" - Gestión de localidades";
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestión de localidades", this.trayectoriaActual);
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestión de localidades", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         
         
 

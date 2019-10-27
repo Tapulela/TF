@@ -56,7 +56,7 @@ public class BuscarGenerico extends javax.swing.JFrame {
         this.organizacion = organizacion;
         this.trayectoriaActual = trayectoriaAnterior + " - Busqueda de GENERICO";
         
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Busqueda de un CONCEPTO", this.trayectoriaActual);
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Busqueda de un CONCEPTO", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         jTable1.setRowHeight(30);
         jTable1.getColumnModel().getColumn(0).setPreferredWidth(60);
         jTable1.getColumnModel().getColumn(0).setMaxWidth(60);

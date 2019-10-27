@@ -270,7 +270,7 @@ public class Equipamiento {
 
     public void cambiarDeBascula(Bascula unaBascula) throws ExcepcionCargaParametros {
         
-        if (!estaActivo())
+        if (!unaBascula.estaActivo())
             throw new ExcepcionCargaParametros("La bascula no se encuentra activa para ser asociada.");
         if (this.basculaAsociada == null)
             throw new ExcepcionCargaParametros("El equipamiento no posee una Bascula asociada");
@@ -307,6 +307,32 @@ public class Equipamiento {
             return this.getBasculaAsociada().getNombre();
         else
             return "No posee";
+    }
+
+    public boolean puedeAlbergar(float unPesoAVerificar, String unidadMedidaPeso) throws ExcepcionCargaParametros {
+        float capacidadDisponible = Organizacion.convertirUnidadPeso(this.unidadDeMedida, this.capacidadMaxima, unidadMedidaPeso) - this.getCantidadAlmacenada(unidadMedidaPeso);
+        return (capacidadDisponible >= unPesoAVerificar);
+    }
+    
+    public ArrayList getLotesAsociadosNoAnulados(){
+        ArrayList retorno = new ArrayList();
+        Iterator lotes = this.lotesEnExistenciaActuales.iterator();
+        while (lotes.hasNext()){
+            Lote unLote = (Lote) lotes.next();
+            if (!unLote.estaAnulado())
+                retorno.add(unLote);
+        }        
+        return retorno;
+    }
+    
+    private float getCantidadAlmacenada(String unaUnidadMedida) throws ExcepcionCargaParametros {
+        float retorno = 0;
+        Iterator lotesNoAnulados = getLotesAsociadosNoAnulados().iterator();
+        while (lotesNoAnulados.hasNext()){
+            Lote unLote = (Lote) lotesNoAnulados.next();
+            retorno = retorno + Organizacion.convertirUnidadPeso(unLote.getUnidadDeMedida(), unLote.getCantidad(), unaUnidadMedida);
+        }
+        return retorno;
     }
     
 }

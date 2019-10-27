@@ -50,7 +50,7 @@ public class BuscarEquipamiento extends javax.swing.JFrame {
         this.ventanaAnterior.setFocusable(false);
         this.organizacion = organizacion;
         this.trayectoriaActual = trayectoriaAnterior + " - Busqueda de Equipamiento";
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Busqueda de un equipamiento", this.trayectoriaActual);
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Busqueda de un equipamiento", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         jTable1.setRowHeight(30);
         jTable1.getColumnModel().getColumn(0).setPreferredWidth(60);
         jTable1.getColumnModel().getColumn(0).setMaxWidth(60);

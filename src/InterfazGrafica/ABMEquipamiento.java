@@ -47,7 +47,7 @@ public class ABMEquipamiento extends javax.swing.JFrame implements Transferencia
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
         this.trayectoriaActual = trayectoriaAnterior + " - Gestionar Equipamientos";
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestion de Equipamientos", trayectoriaAnterior + " - Gestionar Equipamientos");
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestion de Equipamientos", trayectoriaAnterior + " - Gestionar Equipamientos", organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         
 
         

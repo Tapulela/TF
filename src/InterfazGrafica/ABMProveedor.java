@@ -64,7 +64,7 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
         trayectoriaActual = trayectoriaAnterior+" - Gestionar Proveedores";
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestion de Proveedores", this.trayectoriaActual);
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestion de Proveedores", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         
         cargarLocalidades();
 

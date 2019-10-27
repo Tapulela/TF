@@ -63,7 +63,7 @@ public class OrdenDeCompra {
         this.id = id;
     }
 
-    public Date getFechaOrigen() {
+    public java.sql.Date getFechaOrigen() {
         return new Date(this.fechaOrigen.getTimeInMillis());
     }
 

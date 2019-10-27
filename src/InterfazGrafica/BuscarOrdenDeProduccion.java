@@ -49,7 +49,7 @@ public class BuscarOrdenDeProduccion extends javax.swing.JFrame {
         this.organizacion = organizacion;
         this.trayectoriaActual = trayectoriaAnterior + " - Busqueda de Orden de Producción";
         
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Busqueda de una orden de producción", this.trayectoriaActual);
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Busqueda de una orden de producción", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         jTable1.setRowHeight(30);
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);

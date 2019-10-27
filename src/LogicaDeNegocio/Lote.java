@@ -6,6 +6,7 @@
 package LogicaDeNegocio;
 
 import LogicaDeNegocio.Organizacion;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -17,6 +18,7 @@ import java.util.Map;
  */
 public class Lote {
     public static final String ESTADO_ANULADO = "Anulado";
+    public static final String ESTADO_REGULAR = "Regular";
     
     
     private int id;
@@ -29,6 +31,8 @@ public class Lote {
     private OrdenDeProduccion ordenDeProduccionAsociada;
     private OrdenDeCompra ordenDeCompraAsociada;
     private Equipamiento equipamientoDondeReside;
+    private MovimientoInternoMateriaPrima movimientoDeIngreso;
+    private MovimientoInternoMateriaPrima ultimoMovimientoRegular;
     
     private ArrayList movimientosAsociados;
     private ArrayList transformacionesAsociadas;
@@ -52,21 +56,42 @@ public class Lote {
         this.transformacionesAsociadas = new ArrayList();
     }
 
-    public Lote(String etiqueta, float cantidad, String tipo_Lote, String unidadDeMedida, Calendar fechaAdquisicion, OrdenDeCompra ordenDeCompraAsociada, Equipamiento equipamientoDondeReside) {
-        this.etiqueta = etiqueta;
+    public Lote(float cantidad, String tipo_Lote, String unidadDeMedida, Calendar fechaAdquisicion, OrdenDeCompra ordenDeCompraAsociada, Equipamiento equipamientoDondeReside) {
         this.cantidad = cantidad;
         this.tipo_Lote = tipo_Lote;
         this.unidadDeMedida = unidadDeMedida;
         this.fechaAdquisicion = fechaAdquisicion;
         this.ordenDeCompraAsociada = ordenDeCompraAsociada;
+        this.equipamientoDondeReside = equipamientoDondeReside;
+        this.estado = ESTADO_REGULAR;
         this.ordenDeProduccionAsociada = ordenDeCompraAsociada.getOrdenDeProduccionAsociada();
         this.movimientosAsociados = new ArrayList();
         this.transformacionesAsociadas = new ArrayList();
     }
 
+    public MovimientoInternoMateriaPrima getMovimientoDeIngreso() {
+        return movimientoDeIngreso;
+    }
+
+    public void setMovimientoDeIngreso(MovimientoInternoMateriaPrima movimientoDeIngreso) {
+        this.movimientoDeIngreso = movimientoDeIngreso;
+    }
+
+    public MovimientoInternoMateriaPrima getUltimoMovimientoRegular() {
+        return ultimoMovimientoRegular;
+    }
+
+    public void setUltimoMovimientoRegular(MovimientoInternoMateriaPrima ultimoMovimientoRegular) {
+        this.ultimoMovimientoRegular = ultimoMovimientoRegular;
+    }
+
     
-    public Calendar getFechaAdquisicion() {
-        return fechaAdquisicion;
+    public java.sql.Date getFechaAdquisicion() {
+        return new Date(this.fechaAdquisicion.getTimeInMillis());
+    }
+    
+    public Calendar getFechaAdquisicionC() {
+        return this.fechaAdquisicion;
     }
 
     public OrdenDeProduccion getOrdenDeProduccionAsociada() {
@@ -156,7 +181,28 @@ public class Lote {
     }
 
     boolean estaAnulado() {
-        return this.estado.equals(ESTADO_ANULADO);
+        boolean retorno = false;
+        retorno = (this.estado != null && this.estado.equals(ESTADO_ANULADO));
+        return retorno;
+    }
+
+    public void agregarMovmimientoDeIngreso(MovimientoInternoMateriaPrima unMovimiento) {
+        this.movimientoDeIngreso = unMovimiento;
+    }
+
+    public void asignarUltimoMovimiento(MovimientoInternoMateriaPrima unMovimiento) {
+        this.ultimoMovimientoRegular = unMovimiento;
+    }
+
+    boolean poseeUnoOMasMovimientosAsociadosRegulares() {
+        //SE IGNORA EL MOVIMIENTO DE INGRESO.
+        boolean seEncontroMovimientoRegular = false;
+        Iterator movimientos = this.movimientosAsociados.iterator();
+        while (movimientos.hasNext() && !seEncontroMovimientoRegular){
+            MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) movimientos.next();
+            seEncontroMovimientoRegular = (unMovimiento.estaRegular() && unMovimiento.poseeEquipamientoOrigen());
+        }
+        return seEncontroMovimientoRegular;
     }
     
     

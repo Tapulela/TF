@@ -54,7 +54,7 @@ public class ABMProvincia extends javax.swing.JFrame implements TransferenciaIns
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
         
         trayectoriaActual = trayectoriaAnterior+" - Gestión de provincias";
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestión de provincias", this.trayectoriaActual);
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestión de provincias", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         
         
 

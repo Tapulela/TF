@@ -33,14 +33,17 @@
 
 --v1.10
 --	Adicion de ROLES
-
+--	Un lote referencia a su primer movimiento (ingreso) y a su ultimo movimiento en estado regular.
 
 --PRIMERO SE DEBEN ELIMINAR TODOS LOS USUARIOS
-DELETE from usuarios;
 
+
+DELETE from usuarios;
 --Borrar toda la base de datos, para luego poder realizar todas las definiciones con los contadores incrementales en 0.
 DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;
+
+
 
 --ESTABLECER EL FORMATO DD/MM/AAAA:
 SET DATESTYLE TO 'European';
@@ -71,6 +74,18 @@ language plpgsql;
 
 
 --CREAR LAS TABLAS
+
+create table USUARIOS (
+	ID SERIAL, 
+	Nombre_Usuario varchar(100),
+	Nombre varchar(100) NOT NULL,
+	Apellido varchar(100) NOT NULL,
+	DNI varchar(100) UNIQUE NOT NULL,
+	Estado varchar(30) NOT NULL,
+	Rol varchar(100),
+	primary key(ID));
+	
+alter table USUARIOS add column rol_asociado oid;
 
 create table PAISES (
 	ID SERIAL, 
@@ -114,7 +129,7 @@ create table PROVEEDORES (
 	ID SERIAL,
 	Razon_Social varchar(60), 
 	CUIT varchar(30) NOT NULL, 
-	Estado varchar(30), 
+	Estado varchar(30) NOT NULL, 
 	primary key (ID), 
 	UNIQUE(CUIT),
 	UNIQUE(Razon_Social));
@@ -131,9 +146,9 @@ create table LOTES (
 
 create table MOVIMIENTOS_INTERNOS_MP(
 	ID SERIAL,
-	Fecha_Origen TIMESTAMPTZ NOT NULL,
-	Fecha_Entrada TIMESTAMPTZ NOT NULL,
-	Fecha_Salida TIMESTAMPTZ NOT NULL,
+	Fecha_Origen date NOT NULL,
+	Hora_Entrada TIMESTAMPTZ NOT NULL,
+	Hora_Salida TIMESTAMPTZ NOT NULL,
 	Tipo_Unidad_Transporte varchar(60) NOT NULL,
 	cantidad_Unidades int NOT NULL,
 	Unidad_De_Medida_Peso varchar(30) NOT NULL,
@@ -204,9 +219,15 @@ alter table public.ORDENES_COMPRA add constraint FK_ORDENES_PRODUCCION_ID foreig
 alter table LOTES add column IdOrdenCompra int NOT NULL; --NO PUEDE SER NULL.
 alter table public.LOTES add constraint FK_ORDENES_COMPRA_ID foreign key (IdOrdenCompra) references ORDENES_COMPRA(ID) on update cascade;
 
+alter table LOTES add column IdMovimientoInternoMpIngreso int; --PUEDE Y DEBE SER NULL PARA PODER DAR DE ALTA EL LOTE, GENERAR SU ETIQUETA Y LUEGO GENERAR EL MOVIMIENTO PARA LUEGO VINCULARLO.
+alter table public.LOTES add constraint FK_PRIMERO_MOVIMIENTO_ID foreign key (IdMovimientoInternoMpIngreso) references MOVIMIENTOS_INTERNOS_MP(ID) on update cascade;
 
-
+alter table LOTES add column IdMovimientoInternoMpUltimo int; --ES EL ULTIMO MOVIMIENTO. DEBE SER NULL POR EL MISMO MOTIVO DESCRITO EN EL MOVIMIENTO DE INGRESO.
+alter table public.LOTES add constraint FK_ULTIMO_MOVIMIENTO_ID foreign key (IdMovimientoInternoMpUltimo) references MOVIMIENTOS_INTERNOS_MP(ID) on update cascade;
 --MOVIMIENTOS_INTERNOS_MP
+
+alter table MOVIMIENTOS_INTERNOS_MP add column IdUsuario int;
+alter table public.MOVIMIENTOS_INTERNOS_MP add constraint FK_USUARIOS_ID foreign key (IdUsuario) references USUARIOS(ID) on update cascade;
 
 alter table MOVIMIENTOS_INTERNOS_MP add column IdLote int NOT NULL;
 alter table public.MOVIMIENTOS_INTERNOS_MP add constraint FK_LOTES_ID foreign key (IdLote) references LOTES(ID) on update cascade;
@@ -219,6 +240,7 @@ alter table public.MOVIMIENTOS_INTERNOS_MP add constraint FK_ORIGEN_ID foreign k
 
 alter table MOVIMIENTOS_INTERNOS_MP add column IdEquipamientoDestino int;
 alter table public.MOVIMIENTOS_INTERNOS_MP add constraint FK_DESTINO_ID foreign key (IdEquipamientoDestino) references EQUIPAMIENTOS(ID) on update cascade;
+
 --alter table public.MOVIMIENTOS_INTERNOS_MP add constraint CK_MIMP_IdBascula check (SELECT MOVIMIENTOS_INTERNOS_MP.IdBascula IN (SELECT ID from EQUIPAMIENTOS where EQUIPAMIENTOS.Tipo_Equipamiento='Bascula'));
 --NO SE PUEDEN REALIZAR SUB-CONSULTAS EN RESTRICCION CHECK. AMERITA TRIGGERS OBLIGATORIAMENTE.
 
@@ -370,16 +392,7 @@ CREATE TRIGGER insercion_MIMP BEFORE INSERT OR UPDATE ON MOVIMIENTOS_INTERNOS_MP
 
 --TABLA DE USUARIOS
 
-create table USUARIOS (
-	ID SERIAL, 
-	Nombre varchar(100) NOT NULL,
-	Apellido varchar(100) NOT NULL,
-	DNI varchar(100) UNIQUE NOT NULL,
-	Estado varchar(30) NOT NULL,
-	Rol varchar(100),
-	primary key(ID));
-	
-alter table USUARIOS add column rol_asociado oid;
+
 	
 	
 
@@ -390,7 +403,8 @@ DECLARE aux varchar;
 	BEGIN
 		aux = 'c'||NEW.DNI;
 		execute 'CREATE ROLE '||aux||' LOGIN PASSWORD '||$$'$$||NEW.DNI||$$'$$||' IN ROLE '||NEW.Rol;
-		UPDATE USUARIOS set rol_asociado= (SELECT oid from pg_roles where (rolname = aux)) where DNI = NEW.DNI;
+		UPDATE USUARIOS set rol_asociado= (SELECT oid from pg_roles where (rolname = aux)) where ID = NEW.ID;
+		UPDATE USUARIOS set Nombre_Usuario = aux WHERE ID = NEW.ID;
 		RETURN NULL;
 	END;
 $BODY$
@@ -420,8 +434,7 @@ CREATE TRIGGER borrado_cuentas after DELETE on USUARIOS
 
 
 
-INSERT INTO USUARIOS (Nombre, Apellido, DNI, Rol, Estado) VALUES ('Juanjo', 'Bolano', 39, 'GerenteAreaProduccion', 'Activo');
-INSERT INTO USUARIOS (Nombre, Apellido, DNI, Rol, Estado) VALUES ('Fede', 'Bolano', 40, 'OperadorBalanza', 'Activo');
+
 
 DO
 $BODY$
@@ -479,6 +492,47 @@ GRANT USAGE ON SCHEMA public TO OperadorBalanza;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO GerenteAreaProduccion;
 GRANT INSERT, UPDATE ON LOTES to OperadorBalanza;
 GRANT CONNECT ON DATABASE postgres TO OperadorBalanza;
+
+
+
+
+
+CREATE OR REPLACE FUNCTION sp_perteneceARol(usuario varchar, rol varchar) returns boolean as
+$BODY$
+DECLARE retorno boolean;
+DECLARE oid_rol_actual oid;
+DECLARE oid_rol_perteneciente oid;
+BEGIN
+	retorno = false;
+	oid_rol_actual = (SELECT oid from pg_roles where rolname = (usuario));
+	oid_rol_perteneciente = (SELECT oid from pg_roles where rolname=rol);
+	if oid_rol_perteneciente IS NOT NULL then
+		if (oid_rol_actual in (SELECT member from pg_auth_members where roleid=oid_rol_perteneciente)) then
+			retorno = true;
+		end if;
+	end if;
+	return retorno;
+END;
+$BODY$
+language plpgsql SECURITY DEFINER;
+
+INSERT INTO USUARIOS (Nombre, Apellido, DNI, Rol, Estado) VALUES ('Juan Jose', 'Bolano', 39, 'gerenteareaproduccion', 'Activo');
+INSERT INTO USUARIOS (Nombre, Apellido, DNI, Rol, Estado) VALUES ('Fede', 'Bolano', 40, 'operadorbalanza', 'Activo');
+
+
+
+
+/*
+DO
+$BODY$
+begin
+	RAISE NOTICE '%',sp_perteneceARol('c39','gerenteareaproduccion');
+end;
+$BODY$
+*/
+
+
+
 
 /*
 REVOKE ALL PRIVILEGES ON ALL TABLES in schema public FROM GerenteAreaProduccion;

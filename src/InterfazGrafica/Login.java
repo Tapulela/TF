@@ -5,11 +5,14 @@
  */
 package InterfazGrafica;
 
+import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.Organizacion;
 import Persistencia.Persistencia;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -168,9 +171,11 @@ public class Login extends javax.swing.JFrame {
         
         try {    
             //persistencia.iniciarSesion(tBUsuario.getText(), jPFPass.getText());
+            persistencia.iniciarSesion(tBUsuario.getText(), jPFPass.getText());//Con esto me aseguro de validar usuario y contraseña antes de recuperar toda la base de datos
+            persistencia.cerrarSesion();
             Organizacion unaOrganizacion = null;
             unaOrganizacion = new Organizacion(persistencia);
-            persistencia.iniciarSesion(tBUsuario.getText(), jPFPass.getText());
+            persistencia.iniciarSesion(tBUsuario.getText(), jPFPass.getText(), unaOrganizacion);
             MenuPrincipal unMenuPrincipal = new MenuPrincipal(unaOrganizacion);
             this.dispose();
         } catch (ClassNotFoundException ex) {
@@ -178,6 +183,8 @@ public class Login extends javax.swing.JFrame {
         } catch (SQLException ex) {
             jLError.setText("<html>Error con la conexión: El usuario o la contraseña son incorrectos.</html>");
             //ex.printStackTrace();
+        } catch (ExcepcionCargaParametros ex) {
+            jLError.setText("<html>"+ex.getMessage()+"</html>");
         }
         
 

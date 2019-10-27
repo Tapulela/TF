@@ -53,7 +53,7 @@ public class ABMPais extends javax.swing.JFrame implements TransferenciaInstanci
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
         
         trayectoriaActual = trayectoriaAnterior+" - Gestion de paises";
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestion de paises", this.trayectoriaActual);
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestion de paises", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         
         cargarEstados();
         cargarPaises();

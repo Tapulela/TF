@@ -9,6 +9,8 @@ import LogicaDeNegocio.GestionUsuariosYRoles.Usuario;
 import Persistencia.ExcepcionPersistencia;
 import Persistencia.Persistencia;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -23,10 +25,14 @@ import java.util.regex.Matcher;
  */
 public class Organizacion {
     private Persistencia persistencia;
+    
+    private Usuario usuarioActivo;
+    
     private Map<Integer, Empleado> empleados;
     private Map<Integer, Proveedor> proveedores;
     private Map<Integer, Equipamiento> equipamientos;
-    private Map<Integer, MovimientoInternoMateriaPrima> movimientos;
+    private Map<Integer, MovimientoInternoMateriaPrima> movimientos; //INCLUYE INGRESOS
+    private Map<Integer, MovimientoInternoMateriaPrima> movimientosDeIngreso;
     private Map<Integer, Lote> lotes;
     private Map<Integer, OrdenDeProduccion> ordenesProduccion;
     private Map<Integer, OrdenDeCompra> ordenesCompra;
@@ -40,6 +46,7 @@ public class Organizacion {
         this.proveedores = new HashMap<Integer, Proveedor>();
         this.equipamientos = new HashMap<Integer, Equipamiento>();
         this.movimientos = new HashMap<Integer, MovimientoInternoMateriaPrima>();
+        this.movimientosDeIngreso = new HashMap<Integer, MovimientoInternoMateriaPrima>();
         this.ordenesProduccion = new HashMap <Integer, OrdenDeProduccion>();
         this.lotes = new HashMap <Integer, Lote>();
         this.ordenesCompra = new HashMap <Integer, OrdenDeCompra>();
@@ -50,6 +57,16 @@ public class Organizacion {
         this.persistencia.recuperarOrganizacion(this);
     }
 
+    public Map<Integer, MovimientoInternoMateriaPrima> getMovimientosDeIngreso() {
+        return movimientosDeIngreso;
+    }
+
+    public void setMovimientosDeIngreso(Map<Integer, MovimientoInternoMateriaPrima> movimientosDeIngreso) {
+        this.movimientosDeIngreso = movimientosDeIngreso;
+    }
+
+    
+    
     public Map<Integer, Usuario> getUsuarios() {
         return usuarios;
     }
@@ -100,6 +117,14 @@ public class Organizacion {
 
     public Map<Integer, Localidad> getLocalidades() {
         return localidades;
+    }
+
+    public Usuario getUsuarioActivo() {
+        return usuarioActivo;
+    }
+
+    public void setUsuarioActivo(Usuario usuarioActivo) {
+        this.usuarioActivo = usuarioActivo;
     }
     
 
@@ -175,6 +200,109 @@ public class Organizacion {
         }
         
                 
+    }
+
+    public void registrarIngresoMateriaPrima(Calendar fechaOrigen, LocalTime horaEntrada, LocalTime horaSalida, String unidadTransporte, String cantidadUnidades, String unidadMedidaPeso, String pesoEntrada, String pesoSalida, String nHojaRuta, String nRemito, String nPrecinto, String nombreConductor, String patenteChasis, String patenteAcoplado, Equipamiento destino, OrdenDeCompra unaOrdenDeCompraAsociada,Proveedor unProveedorDeServicioDeTransporte) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+        if (fechaOrigen == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una fecha de origen valida.");
+        if (fechaOrigen.after(Calendar.getInstance()))
+            throw new ExcepcionCargaParametros("La fecha origen no puede exceder la fecha actual.");
+        
+        if (unaOrdenDeCompraAsociada == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de compra asociada.");
+        if (!unaOrdenDeCompraAsociada.seEncuentraRegular())
+            throw new ExcepcionCargaParametros("La orden de compra seleccionada no se encuentra en estado regular.");
+        if (!unaOrdenDeCompraAsociada.poseeProveedorAsociado())
+            throw new ExcepcionCargaParametros("La orden de compra seleccionada no posee un proveedor asociado.");
+        
+        if (unProveedorDeServicioDeTransporte == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un proveedor de servicio de transporte.");
+        if (!unProveedorDeServicioDeTransporte.seEncuentraActivo())
+            throw new ExcepcionCargaParametros("El proveedor seleccionado no se encuentra activo.");
+        
+        if (destino == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un equipamiento de destino.");
+        if (destino instanceof Bascula)
+            throw new ExcepcionCargaParametros("El destino no puede ser una bascula");
+        if (!destino.getBasculaAsociada().estaActivo())
+            throw new ExcepcionCargaParametros("El destino no posee una bascula activa.");
+        
+        if (horaEntrada==null)
+            throw new ExcepcionCargaParametros("No se ha ingresado una hora de entrada.");
+        if (horaSalida==null)
+            throw new ExcepcionCargaParametros("No se ha ingresado una hora de salida.");
+        
+        if (nHojaRuta.equals(""))
+            throw new ExcepcionCargaParametros("No se ha ingresado un número de hoja de ruta.");
+        if (nRemito.equals(""))
+            throw new ExcepcionCargaParametros("No se ha ingresado un número de remito.");
+        if (nPrecinto.equals(""))
+            throw new ExcepcionCargaParametros("No se ha ingresado un número de precinto.");
+        if (nombreConductor.equals(""))
+            throw new ExcepcionCargaParametros("No se ha ingresado el nombre del conductor.");
+        
+        if (patenteChasis.equals(""))
+            throw new ExcepcionCargaParametros("No se ha ingresado la patente del chasis.");
+        if (!Validaciones.esUnaPatenteValida(patenteChasis))
+            throw new ExcepcionCargaParametros("No se ha ingresado una patente de chasis valida (XXX-XXX) o (XX-XXX-XX).");
+                
+        if (patenteAcoplado.equals(""))
+            throw new ExcepcionCargaParametros("No se ha ingresado la patente del acoplado.");
+        if (!Validaciones.esUnaPatenteValida(patenteAcoplado))
+            throw new ExcepcionCargaParametros("No se ha ingresado una patente de acoplado valida (XXX-XXX) o (XX-XXX-XX).");
+        
+        if (unidadTransporte.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("No se ha seleccionado una unidad de transporte");
+        if (unidadMedidaPeso.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("No se ha seleccionado una unidad de medida");
+        if (!Validaciones.esUnNumeroFraccionarioValido(pesoEntrada))
+            throw new ExcepcionCargaParametros("El peso de entrada no posee un formato valido (Utilice solo numeros y una coma)");
+        if (!Validaciones.esUnNumeroFraccionarioValido(pesoSalida))
+            throw new ExcepcionCargaParametros("El peso de salida no posee un formato valido (Utilice solo numeros y una coma)");
+        if (horaEntrada.isAfter(horaSalida))
+            throw new ExcepcionCargaParametros("La hora de entrada no puede exceder la hora de salida.");
+        
+        float unPesoEntrada = Float.parseFloat(pesoEntrada);
+        float unPesoSalida = Float.parseFloat(pesoSalida);
+        float pesoNeto = unPesoEntrada - unPesoSalida;
+        if (pesoNeto <= 0)
+            throw new ExcepcionCargaParametros("El peso de salida no puede exceder el peso de entrada.");
+        if (!Validaciones.esUnNumeroEnteroValido(cantidadUnidades))
+            throw new ExcepcionCargaParametros("La cantidad de unidades ingresadas no es valida (Solo números).");
+        int unaCantidadDeUnidades = Integer.parseInt(cantidadUnidades);
+        if (unaCantidadDeUnidades <= 0)
+            throw new ExcepcionCargaParametros("La cantidad de unidades ingresadas de "+unidadTransporte+" no puede ser negativa.");
+        if (unPesoEntrada <=0 || unPesoSalida <= 0)
+            throw new ExcepcionCargaParametros("El peso de entrada o de salida no pueden ser 0 (cero) o negativos.");
+        
+        if (pesoNeto > unaOrdenDeCompraAsociada.getCantidadRestanteARecibir())
+            throw new ExcepcionCargaParametros("No se puede registrar un ingreso que supere lo pactado en la orden de compra.");
+        
+        if (!destino.puedeAlbergar(pesoNeto, unidadMedidaPeso))
+            throw new ExcepcionCargaParametros("El destino donde residirá el lote no posee espacio suficiente.");
+        
+        Lote unLote = new Lote(pesoNeto, "YCV", unidadMedidaPeso, fechaOrigen, unaOrdenDeCompraAsociada, destino);
+        persistencia.persistirObjeto(unLote);
+        unLote.setEtiqueta(( new SimpleDateFormat( "yyyyMMdd" ) ).format( fechaOrigen.getTime() )+"-"+unLote.getId());
+        MovimientoInternoMateriaPrima unMovimiento = new MovimientoInternoMateriaPrima(this.getUsuarioActivo(), horaEntrada, horaSalida, unidadTransporte, unaCantidadDeUnidades, unidadMedidaPeso, unPesoEntrada, unPesoSalida, nHojaRuta, nRemito, nPrecinto, nombreConductor, patenteChasis, patenteAcoplado, unLote, null, destino);
+        persistencia.persistirObjeto(unMovimiento);
+        unLote.agregarMovmimientoDeIngreso(unMovimiento);
+        unLote.asignarUltimoMovimiento(unMovimiento);
+        
+        persistencia.modificarObjeto(unLote);//ACTUALIZAR EN LA BASE DE DATOS EL MOVIMENTO INTERNO ASOCIADO AL INGRESO Y SU ETIQUETA.
+        unaOrdenDeCompraAsociada.agregarLote(unLote);
+        persistencia.modificarObjeto(unaOrdenDeCompraAsociada);
+        this.lotes.put(unLote.getId(), unLote);
+        this.movimientos.put(unMovimiento.getId(), unMovimiento);
+        this.movimientosDeIngreso.put(unMovimiento.getId(), unMovimiento);
+    }
+    
+    public void anularIngresoDeMateriaPrima(MovimientoInternoMateriaPrima unMovimiento) throws ExcepcionCargaParametros{
+        Lote unLoteImplicado = unMovimiento.getLoteAsociado();
+        if (unLoteImplicado.poseeUnoOMasMovimientosAsociadosRegulares())
+            throw new ExcepcionCargaParametros("No se puede dar de baja un ingreso cuyo lote tenga movimientos posteriores en estados regulares.");
+        /*if (unLoteImplicado.poseeUnaOMasTransformacionesAsociadasRegulares())
+            throw new ExcepcionCargaParametros("No se puede dar de baja un ingreso cuyo lote tenga movimientos posteriores en estados regulares.");*/
     }
     
     public void registrarMovimientoInternoMateriaPrima(Calendar fechaEntrada, Calendar fechaSalida, String unidadTransporte, int cantidadUnidades, String unidadMedidaPeso, float pesoEntrada, float pesoSalida, String nHojaRuta, String nRemito, String nPrecinto, String nombreConductor, String patenteChasis, String patenteAcoplado, Lote unLoteAMover, Bascula unaBascula) throws ExcepcionCargaParametros{
@@ -620,6 +748,8 @@ public class Organizacion {
         
         if (unaOrdenDeCompra == null)
             throw new ExcepcionCargaParametros("No se ha seleccionado una orden de Compra");
+        if (unaOrdenDeCompra.poseeLotesAsociados() && proveedorSeleccionado == null)
+            throw new ExcepcionCargaParametros("No puede desvincularse un proveedor de una orden de compra si la orden de compra posee ingresos de lotes asociados.");
         if (ordenProduccionSeleccionada == null)
             throw new ExcepcionCargaParametros("No se ha seleccionado una orden de producción");
         if (unEstado.equals(OrdenDeCompra.ESTADO_ANULADO) && unaOrdenDeCompra.poseeLotesRegularesAsociados())
@@ -793,6 +923,38 @@ public class Organizacion {
         return retorno;
     }
 
+    public ArrayList filtrarOrdenesDeCompraConProveedorAsociado(Map<String, Boolean> criterios, OrdenDeProduccion unaOrdenProduccionSeleccionada, Proveedor unProveedorSeleccionado, String unEstado, Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior) throws ExcepcionCargaParametros {
+        ArrayList retorno = new ArrayList();
+        Boolean criterioOrdenDeProduccionAsociada = criterios.get("ordenProduccion");
+        Boolean criterioProveedor = criterios.get("proveedor");
+        Boolean criterioEstado = criterios.get("estado");
+        Boolean criterioFechaOrigen = criterios.get("fechaOrigen");
+        if (criterioOrdenDeProduccionAsociada && unaOrdenProduccionSeleccionada == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de producción.");
+        if (criterioProveedor && unProveedorSeleccionado == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un proveedor.");
+        if (criterioEstado && unEstado.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("No se ha seleccionado un estado.");
+        if (criterioFechaOrigen && (fechaOrigenInferior == null || fechaOrigenSuperior == null))
+            throw new ExcepcionCargaParametros("Verifique las fechas de Origen Inferior y Superior ingresadas");
+        Iterator ordenesDeCompra = this.ordenesCompra.keySet().iterator();
+        while (ordenesDeCompra.hasNext()){
+            Boolean sePuedeAgregar = true;
+            int unId = (int) ordenesDeCompra.next();
+            OrdenDeCompra unaOrdenDeCompra = this.ordenesCompra.get(unId);
+            sePuedeAgregar = unaOrdenDeCompra.poseeProveedorAsociado();
+            if (sePuedeAgregar && criterioOrdenDeProduccionAsociada)
+                sePuedeAgregar = unaOrdenDeCompra.poseeOrdenDeProduccionAsociada(unaOrdenProduccionSeleccionada);
+            if (sePuedeAgregar && criterioProveedor)
+                sePuedeAgregar = unaOrdenDeCompra.poseeProveedorAsociado();
+            if (sePuedeAgregar && criterioFechaOrigen){
+                sePuedeAgregar = unaOrdenDeCompra.origenEstaEntre(fechaOrigenInferior, fechaOrigenSuperior);
+            }
+            if (sePuedeAgregar)
+                retorno.add(unaOrdenDeCompra);
+        }
+        return retorno;
+    }
     public void registrarOrdenDeCompra(OrdenDeProduccion ordenProduccionSeleccionada, Proveedor proveedorSeleccionado, String unaUnidadMedida,String unaCantidadAComprar, String unCostoDeCompra) throws ExcepcionCargaParametros, SQLException {
         unaCantidadAComprar = unaCantidadAComprar.replace(",", ".");
         unCostoDeCompra = unCostoDeCompra.replace(",", ".");
@@ -913,7 +1075,23 @@ public class Organizacion {
                 existe = true;
         }
         return existe;
-    }        
+    }
+    
+    public Usuario recuperarUsuario(String unNombreDeUsuario){
+        Usuario retorno = null;
+        Iterator recorredorUsuarios = this.usuarios.keySet().iterator();
+        boolean seEncontro = false;
+        while (recorredorUsuarios.hasNext() && !seEncontro){
+            int unId = (int) recorredorUsuarios.next();
+            Usuario unUsuario = this.usuarios.get(unId);
+            if (unUsuario.seIdentifica(unNombreDeUsuario)){
+                retorno = unUsuario;
+                seEncontro = true;
+            }
+        }
+        return retorno;
+    }
+
 
 
 

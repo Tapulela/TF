@@ -47,7 +47,7 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
         trayectoriaActual = trayectoriaAnterior+" - Gestionar Ordenes de Produccion";
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestion de ordenes de Produccion", this.trayectoriaActual);
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestion de ordenes de Produccion", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         
         
         
