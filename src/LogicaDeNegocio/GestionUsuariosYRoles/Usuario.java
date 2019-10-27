@@ -13,7 +13,35 @@ public class Usuario {
     private int id;
     private String nombre;
     private String Apellido;
+    private String Estado;
     private String dni;
+    private String rol;
+
+    public Usuario(int id, String nombre, String Apellido, String Estado, String dni, String rol) {
+        this.id = id;
+        this.nombre = nombre;
+        this.Apellido = Apellido;
+        this.Estado = Estado;
+        this.dni = dni;
+        this.rol = rol;
+    }
+
+    public String getEstado() {
+        return Estado;
+    }
+
+    public void setEstado(String Estado) {
+        this.Estado = Estado;
+    }
+
+    public String getRol() {
+        return rol;
+    }
+
+    public void setRol(String rol) {
+        this.rol = rol;
+    }
+    
 
     public int getId() {
         return id;

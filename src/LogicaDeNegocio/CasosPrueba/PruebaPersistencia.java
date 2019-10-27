@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 public class PruebaPersistencia {
 
 
-    public void probarRecuperacion(Organizacion unaOrganizacion) throws SQLException{
+    public void probarRecuperacion(Organizacion unaOrganizacion) throws SQLException, ClassNotFoundException{
         unaOrganizacion.getPersistencia().recuperarOrganizacion(unaOrganizacion);;    
     }
     
