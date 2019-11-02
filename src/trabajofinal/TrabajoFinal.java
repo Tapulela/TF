@@ -6,7 +6,6 @@
 package trabajofinal;
 
 import InterfazGrafica.Login;
-import LogicaDeNegocio.CasosPrueba.PruebaPersistencia;
 import LogicaDeNegocio.Lote;
 import LogicaDeNegocio.Proveedor;
 import LogicaDeNegocio.Equipamiento;

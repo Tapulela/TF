@@ -11,12 +11,15 @@ import LogicaDeNegocio.Equipamiento;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.Organizacion;
 import Persistencia.ExcepcionPersistencia;
+import java.awt.Component;
+import java.awt.Toolkit;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 /**
  *
@@ -42,7 +45,10 @@ public class ABMEquipamiento extends javax.swing.JFrame implements Transferencia
 
 
     ABMEquipamiento(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
+        this.setUndecorated(true);
         initComponents();
+        this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
+        
         this.organizacion = organizacion;
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
@@ -58,6 +64,7 @@ public class ABMEquipamiento extends javax.swing.JFrame implements Transferencia
         jBBuscar.setVisible(false);
         
         this.ventanaAnterior = ventanaAnterior;
+        ParametrosDeInterfaz.configurarVentana(this);
     }
     private void organizarElementos(){
         this.cargaBasculas();
@@ -80,7 +87,7 @@ public class ABMEquipamiento extends javax.swing.JFrame implements Transferencia
                 break;
                 
         }
-        this.pack();
+        //this.pack();
         
     }
     /**
@@ -325,7 +332,7 @@ public class ABMEquipamiento extends javax.swing.JFrame implements Transferencia
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 19, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel12)
                     .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -374,12 +381,11 @@ public class ABMEquipamiento extends javax.swing.JFrame implements Transferencia
                         .addComponent(jLDuracionMax)
                         .addComponent(jTFDuracionMax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLDias)))
-                .addContainerGap())
+                .addContainerGap(18, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
     private void cargaBasculas(){
         this.jCBBascula.removeAllItems();
         this.jCBBascula.addItem("Seleccionar");
@@ -428,7 +434,7 @@ public class ABMEquipamiento extends javax.swing.JFrame implements Transferencia
                         case "Camara Est. Acel.":
                             unaBasculaAsociada = this.organizacion.getUnaBascula((String) jCBBascula.getSelectedItem());
                             try {
-                                this.organizacion.registrarEquipamiento((String) jCBTipoEquipamiento.getSelectedItem(), jTFNombre.getText(), jTFDireccion.getText(), jCFechaAdquisicion.getCalendar(), jCFechaUltimoMantenimiento.getCalendar(), Float.parseFloat(jTFCapacidadMax.getText()),(String) jCBUnidadMedida.getSelectedItem(), unaBasculaAsociada, Float.parseFloat((String)jTFDuracionMax.getText()));
+                                this.organizacion.registrarEquipamiento("Camara de estacionamiento acelerado", jTFNombre.getText(), jTFDireccion.getText(), jCFechaAdquisicion.getCalendar(), jCFechaUltimoMantenimiento.getCalendar(), Float.parseFloat(jTFCapacidadMax.getText()),(String) jCBUnidadMedida.getSelectedItem(), unaBasculaAsociada, Float.parseFloat((String)jTFDuracionMax.getText()));
                             } catch (NumberFormatException e){
                                 JOptionPane.showMessageDialog(null, "Por favor, ingrese una capacidad Maxima y duracion maxima de estacionamiento en formato valido (Solo numeros y un punto)");
                                 return;
@@ -661,7 +667,7 @@ public class ABMEquipamiento extends javax.swing.JFrame implements Transferencia
         organizarElementos();
         jBConcretarAccion.setEnabled(true);
         jBCancelar.setEnabled(true);
-        this.pack();
+        //this.pack();
     }
 
     private void prepararAlta() {

@@ -12,6 +12,7 @@ import LogicaDeNegocio.Organizacion;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -21,9 +22,12 @@ import java.util.Calendar;
  *
  * @author usuario
  */
-public class MovimientoInternoMateriaPrima {
+public class MovimientoInternoMateriaPrima extends Evento{
+    public static final String ESTADO_REGULAR = "Regular";
+    public static final String ESTADO_ANULADO = "Anulado";
+    
+    
     private int id;
-    private Usuario unOperador;
     private Calendar fechaOrigen;
     private LocalTime horaEntrada;
     private LocalTime horaSalida;
@@ -45,10 +49,12 @@ public class MovimientoInternoMateriaPrima {
     
     private Equipamiento equipamientoOrigen;
     private Equipamiento equipamientoDestino;
+    private Proveedor proveedorTransporte;
+    
 
-    public MovimientoInternoMateriaPrima(int id, Usuario unOperador, java.sql.Date fechaOrigen, java.sql.Time horaEntrada, java.sql.Time horaSalida, String unidadTransporte, int cantidadUnidades, String unidadDeMedidaPeso, float pesoEntrada, float pesoSalida, String nHojaRuta, String nRemito, String precinto, String nombreConductor, String patenteChasis, String patenteAcoplado, String unEstado,Lote loteAMover, Equipamiento origen,Equipamiento destino, Bascula unaBasculaAsociada) {
+    public MovimientoInternoMateriaPrima(int id, Usuario unOperador, java.sql.Date fechaOrigen, java.sql.Time horaEntrada, java.sql.Time horaSalida, String unidadTransporte, int cantidadUnidades, String unidadDeMedidaPeso, float pesoEntrada, float pesoSalida, String nHojaRuta, String nRemito, String precinto, String nombreConductor, String patenteChasis, String patenteAcoplado, String unEstado,Lote loteAMover, Equipamiento origen,Equipamiento destino, Bascula unaBasculaAsociada, Proveedor unProveedor, int idEvento) {
+        super(idEvento, unEstado, unOperador);
         this.id = id;
-        this.unOperador = unOperador;
         
         this.fechaOrigen = Calendar.getInstance();
         this.fechaOrigen.setTime(fechaOrigen);
@@ -72,10 +78,11 @@ public class MovimientoInternoMateriaPrima {
         this.equipamientoOrigen = origen;
         this.equipamientoDestino = destino;
         this.basculaAsociada = unaBasculaAsociada;
+        this.proveedorTransporte = unProveedor;
     }
     
-    public MovimientoInternoMateriaPrima(Usuario unOperador, LocalTime horaEntrada, LocalTime horaSalida, String unidadTransporte, int cantidadUnidades, String unidadDeMedidaPeso, float pesoEntrada, float pesoSalida, String nHojaRuta, String nRemito, String precinto, String nombreConductor, String patenteChasis, String patenteAcoplado, Lote loteAMover, Equipamiento origen,Equipamiento destino) {
-        this.unOperador = unOperador;
+    public MovimientoInternoMateriaPrima(Usuario unOperador, LocalTime horaEntrada, LocalTime horaSalida, String unidadTransporte, int cantidadUnidades, String unidadDeMedidaPeso, float pesoEntrada, float pesoSalida, String nHojaRuta, String nRemito, String precinto, String nombreConductor, String patenteChasis, String patenteAcoplado, Lote loteAMover, Equipamiento origen, Equipamiento destino, Proveedor unProveedorDeTransporte) {
+        super(Evento.ESTADO_REGULAR, unOperador);
         this.fechaOrigen = Calendar.getInstance();
         this.horaEntrada = horaEntrada;
         this.horaSalida = horaSalida;
@@ -90,14 +97,32 @@ public class MovimientoInternoMateriaPrima {
         this.nombreConductor = nombreConductor;
         this.patenteChasis = patenteChasis;
         this.patenteAcoplado = patenteAcoplado;
-        this.estado = "Activo";
+        this.estado = ESTADO_REGULAR;
         
         this.loteAsociado = loteAMover;
         this.equipamientoOrigen = origen;
         this.equipamientoDestino = destino;
         this.basculaAsociada = this.equipamientoDestino.getBasculaAsociada();
+        this.proveedorTransporte = unProveedorDeTransporte;
     }
 
+    public Bascula getBasculaAsociada() {
+        return basculaAsociada;
+    }
+
+    public void setBasculaAsociada(Bascula basculaAsociada) {
+        this.basculaAsociada = basculaAsociada;
+    }
+
+    public Proveedor getProveedorTransporte() {
+        return proveedorTransporte;
+    }
+
+    public void setProveedorTransporte(Proveedor proveedorTransporte) {
+        this.proveedorTransporte = proveedorTransporte;
+    }
+
+    
     public int getId() {
         return id;
     }
@@ -106,17 +131,13 @@ public class MovimientoInternoMateriaPrima {
         this.id = id;
     }
 
-    public Usuario getUnOperador() {
-        return unOperador;
-    }
-
-    public void setUnOperador(Usuario unOperador) {
-        this.unOperador = unOperador;
-    }
 
     public java.sql.Date getFechaOrigen() {
         return new Date(this.fechaOrigen.getTimeInMillis());
     }
+    public Calendar getFechaOrigenC() {
+        return fechaOrigen;
+    }    
 
     public void setFechaOrigen(Calendar fechaOrigen) {
         this.fechaOrigen = fechaOrigen;
@@ -229,7 +250,7 @@ public class MovimientoInternoMateriaPrima {
     }
 
     public String getEstado() {
-        return estado;
+        return this.estado;
     }
 
     public void setEstado(String estado) {
@@ -259,22 +280,65 @@ public class MovimientoInternoMateriaPrima {
     public void setEquipamientoOrigen(Equipamiento equipamientoOrigen) {
         this.equipamientoOrigen = equipamientoOrigen;
     }
+
+    public void anular() {
+        super.anularEsteEvento();
+        this.estado = ESTADO_ANULADO;
+    }
     
     
     
     
     
     public boolean estaRegular(){
-        return this.estado.equals("Regular");
+        return this.estado.equals(ESTADO_REGULAR);
     }
 
 
-    public float getPesoNeto(String unidadDeMedida) throws Exception {
+    public float getPesoNeto(String unidadDeMedida) throws ExcepcionCargaParametros {
         return Organizacion.convertirUnidadPeso(this.unidadDeMedidaPeso, this.pesoEntrada-this.pesoSalida, unidadDeMedida);
     }
 
     public boolean poseeEquipamientoOrigen() {
         return this.equipamientoOrigen != null;
+    }
+
+    public boolean poseeOrdenDeProduccionAsociada(OrdenDeProduccion unaOrdenProduccionSeleccionada) {
+        return this.loteAsociado.poseeOrdenDeProduccionAsociada(unaOrdenProduccionSeleccionada);
+    }
+
+    public boolean poseeEstado(String unEstado) {
+        return this.estado.equals(unEstado);
+    }
+
+    public boolean poseeEtiqueta(String unaEtiqueta) {
+        return this.loteAsociado.poseeEtiqueta(unaEtiqueta);
+    }
+
+    public boolean poseeOrdenDeCompraAsociada(OrdenDeCompra unaOrdenCompraSeleccionada) {
+        return this.loteAsociado.poseeOrdenDeCompraAsociada(unaOrdenCompraSeleccionada);
+    }
+
+    public boolean poseeProveedorTransporteAsociado(Proveedor unProveedorTransporte) {
+        return this.proveedorTransporte.equals(unProveedorTransporte);
+    }
+
+    public boolean origenEstaEntre(Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior) {
+        return (this.fechaOrigen.after(fechaOrigenInferior) && this.fechaOrigen.before(fechaOrigenSuperior));
+    }
+
+    public boolean poseeEquipamientoDestino(Equipamiento unEquipamiento) {
+        return this.equipamientoDestino.equals(unEquipamiento);
+    }
+
+    public Object[] devolverVector() {
+        String fecha = ( new SimpleDateFormat( "dd/MM/yyyy" ) ).format( Calendar.getInstance().getTime() );
+        Object[] vec ={this.getId(), this.getEstadoEvento(), this.getLoteAsociado().getOrdenDeProduccionAsociada().getId(), this.getLoteAsociado().getOrdenDeCompraAsociada().getId(),this.getEquipamientoDestino().getNombre(), this.proveedorTransporte.getRazonSocial(), fecha, this.loteAsociado.getEtiqueta()};
+        return vec;
+    }
+
+    public Boolean poseeProveedorAsociado(Proveedor unProveedor) {
+        return this.loteAsociado.getOrdenDeCompraAsociada().getProveedorAsociado().equals(unProveedor);
     }
     
     

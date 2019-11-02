@@ -80,24 +80,15 @@ public class Equipamiento {
         this.movimientosAsociadosDeSalidaActuales = new ArrayList();
     }
     
-    public float obtenerCapacidadDisponible(String unidadDeMedida) throws Exception{
+    public float obtenerCapacidadDisponible(String unidadDeMedida) throws ExcepcionCargaParametros{
         //Capacidad máxima menos todos los movimientos de entrada mas todos los movimientos de salida
         float retorno = this.capacidadMaxima;
-        float total_Entrada = 0;
-        float total_Salida = 0;
-        Iterator entradas = this.movimientosAsociadosDeEntradaActuales.iterator();
-        Iterator salidas = this.movimientosAsociadosDeSalidaActuales.iterator();
-        while (entradas.hasNext()){
-            MovimientoInternoMateriaPrima unMovimientoDeEntrada = (MovimientoInternoMateriaPrima) entradas.next();
-            if (unMovimientoDeEntrada.estaRegular())
-                total_Entrada = total_Entrada + unMovimientoDeEntrada.getPesoNeto(unidadDeMedida);
+        Iterator recorredorLotes = this.lotesEnExistenciaActuales.iterator();
+        while (recorredorLotes.hasNext()){
+            Lote unLote = (Lote) recorredorLotes.next();
+            retorno = retorno - Organizacion.convertirUnidadPeso(unLote.getUnidadDeMedida(), unLote.getCantidad(), this.unidadDeMedida);
         }
-        while (salidas.hasNext()){
-            MovimientoInternoMateriaPrima unMovimientoDeSalida = (MovimientoInternoMateriaPrima) salidas.next();
-            if (unMovimientoDeSalida.estaRegular())
-                total_Salida = total_Salida + unMovimientoDeSalida.getPesoNeto((unidadDeMedida));
-        }
-        retorno = total_Entrada - total_Salida;
+        
         return retorno;
     }
     
@@ -260,7 +251,7 @@ public class Equipamiento {
         this.basculaAsociada = unaBascula;
     }
 
-    public boolean poseeLotes() {
+    public boolean poseeUnoOMasLotes() {
         return !this.lotesEnExistenciaActuales.isEmpty();
     }
 
@@ -333,6 +324,20 @@ public class Equipamiento {
             retorno = retorno + Organizacion.convertirUnidadPeso(unLote.getUnidadDeMedida(), unLote.getCantidad(), unaUnidadMedida);
         }
         return retorno;
+    }
+
+    public void removerLote(Lote unLote) {
+        this.lotesEnExistenciaActuales.remove(unLote);
+    }
+
+    boolean poseeLotes(ArrayList<Lote> lotes) {
+        boolean estanTodosDentro = true;
+        Iterator recorredorLotes = lotes.iterator();
+        while (recorredorLotes.hasNext() && estanTodosDentro){
+            Lote unLote = (Lote) recorredorLotes.next();
+            estanTodosDentro = this.lotesEnExistenciaActuales.contains(unLote);
+        }
+        return estanTodosDentro;
     }
     
 }

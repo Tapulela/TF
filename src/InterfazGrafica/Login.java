@@ -8,8 +8,12 @@ package InterfazGrafica;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.Organizacion;
 import Persistencia.Persistencia;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import static java.lang.Thread.sleep;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,6 +46,10 @@ public class Login extends javax.swing.JFrame {
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
         getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "ESCAPE_KEY");
         getRootPane().getActionMap().put("ESCAPE_KEY", escapeAction);
+        
+        
+        
+        //this.setLocationRelativeTo(null);
     }
 
     /**
@@ -64,6 +72,7 @@ public class Login extends javax.swing.JFrame {
         jLError = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setUndecorated(true);
         setResizable(false);
 
         jLabel2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
@@ -79,7 +88,7 @@ public class Login extends javax.swing.JFrame {
         jLabel5.setText("Contraseña");
 
         tBUsuario.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        tBUsuario.setText("postgres");
+        tBUsuario.setText("c39");
         tBUsuario.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 tBUsuarioActionPerformed(evt);
@@ -87,7 +96,7 @@ public class Login extends javax.swing.JFrame {
         });
 
         jPFPass.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jPFPass.setText("postgres");
+        jPFPass.setText("39");
         jPFPass.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jPFPassActionPerformed(evt);
@@ -175,6 +184,7 @@ public class Login extends javax.swing.JFrame {
             persistencia.cerrarSesion();
             Organizacion unaOrganizacion = null;
             unaOrganizacion = new Organizacion(persistencia);
+            persistencia.setOrganizacionAsociada(unaOrganizacion);
             persistencia.iniciarSesion(tBUsuario.getText(), jPFPass.getText(), unaOrganizacion);
             MenuPrincipal unMenuPrincipal = new MenuPrincipal(unaOrganizacion);
             this.dispose();

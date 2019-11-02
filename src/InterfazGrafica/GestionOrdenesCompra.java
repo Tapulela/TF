@@ -12,6 +12,8 @@ import LogicaDeNegocio.Organizacion;
 import LogicaDeNegocio.Proveedor;
 import LogicaDeNegocio.Validaciones;
 import Persistencia.ExcepcionPersistencia;
+import java.awt.Component;
+import java.awt.Toolkit;
 import java.awt.event.ItemEvent;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -21,6 +23,7 @@ import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 /**
  *
@@ -53,7 +56,9 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
 
 
     GestionOrdenesCompra(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
+        this.setUndecorated(true);
         initComponents();
+        this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
         this.organizacion = organizacion;
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
         jCBoxProveedorAsociado.setBackground(ParametrosDeInterfaz.colorFondo);
@@ -67,6 +72,7 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
         
         
         this.ventanaAnterior = ventanaAnterior;
+        ParametrosDeInterfaz.configurarVentana(this);
     }
     private void organizarElementos(){
         this.deshabilitarTodo();
@@ -85,7 +91,7 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
                 break;
                 
         }
-        this.pack();
+        //this.pack();
         
     }
     /**
@@ -435,7 +441,7 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
                         throw new ExcepcionCargaParametros("Debe seleccionar el proveedor sobre el que se registra la orden de compra.");
                     if (!jCBoxProveedorAsociado.isSelected())
                         proveedorSeleccionado = null;
-                    this.organizacion.modificarOrdenDeCompra(unaOrdenDeCompraSeleccionada, (String) jCB1.getSelectedItem(), jTFCampo2.getText(), unaOrdenDeCompraSeleccionada.getEstado(), jTFCampo1.getText(), proveedorSeleccionado, ordenProduccionSeleccionada);
+                    this.organizacion.modificarOrdenDeCompra(unaOrdenDeCompraSeleccionada, (String) jCB1.getSelectedItem(), jTFCampo2.getText(), unaOrdenDeCompraSeleccionada.getEstadoEvento(), jTFCampo1.getText(), proveedorSeleccionado, ordenProduccionSeleccionada);
                     break;
             }
             JOptionPane.showMessageDialog(null, "Operacion realizada con exito.");
@@ -642,7 +648,7 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
         organizarElementos();
         jBConcretarAccion.setEnabled(true);
         jBCancelar.setEnabled(true);
-        this.pack();
+        //this.pack();
     }
     
     private void prepararAlta() {
@@ -825,7 +831,7 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
         jTFCampo1.setText(""+unaOrdenDeCompraSeleccionada.getCantidadAComprar());
         jTFCampo2.setText(""+unaOrdenDeCompraSeleccionada.getCostoPorUnidad());
         jLFechaOrigen.setText(( new SimpleDateFormat( "dd/MM/YYYY" ) ).format(unaOrdenDeCompraSeleccionada.getFechaOrigenC().getTime()) );
-        jLEstado.setText(unaOrdenDeCompraSeleccionada.getEstado());
+        jLEstado.setText(unaOrdenDeCompraSeleccionada.getEstadoEvento());
     }
     
     private void cargarOrdenDeProduccion(){

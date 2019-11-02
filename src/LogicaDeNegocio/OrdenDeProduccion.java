@@ -5,6 +5,7 @@
  */
 package LogicaDeNegocio;
 
+import LogicaDeNegocio.GestionUsuariosYRoles.Usuario;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.Vector;
  *
  * @author usuario
  */
-public class OrdenDeProduccion {
+public class OrdenDeProduccion extends Evento{
     private static final String ESTADO_REGULAR = "Regular";
     private static final String ESTADO_ANULADO = "Anulado";
     private int id;
@@ -29,8 +30,8 @@ public class OrdenDeProduccion {
     
     private ArrayList ordenesCompraImplicadas;
     
-
-    public OrdenDeProduccion(int id, java.sql.Date fechaOrigen, float cantidadAProducir, String unidadDeMedida, java.sql.Date fechaEntregaProductoTerminado, String estado, String unaDescripcion) {
+    public OrdenDeProduccion(int id, java.sql.Date fechaOrigen, float cantidadAProducir, String unidadDeMedida, java.sql.Date fechaEntregaProductoTerminado, String estado, String unaDescripcion, int idEvento, Usuario unUsuario) {
+        super(idEvento, estado, unUsuario);
         this.id = id;
         this.fechaOrigen = Calendar.getInstance();
         this.fechaOrigen.setTime(fechaOrigen);
@@ -38,22 +39,25 @@ public class OrdenDeProduccion {
         this.unidadDeMedida = unidadDeMedida;
         this.fechaEntregaProductoTerminado = Calendar.getInstance();
         this.fechaEntregaProductoTerminado.setTime(fechaOrigen);
+        
         this.estado = estado;
         this.descripcion = unaDescripcion;
         
         this.ordenesCompraImplicadas = new ArrayList();
     }
 
-    public OrdenDeProduccion(Calendar fechaOrigen, float cantidadAProducir, String unidadDeMedida, Calendar fechaEntregaProductoTerminado, String descripcion) {
+    public OrdenDeProduccion(Calendar fechaOrigen, float cantidadAProducir, String unidadDeMedida, Calendar fechaEntregaProductoTerminado, String descripcion, Usuario unUsuario) {
+        super(Evento.ESTADO_REGULAR, unUsuario);
         this.fechaOrigen = fechaOrigen;
         this.cantidadAProducir = cantidadAProducir;
         this.unidadDeMedida = unidadDeMedida;
         this.fechaEntregaProductoTerminado = fechaEntregaProductoTerminado;
         this.descripcion = descripcion.toUpperCase();
-        
-        this.estado = "Regular";
+        this.estado = ESTADO_REGULAR;
         this.ordenesCompraImplicadas = new ArrayList();
+        
     }
+
     
     
 
@@ -124,7 +128,7 @@ public class OrdenDeProduccion {
         this.fechaEntregaProductoTerminado = fechaEntregaProductoTerminado;
     }
 
-    public String getEstado() {
+    public String getEstadoEvento() {
         return estado;
     }
 
@@ -140,7 +144,7 @@ public class OrdenDeProduccion {
         return this.estado.equals(ESTADO_REGULAR);
     }
     public Object[] devolverVector() {
-        Object[] vec ={this.getId(),this.getCantidadAProducir(), this.getUnidadDeMedida(), ( new SimpleDateFormat( "dd-MM-yyyy" ) ).format( this.getFechaOrigen().getTime() ), ( new SimpleDateFormat( "dd-MM-yyyy" ) ).format( this.getFechaEntregaProductoTerminado().getTime() ),this.getEstado()};
+        Object[] vec ={this.getId(),this.getCantidadAProducir(), this.getUnidadDeMedida(), ( new SimpleDateFormat( "dd-MM-yyyy" ) ).format( this.getFechaOrigen().getTime() ), ( new SimpleDateFormat( "dd-MM-yyyy" ) ).format( this.getFechaEntregaProductoTerminado().getTime() ),this.getEstadoEvento()};
         return vec;
     }
 
@@ -176,7 +180,20 @@ public class OrdenDeProduccion {
         return retorno;
     }
 
-    void anular() {
+    public void anular() {
+        super.anularEsteEvento();
         this.estado = ESTADO_ANULADO;
+        
+    }
+
+    public float getPesoRestanteAComprar() throws ExcepcionCargaParametros {
+        float retorno = this.cantidadAProducir;
+        Iterator ordenesDeCompra = this.ordenesCompraImplicadas.iterator();
+        while (ordenesDeCompra.hasNext()){
+            OrdenDeCompra unaOrden = (OrdenDeCompra) ordenesDeCompra.next();
+            if (unaOrden.seEncuentraRegular())
+                retorno = retorno - Organizacion.convertirUnidadPeso(unaOrden.getUnidadDeMedida(), unaOrden.getCantidadAComprar(), this.unidadDeMedida);
+        }
+        return retorno;
     }
 }

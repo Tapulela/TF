@@ -6,11 +6,14 @@
 package InterfazGrafica;
 
 
+import static InterfazGrafica.UtilidadesInterfazGrafica.establecerAlineacionDeTabla;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.OrdenDeCompra;
 import LogicaDeNegocio.OrdenDeProduccion;
 import LogicaDeNegocio.Organizacion;
 import LogicaDeNegocio.Proveedor;
+import java.awt.Component;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -20,6 +23,8 @@ import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -55,7 +60,9 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
 
     public BuscarOrdenCompra(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior)  {
         
+        this.setUndecorated(true);
         initComponents();
+        this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
         this.setVisible(true); 
         this.ventanaAnterior = ventanaAnterior;
         this.ventanaAnterior.setFocusable(false);
@@ -83,6 +90,8 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
                 datoCriterio3.setSelectedItem("Activo");
                 datoCriterio3.setEnabled(false);
         }        
+        establecerAlineacionDeTabla(jTable1, SwingConstants.CENTER);
+        ParametrosDeInterfaz.configurarVentana(this);
     }
 
     /**
@@ -406,7 +415,6 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
         this.ventanaAnterior.setFocusable(true);
         this.dispose();
     }//GEN-LAST:event_jBConcretarAccionActionPerformed
-
     private void jBCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBCancelarActionPerformed
 
         this.limpiarCampos();

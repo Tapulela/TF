@@ -6,25 +6,22 @@
 package InterfazGrafica;
 
 import LogicaDeNegocio.Bascula;
-import LogicaDeNegocio.CamaraEstacionamiento;
 import LogicaDeNegocio.Equipamiento;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.Lote;
-
+import LogicaDeNegocio.MovimientoInternoMateriaPrima;
 import LogicaDeNegocio.Organizacion;
+import LogicaDeNegocio.Proveedor;
 import Persistencia.ExcepcionPersistencia;
-import java.awt.Color;
+import java.awt.Toolkit;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.text.NumberFormat;
+import java.time.LocalTime;
 import java.util.Calendar;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.text.PlainDocument;
 
 /**
  *
@@ -33,55 +30,102 @@ import javax.swing.UnsupportedLookAndFeelException;
 public class GestionMovimientos extends javax.swing.JFrame implements TransferenciaInstancias {
     
     /**
-     * Creates new form CargaEquipamientos
+     * Creates new form ABMProveedor
      */
     private Organizacion organizacion;
     private JFrame ventanaAnterior;
-    private String trayectoriaActual;
-    private String ObjetoABuscar; //Variable utilizada para poder comunicar a la ventana de busqueda cual es la intencion de la busqueda.
-    private Equipamiento unEquipamientoOrigenSeleccionado;
-    private Lote unLoteSeleccionado;
-    private Equipamiento unEquipamientoDestinoSeleccionado;
     
+    private MovimientoInternoMateriaPrima unMovimientoSeleccionado;
+    private Equipamiento unEquipamientoOrigenSeleccionado;
+    private Equipamiento unEquipamientoDestinoSeleccionado;
+    private Proveedor unProveedorDeServicioTransporte;
+    
+    private Lote unLoteSeleccionado;
 
+    private String trayectoriaActual;
+    private String operacionActual;
+    
+    private final String textoAlta = "Registrar movimiento de un Lote";
+    private final String textoBaja = "Anular movimiento de un lote";
+    private final String textoModificacion = "Modificar un CONCEPTO";
+    private String objetoABuscar;
+    
+    
+    
+    
+    
+    
+    
     public GestionMovimientos() {
         initComponents();
     }
 
 
 
-    GestionMovimientos(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
-        initComponents();
+    public GestionMovimientos(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
         
+        
+        this.setUndecorated(true);
+        initComponents();
+        this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
         this.organizacion = organizacion;
-        setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
-        this.trayectoriaActual = trayectoriaAnterior + " - Gestion de Movimientos";
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestion de Movimientos", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
+                
         
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
+        setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
+        
+        trayectoriaActual = trayectoriaAnterior+" - Gestión de movimientos de materia prima";
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestión de movimientos de materia prima", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         
         
-        
+
         this.setVisible(true); 
         jBBuscar.setVisible(false);
         
+        
         this.ventanaAnterior = ventanaAnterior;
+        habilitarCamposIniciales();
+    
+        //PRUEBA DE EDICION DE COMPONENTES
+        ParametrosDeInterfaz.configurarVentana(this);
+        
+        
+        //Prueba de campo formateado
+        
+        
+        //PRUEBA DE FILTRO DE TEXTO
+
+        FiltroTextosSoloNumeros filtroTexto = new FiltroTextosSoloNumeros();
+        ((PlainDocument) jTFCampo9.getDocument()).setDocumentFilter(filtroTexto);
+        ((PlainDocument) jTFCampo1.getDocument()).setDocumentFilter(filtroTexto);
+        
+        FiltroTextoPatente filtroTextoPatente = new FiltroTextoPatente();
+        ((PlainDocument) jTFCampo5.getDocument()).setDocumentFilter(filtroTextoPatente);
+        ((PlainDocument) jTFCampo6.getDocument()).setDocumentFilter(filtroTextoPatente);    
     }
+    
     private void organizarElementos(){
         this.deshabilitarTodo();
         switch((String)jCBOperacion.getSelectedItem()){
-            case "Insertar un movimiento":
+            case "Alta":
                 prepararAlta();
-                habilitarParametrosAdicionalesSegunEquipamiento();
                 break;
-            case "Anular un movimiento":
+            case "Baja":
                 prepararBaja();
-                visibilizarParametrosAdicionalesSegunEquipamiento();
                 break;
+            case "Modificacion":
+                prepararModificacion();
+                break;
+            default:
+                limpiarCampos();
+                break;
+                
         }
-        this.pack();
+        //this.pack();
         
     }
+    
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -91,65 +135,71 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLStaticEquipamientoDestino = new javax.swing.JLabel();
-        jLOperacion = new javax.swing.JLabel();
-        jLStaticBascula = new javax.swing.JLabel();
         jBConcretarAccion = new javax.swing.JButton();
         jBCancelar = new javax.swing.JButton();
         jLabel12 = new javax.swing.JLabel();
         jCBOperacion = new javax.swing.JComboBox<>();
-        jBBuscarDestino = new javax.swing.JButton();
-        JLBascula = new javax.swing.JLabel();
-        jLStaticEquipamientoOrigen = new javax.swing.JLabel();
-        jBBuscarOrigen = new javax.swing.JButton();
-        jLStaticEquipamientoOrigenSeleccionado = new javax.swing.JLabel();
-        jLEquipamientoOrigen = new javax.swing.JLabel();
-        jLStaticEquipamientoDestinoSeleccionado = new javax.swing.JLabel();
-        jLEquipamientoDestino = new javax.swing.JLabel();
         jBBuscar = new javax.swing.JButton();
-        jLStaticLoteImplicado = new javax.swing.JLabel();
-        JLLote = new javax.swing.JLabel();
-        jBBuscarLote = new javax.swing.JButton();
-        jPanel1 = new javax.swing.JPanel();
-        timePicker1 = new com.github.lgooddatepicker.components.TimePicker();
-        timePicker2 = new com.github.lgooddatepicker.components.TimePicker();
-        jLStaticPatenteAcoplado = new javax.swing.JLabel();
-        jTFPatenteAcoplado = new javax.swing.JTextField();
-        jLStaticNombreConductor = new javax.swing.JLabel();
-        jLStaticCantidad = new javax.swing.JLabel();
-        jTFNombreConductor1 = new javax.swing.JTextField();
-        jLStaticHoraEntrada = new javax.swing.JLabel();
-        jCBTipoEquipamiento = new javax.swing.JComboBox<>();
-        jLStaticPatenteChasis = new javax.swing.JLabel();
-        jTFPatenteChasis = new javax.swing.JTextField();
-        jLStaticHoraSalida = new javax.swing.JLabel();
-        jTFNombreConductor = new javax.swing.JTextField();
-        jLStaticTipoUnidadTransporte = new javax.swing.JLabel();
-        jLStaticFechaOrigen = new javax.swing.JLabel();
-        jCFechaOrigenMov = new com.toedter.calendar.JDateChooser();
-        jLStaticDetallesTicket = new javax.swing.JLabel();
-        jLStaticPesoEntrada = new javax.swing.JLabel();
-        jLPesoSalida = new javax.swing.JLabel();
-        jTFPesoEntrada = new javax.swing.JTextField();
-        jTFPesoSalida = new javax.swing.JTextField();
-        jCBUnidadMedida = new javax.swing.JComboBox<>();
-        jLStaticUnidadMedida = new javax.swing.JLabel();
         cabeceraDeVentana = new InterfazGrafica.CabeceraDeVentana();
+        jPanel1 = new javax.swing.JPanel();
+        jLStaticEtiqueta6 = new javax.swing.JLabel();
+        jLStaticCB1 = new javax.swing.JLabel();
+        jCB1 = new javax.swing.JComboBox<>();
+        jTFCampo1 = new javax.swing.JTextField();
+        jLStaticCampo1 = new javax.swing.JLabel();
+        jLStaticCalendar1 = new javax.swing.JLabel();
+        jC1 = new com.toedter.calendar.JDateChooser();
+        jC2 = new com.github.lgooddatepicker.components.TimePicker();
+        jLStaticCalendar2 = new javax.swing.JLabel();
+        jLStaticCalendar3 = new javax.swing.JLabel();
+        jC3 = new com.github.lgooddatepicker.components.TimePicker();
+        jLStaticCB2 = new javax.swing.JLabel();
+        jCB2 = new javax.swing.JComboBox<>();
+        jLStaticCampo2 = new javax.swing.JLabel();
+        jLStaticCampo3 = new javax.swing.JLabel();
+        jLStaticCampo4 = new javax.swing.JLabel();
+        jTFCampo4 = new javax.swing.JTextField();
+        jLStaticCampo5 = new javax.swing.JLabel();
+        jTFCampo5 = new javax.swing.JTextField();
+        jLStaticCampo6 = new javax.swing.JLabel();
+        jTFCampo6 = new javax.swing.JTextField();
+        jLStaticCampo7 = new javax.swing.JLabel();
+        jTFCampo7 = new javax.swing.JTextField();
+        jLStaticCampo8 = new javax.swing.JLabel();
+        jTFCampo8 = new javax.swing.JTextField();
+        jLStaticCampo9 = new javax.swing.JLabel();
+        jTFCampo9 = new javax.swing.JTextField();
+        NumberFormat formateadorCampoFloat = NumberFormat.getInstance();
+        formateadorCampoFloat.setGroupingUsed(true);
+        formateadorCampoFloat.setMinimumFractionDigits(3);
+        formateadorCampoFloat.setParseIntegerOnly(false);
+        jTFCampo2 = new javax.swing.JFormattedTextField(formateadorCampoFloat);
+        jTFCampo3 = new javax.swing.JFormattedTextField(formateadorCampoFloat);
+        jPanel2 = new javax.swing.JPanel();
+        jLStaticEtiqueta10 = new javax.swing.JLabel();
+        jLStaticEtiqueta11 = new javax.swing.JLabel();
+        jBBuscarEquipamientoOrigen = new javax.swing.JButton();
+        jLStaticEtiqueta12 = new javax.swing.JLabel();
+        jLStaticEtiqueta7 = new javax.swing.JLabel();
+        jBBuscarDestino = new javax.swing.JButton();
+        jLStaticEtiqueta13 = new javax.swing.JLabel();
+        jLStaticEtiqueta1 = new javax.swing.JLabel();
+        jLStaticEtiqueta14 = new javax.swing.JLabel();
+        jLStaticEtiqueta4 = new javax.swing.JLabel();
+        jLStaticEtiqueta15 = new javax.swing.JLabel();
+        jLStaticEtiqueta3 = new javax.swing.JLabel();
+        jLStaticEtiqueta16 = new javax.swing.JLabel();
+        jLStaticEtiqueta5 = new javax.swing.JLabel();
+        jBBuscarLote = new javax.swing.JButton();
+        jLOperacionSeleccionada = new javax.swing.JLabel();
+        jLStaticEtiqueta2 = new javax.swing.JLabel();
+        jLStaticEtiqueta8 = new javax.swing.JLabel();
+        jBBuscarProveedor = new javax.swing.JButton();
+        jLStaticEtiqueta17 = new javax.swing.JLabel();
+        jLStaticEtiqueta18 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(153, 255, 153));
-
-        jLStaticEquipamientoDestino.setText("Equipamiento Destino");
-        jLStaticEquipamientoDestino.setEnabled(false);
-        jLStaticEquipamientoDestino.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
-        jLOperacion.setText("Carga de Movimiento");
-        jLOperacion.setEnabled(false);
-        jLOperacion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
-        jLStaticBascula.setText("Bascula Asociada:");
-        jLStaticBascula.setEnabled(false);
-        jLStaticBascula.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
         jBConcretarAccion.setText("Aceptar");
         jBConcretarAccion.setEnabled(false);
@@ -172,7 +222,7 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
         jLabel12.setText("Seleccione una operacion");
         jLabel12.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jCBOperacion.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Insertar un movimiento", "Anular un movimiento" }));
+        jCBOperacion.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Alta", "Baja" }));
         jCBOperacion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jCBOperacion.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -180,49 +230,7 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
             }
         });
 
-        jBBuscarDestino.setText("Buscar un Equipamiento");
-        jBBuscarDestino.setEnabled(false);
-        jBBuscarDestino.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jBBuscarDestino.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jBBuscarDestinoActionPerformed(evt);
-            }
-        });
-
-        JLBascula.setText("Una Bascula");
-        JLBascula.setEnabled(false);
-        JLBascula.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
-        jLStaticEquipamientoOrigen.setText("Equipamiento Origen");
-        jLStaticEquipamientoOrigen.setEnabled(false);
-        jLStaticEquipamientoOrigen.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
-        jBBuscarOrigen.setText("Buscar un Equipamiento");
-        jBBuscarOrigen.setEnabled(false);
-        jBBuscarOrigen.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jBBuscarOrigen.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jBBuscarOrigenActionPerformed(evt);
-            }
-        });
-
-        jLStaticEquipamientoOrigenSeleccionado.setText("Equipamiento Seleccionado:");
-        jLStaticEquipamientoOrigenSeleccionado.setEnabled(false);
-        jLStaticEquipamientoOrigenSeleccionado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
-        jLEquipamientoOrigen.setText("Equipamiento Seleccionado");
-        jLEquipamientoOrigen.setEnabled(false);
-        jLEquipamientoOrigen.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
-        jLStaticEquipamientoDestinoSeleccionado.setText("Equipamiento Seleccionado:");
-        jLStaticEquipamientoDestinoSeleccionado.setEnabled(false);
-        jLStaticEquipamientoDestinoSeleccionado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
-        jLEquipamientoDestino.setText("Equipamiento Seleccionado");
-        jLEquipamientoDestino.setEnabled(false);
-        jLEquipamientoDestino.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
-        jBBuscar.setText("Buscar un Movimiento");
+        jBBuscar.setText("Buscar un movimiento");
         jBBuscar.setEnabled(false);
         jBBuscar.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jBBuscar.addActionListener(new java.awt.event.ActionListener() {
@@ -231,114 +239,107 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
             }
         });
 
-        jLStaticLoteImplicado.setText("Lote implicado:");
-        jLStaticLoteImplicado.setEnabled(false);
-        jLStaticLoteImplicado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticEtiqueta6.setText("Detalles de Ticket asociado");
+        jLStaticEtiqueta6.setEnabled(false);
+        jLStaticEtiqueta6.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        JLLote.setText("Un lote");
-        JLLote.setEnabled(false);
-        JLLote.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCB1.setText("Tipo de unidad de transporte asociado");
+        jLStaticCB1.setEnabled(false);
+        jLStaticCB1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jBBuscarLote.setText("Buscar un Lote");
-        jBBuscarLote.setEnabled(false);
-        jBBuscarLote.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jBBuscarLote.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jBBuscarLoteActionPerformed(evt);
-            }
-        });
+        jCB1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Bolsa" }));
+        jCB1.setEnabled(false);
+        jCB1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        timePicker1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jTFCampo1.setEnabled(false);
+        jTFCampo1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        timePicker2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCampo1.setText("Cantidad");
+        jLStaticCampo1.setEnabled(false);
+        jLStaticCampo1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLStaticPatenteAcoplado.setText("Patente de Acoplado");
-        jLStaticPatenteAcoplado.setEnabled(false);
-        jLStaticPatenteAcoplado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCalendar1.setText("Fecha de Origen del movimiento");
+        jLStaticCalendar1.setEnabled(false);
+        jLStaticCalendar1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jTFPatenteAcoplado.setText("Ingrese una patente de Acoplado");
-        jTFPatenteAcoplado.setEnabled(false);
-        jTFPatenteAcoplado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jC1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jC1.setEnabled(false);
 
-        jLStaticNombreConductor.setText("Nombre del Conductor");
-        jLStaticNombreConductor.setEnabled(false);
-        jLStaticNombreConductor.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jC2.setEnabled(false);
+        jC2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLStaticCantidad.setText("Cantidad");
-        jLStaticCantidad.setEnabled(false);
-        jLStaticCantidad.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCalendar2.setText("Hora de entrada");
+        jLStaticCalendar2.setEnabled(false);
+        jLStaticCalendar2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jTFNombreConductor1.setText("0");
-        jTFNombreConductor1.setEnabled(false);
-        jTFNombreConductor1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCalendar3.setText("Hora de salida");
+        jLStaticCalendar3.setEnabled(false);
+        jLStaticCalendar3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLStaticHoraEntrada.setText("Hora de entrada");
-        jLStaticHoraEntrada.setEnabled(false);
-        jLStaticHoraEntrada.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jC3.setEnabled(false);
+        jC3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jCBTipoEquipamiento.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Bolsa" }));
-        jCBTipoEquipamiento.setEnabled(false);
-        jCBTipoEquipamiento.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jCBTipoEquipamiento.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                jCBTipoEquipamientoItemStateChanged(evt);
-            }
-        });
+        jLStaticCB2.setText("Unidad de medida");
+        jLStaticCB2.setEnabled(false);
+        jLStaticCB2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLStaticPatenteChasis.setText("Patente de Chasis");
-        jLStaticPatenteChasis.setEnabled(false);
-        jLStaticPatenteChasis.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCB2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Kilogramo", "Tonelada" }));
+        jCB2.setEnabled(false);
+        jCB2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jTFPatenteChasis.setText("Ingrese una patente de chasis");
-        jTFPatenteChasis.setEnabled(false);
-        jTFPatenteChasis.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCampo2.setText("Peso de entrada");
+        jLStaticCampo2.setEnabled(false);
+        jLStaticCampo2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLStaticHoraSalida.setText("Hora de Salida");
-        jLStaticHoraSalida.setEnabled(false);
-        jLStaticHoraSalida.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCampo3.setText("Peso de salida");
+        jLStaticCampo3.setEnabled(false);
+        jLStaticCampo3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jTFNombreConductor.setText("Ingrese un Nombre");
-        jTFNombreConductor.setEnabled(false);
-        jTFNombreConductor.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCampo4.setText("Nombre del conductor");
+        jLStaticCampo4.setEnabled(false);
+        jLStaticCampo4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLStaticTipoUnidadTransporte.setText("Tipo de Unidad de Transporte");
-        jLStaticTipoUnidadTransporte.setEnabled(false);
-        jLStaticTipoUnidadTransporte.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jTFCampo4.setEnabled(false);
+        jTFCampo4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLStaticFechaOrigen.setText("Fecha de Origen de movimiento");
-        jLStaticFechaOrigen.setEnabled(false);
-        jLStaticFechaOrigen.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCampo5.setText("Patente del chasis");
+        jLStaticCampo5.setEnabled(false);
+        jLStaticCampo5.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jCFechaOrigenMov.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jCFechaOrigenMov.setEnabled(false);
+        jTFCampo5.setEnabled(false);
+        jTFCampo5.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLStaticDetallesTicket.setText("Detalles del Ticket de Movimiento asociado");
-        jLStaticDetallesTicket.setEnabled(false);
-        jLStaticDetallesTicket.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCampo6.setText("Patente de acoplado");
+        jLStaticCampo6.setEnabled(false);
+        jLStaticCampo6.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLStaticPesoEntrada.setText("Peso de Entrada");
-        jLStaticPesoEntrada.setEnabled(false);
-        jLStaticPesoEntrada.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jTFCampo6.setEnabled(false);
+        jTFCampo6.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLPesoSalida.setText("Peso de Salida");
-        jLPesoSalida.setEnabled(false);
-        jLPesoSalida.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCampo7.setText("Numero de Precinto");
+        jLStaticCampo7.setEnabled(false);
+        jLStaticCampo7.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jTFPesoEntrada.setText("Peso de entrada");
-        jTFPesoEntrada.setEnabled(false);
-        jTFPesoEntrada.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jTFCampo7.setEnabled(false);
+        jTFCampo7.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jTFPesoSalida.setText("Peso de salida");
-        jTFPesoSalida.setEnabled(false);
-        jTFPesoSalida.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCampo8.setText("Numero de Hoja de ruta");
+        jLStaticCampo8.setEnabled(false);
+        jLStaticCampo8.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jCBUnidadMedida.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Kilogramo", "Tonelada" }));
-        jCBUnidadMedida.setEnabled(false);
-        jCBUnidadMedida.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jTFCampo8.setEnabled(false);
+        jTFCampo8.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLStaticUnidadMedida.setText("Unidad de Medida");
-        jLStaticUnidadMedida.setEnabled(false);
-        jLStaticUnidadMedida.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCampo9.setText("Numero de remito");
+        jLStaticCampo9.setEnabled(false);
+        jLStaticCampo9.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jTFCampo9.setEnabled(false);
+        jTFCampo9.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jTFCampo2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jTFCampo3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -348,102 +349,328 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLStaticTipoUnidadTransporte)
+                        .addComponent(jLStaticCB1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jCB1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLStaticCampo1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jCBTipoEquipamiento, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLStaticCantidad)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jTFNombreConductor1, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLStaticFechaOrigen)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jCFechaOrigenMov, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                            .addComponent(jLStaticHoraEntrada)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addComponent(timePicker1, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                            .addComponent(jLStaticHoraSalida)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(timePicker2, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jTFCampo1, javax.swing.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                         .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                            .addComponent(jLStaticPatenteAcoplado)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jTFPatenteAcoplado, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE))
-                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                            .addComponent(jLStaticNombreConductor)
+                            .addComponent(jLStaticCampo5)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addComponent(jTFNombreConductor))
+                            .addComponent(jTFCampo5))
                         .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                            .addComponent(jLStaticPatenteChasis)
+                            .addComponent(jLStaticCampo6)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(jTFCampo6))
+                        .addComponent(jLStaticEtiqueta6, javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLStaticCalendar1)
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addComponent(jLStaticCalendar2)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(jC2, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(jC1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                            .addComponent(jLStaticCalendar3)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(jC3, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                            .addComponent(jLStaticCB2)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jTFPatenteChasis, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(jLStaticDetallesTicket)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLStaticUnidadMedida)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jCBUnidadMedida, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLStaticPesoEntrada)
-                            .addComponent(jLPesoSalida))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTFPesoSalida, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTFPesoEntrada, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jCB2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                            .addComponent(jLStaticCampo2)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(jTFCampo2, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                            .addComponent(jLStaticCampo3)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(jTFCampo3, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                            .addComponent(jLStaticCampo4)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(jTFCampo4, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                            .addComponent(jLStaticCampo7)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jTFCampo7, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                            .addComponent(jLStaticCampo8)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jTFCampo8, javax.swing.GroupLayout.DEFAULT_SIZE, 353, Short.MAX_VALUE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                            .addComponent(jLStaticCampo9)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jTFCampo9))))
+                .addGap(30, 30, 30))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLStaticDetallesTicket)
+                .addComponent(jLStaticEtiqueta6)
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLStaticTipoUnidadTransporte)
-                    .addComponent(jCBTipoEquipamiento, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLStaticCantidad)
-                    .addComponent(jTFNombreConductor1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLStaticFechaOrigen)
-                    .addComponent(jCFechaOrigenMov, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLStaticCB1)
+                    .addComponent(jCB1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLStaticCampo1)
+                    .addComponent(jTFCampo1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLStaticHoraEntrada)
-                    .addComponent(timePicker1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(29, 29, 29)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(timePicker2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLStaticHoraSalida))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLStaticUnidadMedida)
-                    .addComponent(jCBUnidadMedida, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLStaticPesoEntrada)
-                    .addComponent(jTFPesoEntrada, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLPesoSalida)
-                    .addComponent(jTFPesoSalida, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLStaticCalendar1)
+                    .addComponent(jC1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLStaticNombreConductor)
-                    .addComponent(jTFNombreConductor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jC2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLStaticCalendar2))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLStaticCalendar3)
+                    .addComponent(jC3, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLStaticPatenteChasis)
-                    .addComponent(jTFPatenteChasis, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLStaticCB2)
+                    .addComponent(jCB2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLStaticPatenteAcoplado)
-                    .addComponent(jTFPatenteAcoplado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLStaticCampo2)
+                    .addComponent(jTFCampo2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticCampo3)
+                    .addComponent(jTFCampo3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticCampo4)
+                    .addComponent(jTFCampo4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticCampo5)
+                    .addComponent(jTFCampo5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticCampo6)
+                    .addComponent(jTFCampo6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticCampo7)
+                    .addComponent(jTFCampo7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticCampo8)
+                    .addComponent(jTFCampo8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticCampo9)
+                    .addComponent(jTFCampo9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jLStaticEtiqueta10.setText("Equipamiento seleccionado");
+        jLStaticEtiqueta10.setEnabled(false);
+        jLStaticEtiqueta10.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticEtiqueta11.setText("Equipamiento de origen");
+        jLStaticEtiqueta11.setEnabled(false);
+        jLStaticEtiqueta11.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jBBuscarEquipamientoOrigen.setText("Buscar un equipamiento");
+        jBBuscarEquipamientoOrigen.setEnabled(false);
+        jBBuscarEquipamientoOrigen.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jBBuscarEquipamientoOrigen.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jBBuscarEquipamientoOrigenActionPerformed(evt);
+            }
+        });
+
+        jLStaticEtiqueta12.setText("un equipamiento");
+        jLStaticEtiqueta12.setEnabled(false);
+        jLStaticEtiqueta12.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticEtiqueta7.setText("Equipamiento de destino");
+        jLStaticEtiqueta7.setEnabled(false);
+        jLStaticEtiqueta7.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jBBuscarDestino.setText("Buscar un equipamiento");
+        jBBuscarDestino.setEnabled(false);
+        jBBuscarDestino.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jBBuscarDestino.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jBBuscarDestinoActionPerformed(evt);
+            }
+        });
+
+        jLStaticEtiqueta13.setText("Bascula asociada");
+        jLStaticEtiqueta13.setEnabled(false);
+        jLStaticEtiqueta13.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticEtiqueta1.setText("Lote implicado");
+        jLStaticEtiqueta1.setEnabled(false);
+        jLStaticEtiqueta1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticEtiqueta14.setText("una bascula");
+        jLStaticEtiqueta14.setEnabled(false);
+        jLStaticEtiqueta14.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticEtiqueta4.setText("Equipamiento seleccionado");
+        jLStaticEtiqueta4.setEnabled(false);
+        jLStaticEtiqueta4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticEtiqueta15.setText("Peso disponible");
+        jLStaticEtiqueta15.setEnabled(false);
+        jLStaticEtiqueta15.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticEtiqueta3.setText("una etiqueta");
+        jLStaticEtiqueta3.setEnabled(false);
+        jLStaticEtiqueta3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticEtiqueta16.setText("un peso");
+        jLStaticEtiqueta16.setEnabled(false);
+        jLStaticEtiqueta16.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticEtiqueta5.setText("un equipamiento");
+        jLStaticEtiqueta5.setEnabled(false);
+        jLStaticEtiqueta5.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jBBuscarLote.setText("Buscar un lote");
+        jBBuscarLote.setEnabled(false);
+        jBBuscarLote.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jBBuscarLote.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jBBuscarLoteActionPerformed(evt);
+            }
+        });
+
+        jLOperacionSeleccionada.setText("Operación sobre un Concepto");
+        jLOperacionSeleccionada.setEnabled(false);
+        jLOperacionSeleccionada.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticEtiqueta2.setText("Etiqueta de lote seleccionado");
+        jLStaticEtiqueta2.setEnabled(false);
+        jLStaticEtiqueta2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticEtiqueta8.setText("Proveedor de Servicio de Transporte");
+        jLStaticEtiqueta8.setEnabled(false);
+        jLStaticEtiqueta8.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jBBuscarProveedor.setText("Buscar un Proveedor");
+        jBBuscarProveedor.setEnabled(false);
+        jBBuscarProveedor.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jBBuscarProveedor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jBBuscarProveedorActionPerformed(evt);
+            }
+        });
+
+        jLStaticEtiqueta17.setText("Proveedor de transporte seleccionado");
+        jLStaticEtiqueta17.setEnabled(false);
+        jLStaticEtiqueta17.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticEtiqueta18.setText("un proveedor de transporte");
+        jLStaticEtiqueta18.setEnabled(false);
+        jLStaticEtiqueta18.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLOperacionSeleccionada)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta4)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLStaticEtiqueta5))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta2)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLStaticEtiqueta3))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta10)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLStaticEtiqueta12))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta11)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jBBuscarEquipamientoOrigen))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jBBuscarLote, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jBBuscarDestino))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta13)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLStaticEtiqueta14))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta15)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLStaticEtiqueta16))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jBBuscarProveedor))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta17)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLStaticEtiqueta18)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLOperacionSeleccionada)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta11)
+                    .addComponent(jBBuscarEquipamientoOrigen))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta10)
+                    .addComponent(jLStaticEtiqueta12))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta1)
+                    .addComponent(jBBuscarLote))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta2)
+                    .addComponent(jLStaticEtiqueta3))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta7)
+                    .addComponent(jBBuscarDestino))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta4)
+                    .addComponent(jLStaticEtiqueta5))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta13)
+                    .addComponent(jLStaticEtiqueta14))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta15)
+                    .addComponent(jLStaticEtiqueta16))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta8)
+                    .addComponent(jBBuscarProveedor))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta17)
+                    .addComponent(jLStaticEtiqueta18))
+                .addContainerGap(74, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -452,113 +679,82 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jBConcretarAccion)
-                        .addGap(18, 18, 18)
-                        .addComponent(jBCancelar))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticEquipamientoDestinoSeleccionado)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLEquipamientoDestino))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticBascula)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(JLBascula))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticLoteImplicado)
-                                .addGap(18, 18, 18)
-                                .addComponent(JLLote)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jBBuscarLote))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticEquipamientoOrigen)
-                                .addGap(26, 26, 26)
-                                .addComponent(jBBuscarOrigen))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticEquipamientoOrigenSeleccionado)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLEquipamientoOrigen))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticEquipamientoDestino)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jBBuscarDestino))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel12)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
                                 .addComponent(jBBuscar))
-                            .addComponent(jLOperacion))
+                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(18, 18, 18)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jBConcretarAccion)
+                        .addGap(18, 18, 18)
+                        .addComponent(jBCancelar)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(18, 18, 18)
+                .addContainerGap()
                 .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 26, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel12)
                             .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jBBuscar))
                         .addGap(18, 18, 18)
-                        .addComponent(jLOperacion)
-                        .addGap(18, 18, 18)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLStaticEquipamientoOrigen)
-                            .addComponent(jBBuscarOrigen))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLStaticEquipamientoOrigenSeleccionado)
-                            .addComponent(jLEquipamientoOrigen))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLStaticLoteImplicado)
-                            .addComponent(JLLote)
-                            .addComponent(jBBuscarLote))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLStaticEquipamientoDestino)
-                            .addComponent(jBBuscarDestino))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLStaticEquipamientoDestinoSeleccionado)
-                            .addComponent(jLEquipamientoDestino))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLStaticBascula)
-                            .addComponent(JLBascula))))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jBCancelar)
-                    .addComponent(jBConcretarAccion))
+                            .addComponent(jBCancelar)
+                            .addComponent(jBConcretarAccion))))
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jBConcretarAccionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBConcretarAccionActionPerformed
-        Bascula unaBasculaAsociada = null;
-        switch ((String)jCBOperacion.getSelectedItem()){
-            case "Alta":
-                break;
-        }
 
-        JOptionPane.showMessageDialog(null, "Operacion realizada con exito.");
-        limpiarCampos();
-        deshabilitarTodo();
-        habilitarCamposIniciales();
+    private void jBConcretarAccionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBConcretarAccionActionPerformed
+       
+        try {
+            switch ((String)jCBOperacion.getSelectedItem()){
+                case "Alta":
+                    LocalTime unHorarioEntrada = jC2.getTime();
+                    LocalTime unHorarioSalida = jC3.getTime();
+                    organizacion.registrarMovmimiento(jC1.getCalendar(), unHorarioEntrada, unHorarioSalida, (String) jCB1.getSelectedItem(), jTFCampo1.getText(), (String) jCB2.getSelectedItem(), jTFCampo2.getText(), jTFCampo3.getText(), jTFCampo8.getText(), jTFCampo9.getText(), jTFCampo7.getText(), jTFCampo4.getText(), jTFCampo5.getText(), jTFCampo6.getText(), unLoteSeleccionado,unEquipamientoDestinoSeleccionado, unProveedorDeServicioTransporte);
+                    break;
+                case "Baja":
+                    organizacion.anularMovimientoDeMateriaPrima(unMovimientoSeleccionado);
+                    break;
+                case "Modificacion":
+                    //Se va a modificar
+                    break;
+            }
+            JOptionPane.showMessageDialog(null, "Operación realizada con exito.");
+            deshabilitarTodo();
+            limpiarCampos();
+            habilitarCamposIniciales();
+        } catch (ExcepcionCargaParametros ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error en la base de datos: "+ ex.getMessage());
+        } catch (ExcepcionPersistencia ex) {
+            JOptionPane.showMessageDialog(null, "Error en la Persistencia: "+ ex.getMessage());
+        }
+        
     }//GEN-LAST:event_jBConcretarAccionActionPerformed
 
     private void jBCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBCancelarActionPerformed
@@ -567,39 +763,46 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
         this.habilitarCamposIniciales();
     }//GEN-LAST:event_jBCancelarActionPerformed
 
-    private void jCBTipoEquipamientoItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBTipoEquipamientoItemStateChanged
-        deshabilitarTodo();
-        organizarElementos();
-        habilitarParametrosAdicionalesSegunEquipamiento();
-    }//GEN-LAST:event_jCBTipoEquipamientoItemStateChanged
-
     private void jCBOperacionItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBOperacionItemStateChanged
         if (!jCBOperacion.getSelectedItem().equals("Seleccionar")){
             this.organizarElementos();
+            
         }
         
     }//GEN-LAST:event_jCBOperacionItemStateChanged
 
+    private void jBBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBBuscarActionPerformed
+        BuscarMovimientoMateriaPrima unaVentana = new BuscarMovimientoMateriaPrima(this.organizacion, this, this.trayectoriaActual);
+        this.dispose();
+    }//GEN-LAST:event_jBBuscarActionPerformed
+
+    private void jBBuscarLoteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBBuscarLoteActionPerformed
+        try {
+            if (unEquipamientoOrigenSeleccionado == null)
+                throw new ExcepcionCargaParametros("No se selecciono ningun equipamiento de origen para cargar sus lotes disponibles");
+            BuscarLote unaVentana = new BuscarLote(this.organizacion, this, this.trayectoriaActual, this.unEquipamientoOrigenSeleccionado);
+            this.dispose();
+        } catch (ExcepcionCargaParametros ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+    }//GEN-LAST:event_jBBuscarLoteActionPerformed
+
+    private void jBBuscarEquipamientoOrigenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBBuscarEquipamientoOrigenActionPerformed
+        this.objetoABuscar = "Equipamiento Origen";
+        BuscarEquipamiento unaVentana = new BuscarEquipamiento(this.organizacion, this, this.trayectoriaActual);
+        this.dispose();
+    }//GEN-LAST:event_jBBuscarEquipamientoOrigenActionPerformed
+
     private void jBBuscarDestinoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBBuscarDestinoActionPerformed
-        this.ObjetoABuscar = "Equipamiento Destino";
+        this.objetoABuscar = "Equipamiento Destino";
         BuscarEquipamiento unaVentana = new BuscarEquipamiento(this.organizacion, this, this.trayectoriaActual);
         this.dispose();
     }//GEN-LAST:event_jBBuscarDestinoActionPerformed
 
-    private void jBBuscarOrigenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBBuscarOrigenActionPerformed
-        this.ObjetoABuscar = "Equipamiento Origen";
-        BuscarEquipamiento unaVentana = new BuscarEquipamiento(this.organizacion, this, this.trayectoriaActual);
-        
+    private void jBBuscarProveedorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBBuscarProveedorActionPerformed
+        BuscarProveedor unaVentana = new BuscarProveedor(this.organizacion, this, this.trayectoriaActual);
         this.dispose();
-    }//GEN-LAST:event_jBBuscarOrigenActionPerformed
-
-    private void jBBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBBuscarActionPerformed
-        
-    }//GEN-LAST:event_jBBuscarActionPerformed
-
-    private void jBBuscarLoteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBBuscarLoteActionPerformed
-        this.ObjetoABuscar = "Lote implicado";
-    }//GEN-LAST:event_jBBuscarLoteActionPerformed
+    }//GEN-LAST:event_jBBuscarProveedorActionPerformed
 
     /**
      * @param args the command line arguments
@@ -623,21 +826,9 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
             java.util.logging.Logger.getLogger(GestionMovimientos.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
             java.util.logging.Logger.getLogger(GestionMovimientos.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (UnsupportedLookAndFeelException ex) {
-            Logger.getLogger(GestionMovimientos.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(GestionMovimientos.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
         //</editor-fold>
         //</editor-fold>
         //</editor-fold>
@@ -668,291 +859,456 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel JLBascula;
-    private javax.swing.JLabel JLLote;
     private InterfazGrafica.CabeceraDeVentana cabeceraDeVentana;
     private javax.swing.JButton jBBuscar;
     private javax.swing.JButton jBBuscarDestino;
+    private javax.swing.JButton jBBuscarEquipamientoOrigen;
     private javax.swing.JButton jBBuscarLote;
-    private javax.swing.JButton jBBuscarOrigen;
+    private javax.swing.JButton jBBuscarProveedor;
     private javax.swing.JButton jBCancelar;
     private javax.swing.JButton jBConcretarAccion;
+    private com.toedter.calendar.JDateChooser jC1;
+    private com.github.lgooddatepicker.components.TimePicker jC2;
+    private com.github.lgooddatepicker.components.TimePicker jC3;
+    private javax.swing.JComboBox<String> jCB1;
+    private javax.swing.JComboBox<String> jCB2;
     private javax.swing.JComboBox<String> jCBOperacion;
-    private javax.swing.JComboBox<String> jCBTipoEquipamiento;
-    private javax.swing.JComboBox<String> jCBUnidadMedida;
-    private com.toedter.calendar.JDateChooser jCFechaOrigenMov;
-    private javax.swing.JLabel jLEquipamientoDestino;
-    private javax.swing.JLabel jLEquipamientoOrigen;
-    private javax.swing.JLabel jLOperacion;
-    private javax.swing.JLabel jLPesoSalida;
-    private javax.swing.JLabel jLStaticBascula;
-    private javax.swing.JLabel jLStaticCantidad;
-    private javax.swing.JLabel jLStaticDetallesTicket;
-    private javax.swing.JLabel jLStaticEquipamientoDestino;
-    private javax.swing.JLabel jLStaticEquipamientoDestinoSeleccionado;
-    private javax.swing.JLabel jLStaticEquipamientoOrigen;
-    private javax.swing.JLabel jLStaticEquipamientoOrigenSeleccionado;
-    private javax.swing.JLabel jLStaticFechaOrigen;
-    private javax.swing.JLabel jLStaticHoraEntrada;
-    private javax.swing.JLabel jLStaticHoraSalida;
-    private javax.swing.JLabel jLStaticLoteImplicado;
-    private javax.swing.JLabel jLStaticNombreConductor;
-    private javax.swing.JLabel jLStaticPatenteAcoplado;
-    private javax.swing.JLabel jLStaticPatenteChasis;
-    private javax.swing.JLabel jLStaticPesoEntrada;
-    private javax.swing.JLabel jLStaticTipoUnidadTransporte;
-    private javax.swing.JLabel jLStaticUnidadMedida;
+    private javax.swing.JLabel jLOperacionSeleccionada;
+    private javax.swing.JLabel jLStaticCB1;
+    private javax.swing.JLabel jLStaticCB2;
+    private javax.swing.JLabel jLStaticCalendar1;
+    private javax.swing.JLabel jLStaticCalendar2;
+    private javax.swing.JLabel jLStaticCalendar3;
+    private javax.swing.JLabel jLStaticCampo1;
+    private javax.swing.JLabel jLStaticCampo2;
+    private javax.swing.JLabel jLStaticCampo3;
+    private javax.swing.JLabel jLStaticCampo4;
+    private javax.swing.JLabel jLStaticCampo5;
+    private javax.swing.JLabel jLStaticCampo6;
+    private javax.swing.JLabel jLStaticCampo7;
+    private javax.swing.JLabel jLStaticCampo8;
+    private javax.swing.JLabel jLStaticCampo9;
+    private javax.swing.JLabel jLStaticEtiqueta1;
+    private javax.swing.JLabel jLStaticEtiqueta10;
+    private javax.swing.JLabel jLStaticEtiqueta11;
+    private javax.swing.JLabel jLStaticEtiqueta12;
+    private javax.swing.JLabel jLStaticEtiqueta13;
+    private javax.swing.JLabel jLStaticEtiqueta14;
+    private javax.swing.JLabel jLStaticEtiqueta15;
+    private javax.swing.JLabel jLStaticEtiqueta16;
+    private javax.swing.JLabel jLStaticEtiqueta17;
+    private javax.swing.JLabel jLStaticEtiqueta18;
+    private javax.swing.JLabel jLStaticEtiqueta2;
+    private javax.swing.JLabel jLStaticEtiqueta3;
+    private javax.swing.JLabel jLStaticEtiqueta4;
+    private javax.swing.JLabel jLStaticEtiqueta5;
+    private javax.swing.JLabel jLStaticEtiqueta6;
+    private javax.swing.JLabel jLStaticEtiqueta7;
+    private javax.swing.JLabel jLStaticEtiqueta8;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JTextField jTFNombreConductor;
-    private javax.swing.JTextField jTFNombreConductor1;
-    private javax.swing.JTextField jTFPatenteAcoplado;
-    private javax.swing.JTextField jTFPatenteChasis;
-    private javax.swing.JTextField jTFPesoEntrada;
-    private javax.swing.JTextField jTFPesoSalida;
-    private com.github.lgooddatepicker.components.TimePicker timePicker1;
-    private com.github.lgooddatepicker.components.TimePicker timePicker2;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JTextField jTFCampo1;
+    private javax.swing.JFormattedTextField jTFCampo2;
+    private javax.swing.JFormattedTextField jTFCampo3;
+    private javax.swing.JTextField jTFCampo4;
+    private javax.swing.JTextField jTFCampo5;
+    private javax.swing.JTextField jTFCampo6;
+    private javax.swing.JTextField jTFCampo7;
+    private javax.swing.JTextField jTFCampo8;
+    private javax.swing.JTextField jTFCampo9;
     // End of variables declaration//GEN-END:variables
 
     private void deshabilitarTodo(){
-        this.jLabel12.setEnabled(false);
-        jCBOperacion.setEnabled(false);
+        //TAMBIEN SE HACEN INVISIBLE LOS ELEMENTOS QUE SEAN NECESARIOS
         jBBuscar.setVisible(false);
+        
+        jLOperacionSeleccionada.setEnabled(false);
+        
+        jLStaticCampo1.setEnabled(false);
+        jLStaticCampo2.setEnabled(false);
+        jLStaticCampo3.setEnabled(false);
+        jLStaticCampo4.setEnabled(false);
+        jLStaticCampo5.setEnabled(false);
+        jLStaticCampo6.setEnabled(false);
+        jLStaticCampo7.setEnabled(false);
+        jLStaticCampo8.setEnabled(false);
+        jLStaticCampo9.setEnabled(false);
+        
+        
+        jTFCampo1.setEnabled(false);
+        jTFCampo2.setEnabled(false);
+        jTFCampo3.setEnabled(false);
+        jTFCampo4.setEnabled(false);
+        jTFCampo5.setEnabled(false);
+        jTFCampo6.setEnabled(false);
+        jTFCampo7.setEnabled(false);
+        jTFCampo8.setEnabled(false);
+        jTFCampo9.setEnabled(false);
+        
+        jLStaticCB1.setEnabled(false);
+        jLStaticCB2.setEnabled(false);
+        
+        jCB1.setEnabled(false);
+        jCB2.setEnabled(false);
+        
+        jLStaticEtiqueta1.setEnabled(false);
+        jLStaticEtiqueta2.setEnabled(false);
+        jLStaticEtiqueta3.setEnabled(false);
+        jLStaticEtiqueta4.setEnabled(false);
+        jLStaticEtiqueta5.setEnabled(false);
+        jLStaticEtiqueta6.setEnabled(false);
+        jLStaticEtiqueta7.setEnabled(false);
+        jLStaticEtiqueta8.setEnabled(false);
+        jLStaticEtiqueta10.setEnabled(false);
+        jLStaticEtiqueta11.setEnabled(false);
+        jLStaticEtiqueta12.setEnabled(false);
+        jLStaticEtiqueta13.setEnabled(false);
+        jLStaticEtiqueta14.setEnabled(false);
+        jLStaticEtiqueta15.setEnabled(false);
+        jLStaticEtiqueta16.setEnabled(false);
+        jLStaticEtiqueta17.setEnabled(false);
+        jLStaticEtiqueta18.setEnabled(false);
+        
+        jLStaticCalendar1.setEnabled(false);
+        jLStaticCalendar2.setEnabled(false);
+        jLStaticCalendar3.setEnabled(false);
+        
+        jC1.setEnabled(false);
+        jC2.setEnabled(false);
+        jC3.setEnabled(false);
+        
+        jCBOperacion.setEnabled(false);
         jBBuscar.setEnabled(false);
-        jLOperacion.setEnabled(false);
-        jLStaticEquipamientoOrigen.setEnabled(false);
-        jBBuscarOrigen.setEnabled(false);
-        jLStaticEquipamientoOrigenSeleccionado.setEnabled(false);
-        jLEquipamientoOrigen.setEnabled(false);
-        jLStaticEquipamientoDestino.setEnabled(false);
-        jBBuscarDestino.setEnabled(false);
-        jLStaticEquipamientoDestinoSeleccionado.setEnabled(false);
-        jLEquipamientoDestino.setEnabled(false);
-        jLStaticBascula.setEnabled(false);
-        JLBascula.setEnabled(false);
-        jLStaticLoteImplicado.setEnabled(false);
-        JLLote.setEnabled(false);
+        
+        jBBuscarEquipamientoOrigen.setEnabled(false);
         jBBuscarLote.setEnabled(false);
+        jBBuscarDestino.setEnabled(false);
+        jBBuscarProveedor.setEnabled(false);
         
-        
-        jLStaticDetallesTicket.setEnabled(false);
-        jLStaticTipoUnidadTransporte.setEnabled(false);
-        jCBTipoEquipamiento.setEnabled(false);
-        jLStaticCantidad.setEnabled(false);
-        jTFNombreConductor1.setEnabled(false);
-        jLStaticFechaOrigen.setEnabled(false);
-        jCFechaOrigenMov.setEnabled(false);
-        jLStaticHoraEntrada.setEnabled(false);
-        timePicker1.setEnabled(false);
-        jLStaticHoraSalida.setEnabled(false);
-        timePicker2.setEnabled(false);
-        jLStaticUnidadMedida.setEnabled(false);
-        jCBUnidadMedida.setEnabled(false);
-        jLStaticPesoEntrada.setEnabled(false);
-        jTFPesoEntrada.setEnabled(false);
-        jLPesoSalida.setEnabled(false);
-        jTFPesoSalida.setEnabled(false);
-        jLStaticNombreConductor.setEnabled(false);
-        jTFNombreConductor.setEnabled(false);
-        jLStaticPatenteChasis.setEnabled(false);
-        jTFPatenteChasis.setEnabled(false);
-        jLStaticPatenteAcoplado.setEnabled(false);
-        jTFPatenteAcoplado.setEnabled(false);
-        
-        
-
         jBConcretarAccion.setEnabled(false);
         jBCancelar.setEnabled(false);
         
+        
+        
+
     }
     
     private void limpiarCampos() {
-                jLOperacion.setText("Operacion:");
+                this.operacionActual = "";
+                jLStaticEtiqueta7.setText("Operación:");
                 
-                jLEquipamientoOrigen.setText("");
-                jLEquipamientoDestino.setText("");
-                JLBascula.setText("");
-                jCFechaOrigenMov.setCalendar(Calendar.getInstance());
-                timePicker1.setTimeToNow();
-                timePicker2.setTimeToNow();
-                jTFPesoEntrada.setText("");
-                jTFPesoEntrada.setText("");
-                jTFNombreConductor.setText("");
-                jTFPatenteChasis.setText("");
-                jTFPatenteAcoplado.setText("");
+                jTFCampo1.setText("");
+                jTFCampo2.setText("");
+                jTFCampo3.setText("");
+                jTFCampo4.setText("");
+                jTFCampo5.setText("");
+                jTFCampo6.setText("");
+                jTFCampo7.setText("");
+                jTFCampo8.setText("");
+                jTFCampo9.setText("");
                 
-                jBConcretarAccion.setEnabled(false);
-                jBCancelar.setEnabled(false);
-
-                jCBOperacion.setSelectedItem("Seleccionar");
-
-                this.jCBOperacion.setEnabled(true);
+                jLStaticEtiqueta12.setText("");
+                jLStaticEtiqueta3.setText("");
+                jLStaticEtiqueta5.setText("");
+                jLStaticEtiqueta14.setText("");
+                jLStaticEtiqueta16.setText("");
+                
+                jC2.setText("");
+                jC3.setText("");
+                
                 this.unEquipamientoOrigenSeleccionado = null;
                 this.unEquipamientoDestinoSeleccionado = null;
                 this.unLoteSeleccionado = null;
+                this.unMovimientoSeleccionado = null;
+                this.unProveedorDeServicioTransporte = null;
+                
+                jCB1.setSelectedItem("Seleccionar");
+                jCB2.setSelectedItem("Seleccionar");
     }
 
     @Override
-    public void actualizarUnObjeto(Object UnObjeto) {
-        switch (this.ObjetoABuscar){
-            case "Equipamiento Origen":
-                Equipamiento unEquipamientoOrigen = (Equipamiento) UnObjeto;
-                setUnEquipamientoOrigenSeleccionado(unEquipamientoOrigen);
-                //Habilitar la etiqueta que muestra el equipamiento origen seleccionado y exhibir el equipamiento.
-                jLStaticEquipamientoOrigenSeleccionado.setEnabled(true);
-                jLEquipamientoOrigen.setEnabled(true);
-                jLEquipamientoOrigen.setText(unEquipamientoOrigen.getNombre());
-                //Habilitar opciones de elección de lotes.
-                jLStaticLoteImplicado.setEnabled(true);
-                JLLote.setEnabled(true);
-                jBBuscarLote.setEnabled(true);
-                break;
-            case "Lote implicado":
-                Lote unLote = (Lote) UnObjeto;
-                setUnLoteSeleccionado(unLote);
-                //Habilitar la etiqueta que muestra el lote seleccionado y exhibir el lote.
-                jLStaticLoteImplicado.setEnabled(true);
-                JLLote.setEnabled(true);
-                jBBuscarLote.setEnabled(true);
-                JLLote.setText(unLote.getEtiqueta());
-                
-                //Habilitar el resto de los campos
-                jLStaticEquipamientoDestino.setEnabled(true);
-                jBBuscarDestino.setEnabled(true);
-                
-                break;
-            case "Equipamiento Destino":
-                Equipamiento unEquipamientoDestino = (Equipamiento) UnObjeto;
-                setUnEquipamientoOrigenSeleccionado(unEquipamientoDestino);
-                //Habilitar la etiqueta que muestra el Equipamiento destino seleccionado y exhibir el Equipamiento.
-                jLStaticEquipamientoDestinoSeleccionado.setEnabled(true);
-                jLEquipamientoDestino.setEnabled(true);
-                jLEquipamientoDestino.setText(unEquipamientoDestino.getNombre());
-                jLStaticBascula.setEnabled(true);
-                JLBascula.setEnabled(true);
-                habilitarDetallesDeTicket();
-                
-                jBConcretarAccion.setEnabled(true);
-                break;
+    public void actualizarUnObjeto(Object unObjeto) {
+        
+        if (unObjeto instanceof MovimientoInternoMateriaPrima){
+            unMovimientoSeleccionado = (MovimientoInternoMateriaPrima) unObjeto;
         }
-        this.pack();
+                
+        if (unObjeto instanceof Equipamiento){
+            try {
+                if (unObjeto instanceof Bascula)
+                    throw new ExcepcionCargaParametros("No se puede seleccionar una bascula como destino");
+                if (objetoABuscar.equals("Equipamiento Origen")){
+                    this.unEquipamientoOrigenSeleccionado = (Equipamiento) unObjeto;
+                    exhibirEquipamientoOrigen();
+                    habilitarSeleccionLote();
+                    deshabilitarSeleccionEquipamientoOrigen();
+                }
+                if (objetoABuscar.equals("Equipamiento Destino")){
+                    this.unEquipamientoDestinoSeleccionado = (Equipamiento) unObjeto;
+                    exhibirEquipamientoDestino();
+                    habilitarCargaProveedor();
+                    deshabilitarSeleccionEquipamientoDestino();
+                }
+                    
+                
+            } catch (ExcepcionCargaParametros ex) {
+                JOptionPane.showMessageDialog(null,ex.getMessage());
+                return;
+            }
+            
+        }
+        if (unObjeto instanceof Lote){
+            this.unLoteSeleccionado = (Lote) unObjeto;
+            exhibirLote();
+            habilitarSeleccionEquipamientoDestino();
+            deshabilitarSeleccionLote();
+            
+        }
+        if (unObjeto instanceof Proveedor){
+            this.unProveedorDeServicioTransporte = (Proveedor) unObjeto;
+            exhibirProveedor();
+            deshabilitarSeleccionProveedor();
+            habilitarCargaTicket();
+            habilitarRegistro();
+            
+        }
+        
+        
+        
+        //organizarElementos();
+        jBConcretarAccion.setEnabled(true);
+        jBCancelar.setEnabled(true);
+        //this.pack();
     }
 
     private void prepararAlta() {
+        this.operacionActual = "Alta";
+        jBConcretarAccion.setText("Dar de alta");
+        jLOperacionSeleccionada.setText(this.textoAlta);
         
-        jBConcretarAccion.setText("Registrar movimiento");
-        jLOperacion.setText("Registro de Movimiento");
+        jC1.setCalendar(Calendar.getInstance());
         
+        jLStaticEtiqueta11.setEnabled(true);
+        jBBuscarEquipamientoOrigen.setEnabled(true);
         
-        jLOperacion.setEnabled(true);
-        jLStaticEquipamientoOrigen.setEnabled(true);
-        jBBuscarOrigen.setEnabled(true);
+        jLOperacionSeleccionada.setEnabled(true);
         
-        //Cuando se modifica un equipamiento de origen se debe habilitar el botón de eleccion de lotes.
-        jLStaticEquipamientoOrigenSeleccionado.setEnabled(false);
-        jLEquipamientoOrigen.setEnabled(false);
-        jLStaticEquipamientoDestino.setEnabled(false);
-        jBBuscarDestino.setEnabled(false);
-        jLStaticEquipamientoDestinoSeleccionado.setEnabled(false);
-        jLEquipamientoDestino.setEnabled(false);
-        jLStaticBascula.setEnabled(false);
-        JLBascula.setEnabled(false);
-        jLStaticLoteImplicado.setEnabled(false);
-        JLLote.setEnabled(false);
-        jBBuscarLote.setEnabled(false);
-        
-        
-        jLStaticDetallesTicket.setEnabled(false);
-        jLStaticTipoUnidadTransporte.setEnabled(false);
-        jCBTipoEquipamiento.setEnabled(false);
-        jLStaticCantidad.setEnabled(false);
-        jTFNombreConductor1.setEnabled(false);
-        jLStaticFechaOrigen.setEnabled(false);
-        jCFechaOrigenMov.setEnabled(false);
-        jLStaticHoraEntrada.setEnabled(false);
-        timePicker1.setEnabled(false);
-        jLStaticHoraSalida.setEnabled(false);
-        timePicker2.setEnabled(false);
-        jLStaticUnidadMedida.setEnabled(false);
-        jCBUnidadMedida.setEnabled(false);
-        jLStaticPesoEntrada.setEnabled(false);
-        jTFPesoEntrada.setEnabled(false);
-        jLPesoSalida.setEnabled(false);
-        jTFPesoSalida.setEnabled(false);
-        jLStaticNombreConductor.setEnabled(false);
-        jTFNombreConductor.setEnabled(false);
-        jLStaticPatenteChasis.setEnabled(false);
-        jTFPatenteChasis.setEnabled(false);
-        jLStaticPatenteAcoplado.setEnabled(false);
-        jTFPatenteAcoplado.setEnabled(false);
-        
-        
-
-        jBConcretarAccion.setEnabled(true);
         jBCancelar.setEnabled(true);
-        
-    }
-    private void habilitarParametrosAdicionalesSegunEquipamiento(){
-        
-        
-    }
-    private void visibilizarParametrosAdicionalesSegunEquipamiento(){
-                      
     }
     
     private void prepararBaja() {
-        jBBuscar.setVisible(true);
+        this.operacionActual = "Baja";
+        
         jBBuscar.setEnabled(true);
+        jBBuscar.setVisible(true);
+        
+        jLOperacionSeleccionada.setText(textoBaja);
+        jLOperacionSeleccionada.setEnabled(true);
+        
+        jLStaticCampo1.setEnabled(true);
+        jLStaticCampo2.setEnabled(true);
+        jLStaticCampo3.setEnabled(true);
+        jLStaticCampo4.setEnabled(true);
+        jLStaticCampo5.setEnabled(true);
+        jLStaticCampo6.setEnabled(true);
+        jLStaticCampo7.setEnabled(true);
+        jLStaticCampo8.setEnabled(true);
+        jLStaticCampo9.setEnabled(true);
+        
+        jLStaticCB1.setEnabled(true);
+        jLStaticCB2.setEnabled(true);
+        
+        jLStaticEtiqueta1.setEnabled(true);
+        jLStaticEtiqueta2.setEnabled(true);
+        jLStaticEtiqueta3.setEnabled(true);
+        jLStaticEtiqueta4.setEnabled(true);
+        jLStaticEtiqueta5.setEnabled(true);
+        jLStaticEtiqueta6.setEnabled(true);
+        jLStaticEtiqueta7.setEnabled(true);
+        jLStaticEtiqueta8.setEnabled(true);
+        jLStaticEtiqueta10.setEnabled(true);
+        jLStaticEtiqueta11.setEnabled(true);
+        jLStaticEtiqueta12.setEnabled(true);
+        jLStaticEtiqueta13.setEnabled(true);
+        jLStaticEtiqueta14.setEnabled(true);
+        jLStaticEtiqueta15.setEnabled(true);
+        jLStaticEtiqueta16.setEnabled(true);
+        jLStaticEtiqueta17.setEnabled(true);
+        jLStaticEtiqueta18.setEnabled(true);
+        
+        jLStaticCalendar1.setEnabled(true);
+        jLStaticCalendar2.setEnabled(true);
+        jLStaticCalendar3.setEnabled(true);
+        
         jBCancelar.setEnabled(true);
+        
+        jBConcretarAccion.setEnabled(true);
+        jBConcretarAccion.setText("Dar de baja");
+        
     }
 
     private void prepararModificacion() {
+        this.operacionActual = "Modificacion";
+        jLOperacionSeleccionada.setText(this.textoModificacion);
+        jLOperacionSeleccionada.setEnabled(true);
+
+        jBBuscar.setVisible(true);
+        jBBuscar.setEnabled(true);
+        jBCancelar.setEnabled(true);
+        
+        
+        
+        
+        jLStaticCampo1.setEnabled(true);
+        jLStaticCampo2.setEnabled(true);
+        jLStaticCampo3.setEnabled(true);
+        jLStaticCampo4.setEnabled(true);
+        jLStaticCampo5.setEnabled(true);
+        jLStaticCampo6.setEnabled(true);
+        jLStaticCampo7.setEnabled(true);
+        jLStaticCampo8.setEnabled(true);
+        jLStaticCampo9.setEnabled(true);
+        
+        jTFCampo1.setEnabled(true); //SI ALGUN CAMPO NO SE PUDIERA MODIFICAR, (POR EJEMPLO, FECHA DE CREACION, CONCEPTO ASOCIADO, ETC. BORRAR ESTAS LINEAS)
+        jTFCampo2.setEnabled(true);
+        jTFCampo3.setEnabled(true);
+        jTFCampo4.setEnabled(true);
+        jTFCampo5.setEnabled(true);
+        jTFCampo6.setEnabled(true);
+        jTFCampo7.setEnabled(true);
+        jTFCampo8.setEnabled(true);
+        jTFCampo9.setEnabled(true);
+        
+        jLStaticCB1.setEnabled(true);
+        jLStaticCB2.setEnabled(true);
+        
+        jCB1.setEnabled(true);
+        jCB2.setEnabled(true);
+        
+        jLStaticEtiqueta1.setEnabled(true);
+        jLStaticEtiqueta2.setEnabled(true);
+        jLStaticEtiqueta3.setEnabled(true);
+        jLStaticEtiqueta4.setEnabled(true);
+        jLStaticEtiqueta5.setEnabled(true);
+        jLStaticEtiqueta6.setEnabled(true);
+        jLStaticEtiqueta7.setEnabled(true);
+        jLStaticEtiqueta10.setEnabled(true);
+        jLStaticEtiqueta11.setEnabled(true);
+        jLStaticEtiqueta12.setEnabled(true);
+        jLStaticEtiqueta13.setEnabled(true);
+        jLStaticEtiqueta14.setEnabled(true);
+        jLStaticEtiqueta15.setEnabled(true);
+        jLStaticEtiqueta16.setEnabled(true);
+        
+        jLStaticCalendar1.setEnabled(true);
+        jLStaticCalendar2.setEnabled(true);
+        jLStaticCalendar3.setEnabled(true);
+        
+        jC1.setEnabled(true);
+        jC2.setEnabled(true);
+        jC3.setEnabled(true);
+        
+        jBConcretarAccion.setEnabled(true);
+        jBConcretarAccion.setText("Guardar cambios");
 
     }
 
-
-
-    public void setUnEquipamientoOrigenSeleccionado(Equipamiento unEquipamientoOrigenSeleccionado) {
-        this.unEquipamientoOrigenSeleccionado = unEquipamientoOrigenSeleccionado;
-    }
-
-    public void setUnLoteSeleccionado(Lote unLoteSeleccionado) {
-        this.unLoteSeleccionado = unLoteSeleccionado;
-    }
-
-    public void setUnEquipamientoDestinoSeleccionado(Equipamiento unEquipamientoDestinoSeleccionado) {
-        this.unEquipamientoDestinoSeleccionado = unEquipamientoDestinoSeleccionado;
-    }
-
-    private void habilitarDetallesDeTicket() {
-        jLStaticDetallesTicket.setEnabled(true);
-        jLStaticTipoUnidadTransporte.setEnabled(true);
-        jCBTipoEquipamiento.setEnabled(true);
-        jLStaticCantidad.setEnabled(true);
-        jTFNombreConductor1.setEnabled(true);
-        jLStaticFechaOrigen.setEnabled(true);
-        jCFechaOrigenMov.setEnabled(true);
-        jLStaticHoraEntrada.setEnabled(true);
-        timePicker1.setEnabled(true);
-        jLStaticHoraSalida.setEnabled(true);
-        timePicker2.setEnabled(true);
-        jLStaticUnidadMedida.setEnabled(true);
-        jCBUnidadMedida.setEnabled(true);
-        jLStaticPesoEntrada.setEnabled(true);
-        jTFPesoEntrada.setEnabled(true);
-        jLPesoSalida.setEnabled(true);
-        jTFPesoSalida.setEnabled(true);
-        jLStaticNombreConductor.setEnabled(true);
-        jTFNombreConductor.setEnabled(true);
-        jLStaticPatenteChasis.setEnabled(true);
-        jTFPatenteChasis.setEnabled(true);
-        jLStaticPatenteAcoplado.setEnabled(true);
-        jTFPatenteAcoplado.setEnabled(true);
+    public String getOperacionActual() {
+        return operacionActual;
     }
 
     private void habilitarCamposIniciales() {
         jLabel12.setEnabled(true);
         jCBOperacion.setEnabled(true);
+        this.jCBOperacion.setSelectedItem("Seleccionar");
+    }
+
+
+
+
+
+    private void exhibirEquipamientoDestino() {
+        try {
+            if (unEquipamientoDestinoSeleccionado == null)
+                return;
+            jLStaticEtiqueta4.setEnabled(true);
+            jLStaticEtiqueta13.setEnabled(true);
+            jLStaticEtiqueta15.setEnabled(true);
+            
+            jLStaticEtiqueta5.setEnabled(true);
+            jLStaticEtiqueta14.setEnabled(true);
+            jLStaticEtiqueta16.setEnabled(true);
+            jLStaticEtiqueta5.setText(unEquipamientoDestinoSeleccionado.getNombre());
+            jLStaticEtiqueta14.setText(unEquipamientoDestinoSeleccionado.getBasculaAsociadaS());
+            jLStaticEtiqueta16.setText(""+unEquipamientoDestinoSeleccionado.obtenerCapacidadDisponible(unEquipamientoDestinoSeleccionado.getUnidadDeMedida())+" "+unEquipamientoDestinoSeleccionado.getUnidadDeMedida()+"(s)");
+        } catch (ExcepcionCargaParametros ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+    }
+
+    private void exhibirEquipamientoOrigen() {
+        jLStaticEtiqueta10.setEnabled(true);
+        jLStaticEtiqueta12.setEnabled(true);
+        jLStaticEtiqueta12.setText(unEquipamientoOrigenSeleccionado.getNombre());
+    }
+
+    private void habilitarSeleccionLote() {
+        jLStaticEtiqueta1.setEnabled(true);
+        jBBuscarLote.setEnabled(true);
+    }
+
+    private void exhibirLote() {
+        if (unLoteSeleccionado == null)
+            return;
+        jLStaticEtiqueta2.setEnabled(true);
+        jLStaticEtiqueta3.setEnabled(true);
+        jLStaticEtiqueta3.setText(unLoteSeleccionado.getEtiqueta());
+    }
+
+    private void habilitarSeleccionEquipamientoDestino() {
+        jLStaticEtiqueta7.setEnabled(true);
+        jBBuscarDestino.setEnabled(true);
+    }
+
+    private void habilitarRegistro() {
+        jBConcretarAccion.setEnabled(true);
+    }
+
+    private void habilitarCargaTicket() {
+        ParametrosDeInterfaz.habilitarContenedor(jPanel1.getComponents());
+        jC1.setEnabled(false);
+    }
+
+    private void exhibirProveedor() {
+        jLStaticEtiqueta17.setEnabled(true);
+        jLStaticEtiqueta18.setEnabled(true);
+        if (unProveedorDeServicioTransporte.getRazonSocial().length()>30)
+            jLStaticEtiqueta18.setText(unProveedorDeServicioTransporte.getRazonSocial().substring(0, 30)+"...");
+        else
+            jLStaticEtiqueta18.setText(unProveedorDeServicioTransporte.getRazonSocial());
+    }
+
+    private void habilitarCargaProveedor() {
+        jLStaticEtiqueta8.setEnabled(true);
+        jBBuscarProveedor.setEnabled(true);
+    }
+
+    private void deshabilitarSeleccionEquipamientoOrigen() {
+        jBBuscarEquipamientoOrigen.setEnabled(false);
+    }
+
+    private void deshabilitarSeleccionLote() {
+        jBBuscarLote.setEnabled(false);
+    }
+
+    private void deshabilitarSeleccionEquipamientoDestino() {
+        jBBuscarDestino.setEnabled(false);
+    }
+
+    private void deshabilitarSeleccionProveedor() {
+        jBBuscarProveedor.setEnabled(false);
     }
     
+
 }

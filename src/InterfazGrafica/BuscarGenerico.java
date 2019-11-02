@@ -6,15 +6,20 @@
 package InterfazGrafica;
 
 
+import static InterfazGrafica.UtilidadesInterfazGrafica.establecerAlineacionDeTabla;
 import LogicaDeNegocio.Organizacion;
 import LogicaDeNegocio.Proveedor;
+import java.awt.Component;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
@@ -49,7 +54,9 @@ public class BuscarGenerico extends javax.swing.JFrame {
 
     public BuscarGenerico(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
         
+        this.setUndecorated(true);
         initComponents();
+        this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
         this.setVisible(true); 
         this.ventanaAnterior = ventanaAnterior;
         this.ventanaAnterior.setFocusable(false);
@@ -85,6 +92,8 @@ public class BuscarGenerico extends javax.swing.JFrame {
             }
             
         }
+        ParametrosDeInterfaz.configurarVentana(this);
+        establecerAlineacionDeTabla(jTable1, SwingConstants.CENTER);
     }
 
     /**
@@ -446,7 +455,6 @@ public class BuscarGenerico extends javax.swing.JFrame {
         this.ventanaAnterior.setFocusable(true);
         this.dispose();
     }//GEN-LAST:event_jBConcretarAccionActionPerformed
-
     private void jBCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBCancelarActionPerformed
 
         this.limpiarCampos();

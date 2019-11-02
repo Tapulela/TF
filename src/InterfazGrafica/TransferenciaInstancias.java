@@ -13,6 +13,6 @@ import LogicaDeNegocio.Equipamiento;
  */
 public interface TransferenciaInstancias {
     
-    public void actualizarUnObjeto(Object UnObjeto);
+    public void actualizarUnObjeto(Object unObjeto);
     
 }

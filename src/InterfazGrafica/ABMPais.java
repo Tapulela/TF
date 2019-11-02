@@ -10,6 +10,8 @@ import LogicaDeNegocio.Organizacion;
 import LogicaDeNegocio.Pais;
 import LogicaDeNegocio.Proveedor;
 import Persistencia.ExcepcionPersistencia;
+import java.awt.Component;
+import java.awt.Toolkit;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -17,6 +19,7 @@ import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 /**
  *
@@ -47,7 +50,9 @@ public class ABMPais extends javax.swing.JFrame implements TransferenciaInstanci
 
 
     ABMPais(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
+        this.setUndecorated(true);
         initComponents();
+        this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
         this.organizacion = organizacion;
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
@@ -63,6 +68,7 @@ public class ABMPais extends javax.swing.JFrame implements TransferenciaInstanci
         habilitarCamposIniciales();
         
         this.ventanaAnterior = ventanaAnterior;
+        ParametrosDeInterfaz.configurarVentana(this);
     }
     private void organizarElementos(){
         this.deshabilitarTodo();
@@ -81,7 +87,7 @@ public class ABMPais extends javax.swing.JFrame implements TransferenciaInstanci
                 break;
                 
         }
-        this.pack();
+        //this.pack();
         
     }
     /**
@@ -298,7 +304,7 @@ public class ABMPais extends javax.swing.JFrame implements TransferenciaInstanci
         jTFCampo1.setText(unPais.getNombre());
         jCBEstado.setSelectedItem(unPais.getEstado());
         organizarElementos();
-        this.pack();
+        //this.pack();
     }//GEN-LAST:event_jCB1ItemStateChanged
 
     /**

@@ -133,9 +133,11 @@ public class Organizacion {
             throw new ExcepcionCargaParametros("Se requiere especificar una fecha de origen.");
         if (fechaEntregaProductoTerminado == null)
             throw new ExcepcionCargaParametros("Se requiere especificar una fecha de entrega de producto terminado.");
+        if (fechaEntregaProductoTerminado.before(Calendar.getInstance()))
+            throw new ExcepcionCargaParametros("La fecha de entrega del producto terminado no puede anteceder la fecha actual.");
         if (cantidadAProducir <= 0)
             throw new ExcepcionCargaParametros("Por favor, ingrese una cantidad a Producir positiva.");
-        OrdenDeProduccion unaOrdenDeProduccion = new OrdenDeProduccion(unaFechaOrigen, cantidadAProducir, unidadDeMedida, fechaEntregaProductoTerminado, unaDescripcion);
+        OrdenDeProduccion unaOrdenDeProduccion = new OrdenDeProduccion(unaFechaOrigen, cantidadAProducir, unidadDeMedida, fechaEntregaProductoTerminado, unaDescripcion, this.usuarioActivo);
         this.persistencia.persistirObjeto(unaOrdenDeProduccion);
         this.ordenesProduccion.put(unaOrdenDeProduccion.getId(), unaOrdenDeProduccion);
     }
@@ -202,11 +204,19 @@ public class Organizacion {
                 
     }
 
+    
     public void registrarIngresoMateriaPrima(Calendar fechaOrigen, LocalTime horaEntrada, LocalTime horaSalida, String unidadTransporte, String cantidadUnidades, String unidadMedidaPeso, String pesoEntrada, String pesoSalida, String nHojaRuta, String nRemito, String nPrecinto, String nombreConductor, String patenteChasis, String patenteAcoplado, Equipamiento destino, OrdenDeCompra unaOrdenDeCompraAsociada,Proveedor unProveedorDeServicioDeTransporte) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+        
+        if (this.usuarios.get(usuarioActivo.getId())== null)
+            throw new ExcepcionCargaParametros("Debe ingresar al sistema con un usuario valido.");
+        
         if (fechaOrigen == null)
             throw new ExcepcionCargaParametros("No se ha seleccionado una fecha de origen valida.");
         if (fechaOrigen.after(Calendar.getInstance()))
             throw new ExcepcionCargaParametros("La fecha origen no puede exceder la fecha actual.");
+        
+        if (!Validaciones.esUnNumeroEnteroValido(cantidadUnidades))
+            throw new ExcepcionCargaParametros("Verifique la cantidad de unidades ingresadas.");
         
         if (unaOrdenDeCompraAsociada == null)
             throw new ExcepcionCargaParametros("No se ha seleccionado una orden de compra asociada.");
@@ -262,6 +272,10 @@ public class Organizacion {
         if (horaEntrada.isAfter(horaSalida))
             throw new ExcepcionCargaParametros("La hora de entrada no puede exceder la hora de salida.");
         
+        pesoEntrada = pesoEntrada.replace(".", "");
+        pesoEntrada = pesoEntrada.replace(",", ".");
+        pesoSalida = pesoSalida.replace(".", "");
+        pesoSalida = pesoSalida.replace(",", ".");
         float unPesoEntrada = Float.parseFloat(pesoEntrada);
         float unPesoSalida = Float.parseFloat(pesoSalida);
         float pesoNeto = unPesoEntrada - unPesoSalida;
@@ -275,47 +289,184 @@ public class Organizacion {
         if (unPesoEntrada <=0 || unPesoSalida <= 0)
             throw new ExcepcionCargaParametros("El peso de entrada o de salida no pueden ser 0 (cero) o negativos.");
         
-        if (pesoNeto > unaOrdenDeCompraAsociada.getCantidadRestanteARecibir())
+        if (Organizacion.convertirUnidadPeso(unidadMedidaPeso, pesoNeto, unaOrdenDeCompraAsociada.getUnidadDeMedida()) > unaOrdenDeCompraAsociada.getCantidadRestanteARecibir())
             throw new ExcepcionCargaParametros("No se puede registrar un ingreso que supere lo pactado en la orden de compra.");
         
         if (!destino.puedeAlbergar(pesoNeto, unidadMedidaPeso))
             throw new ExcepcionCargaParametros("El destino donde residirá el lote no posee espacio suficiente.");
         
-        Lote unLote = new Lote(pesoNeto, "YCV", unidadMedidaPeso, fechaOrigen, unaOrdenDeCompraAsociada, destino);
+        Lote unLote = new Lote(pesoNeto, Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE, unidadMedidaPeso, fechaOrigen, unaOrdenDeCompraAsociada, destino);
         persistencia.persistirObjeto(unLote);
         unLote.setEtiqueta(( new SimpleDateFormat( "yyyyMMdd" ) ).format( fechaOrigen.getTime() )+"-"+unLote.getId());
-        MovimientoInternoMateriaPrima unMovimiento = new MovimientoInternoMateriaPrima(this.getUsuarioActivo(), horaEntrada, horaSalida, unidadTransporte, unaCantidadDeUnidades, unidadMedidaPeso, unPesoEntrada, unPesoSalida, nHojaRuta, nRemito, nPrecinto, nombreConductor, patenteChasis, patenteAcoplado, unLote, null, destino);
+        MovimientoInternoMateriaPrima unMovimiento = new MovimientoInternoMateriaPrima(this.getUsuarioActivo(), horaEntrada, horaSalida, unidadTransporte, unaCantidadDeUnidades, unidadMedidaPeso, unPesoEntrada, unPesoSalida, nHojaRuta, nRemito, nPrecinto, nombreConductor, patenteChasis, patenteAcoplado, unLote, null, destino, unProveedorDeServicioDeTransporte);
+        destino.agregarLote(unLote);
         persistencia.persistirObjeto(unMovimiento);
-        unLote.agregarMovmimientoDeIngreso(unMovimiento);
+        unLote.agregarMovimiento(unMovimiento);
         unLote.asignarUltimoMovimiento(unMovimiento);
         
         persistencia.modificarObjeto(unLote);//ACTUALIZAR EN LA BASE DE DATOS EL MOVIMENTO INTERNO ASOCIADO AL INGRESO Y SU ETIQUETA.
         unaOrdenDeCompraAsociada.agregarLote(unLote);
-        persistencia.modificarObjeto(unaOrdenDeCompraAsociada);
         this.lotes.put(unLote.getId(), unLote);
         this.movimientos.put(unMovimiento.getId(), unMovimiento);
         this.movimientosDeIngreso.put(unMovimiento.getId(), unMovimiento);
     }
     
-    public void anularIngresoDeMateriaPrima(MovimientoInternoMateriaPrima unMovimiento) throws ExcepcionCargaParametros{
+    public void anularIngresoDeMateriaPrima(MovimientoInternoMateriaPrima unMovimiento) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+        if (unMovimiento == null)
+            throw new ExcepcionCargaParametros("No se selecciono ningun movimiento para anular");
         Lote unLoteImplicado = unMovimiento.getLoteAsociado();
-        if (unLoteImplicado.poseeUnoOMasMovimientosAsociadosRegulares())
-            throw new ExcepcionCargaParametros("No se puede dar de baja un ingreso cuyo lote tenga movimientos posteriores en estados regulares.");
-        /*if (unLoteImplicado.poseeUnaOMasTransformacionesAsociadasRegulares())
-            throw new ExcepcionCargaParametros("No se puede dar de baja un ingreso cuyo lote tenga movimientos posteriores en estados regulares.");*/
+        if (unLoteImplicado.poseeUnoOMasEventosRegularesPosterioresA(unMovimiento))
+            throw new ExcepcionCargaParametros("No se puede dar de baja un ingreso cuyo lote tenga eventos posteriores (Movimientos o transformaciones) en estados regulares.");
+        unMovimiento.anular();
+        unLoteImplicado.anular();
+        persistencia.modificarObjeto(unMovimiento);
+        persistencia.modificarObjeto(unLoteImplicado);
     }
     
-    public void registrarMovimientoInternoMateriaPrima(Calendar fechaEntrada, Calendar fechaSalida, String unidadTransporte, int cantidadUnidades, String unidadMedidaPeso, float pesoEntrada, float pesoSalida, String nHojaRuta, String nRemito, String nPrecinto, String nombreConductor, String patenteChasis, String patenteAcoplado, Lote unLoteAMover, Bascula unaBascula) throws ExcepcionCargaParametros{
-        float pesoNeto = pesoEntrada - pesoSalida;
-        if (fechaEntrada.after(fechaSalida))
+    public void anularMovimientoDeMateriaPrima(MovimientoInternoMateriaPrima unMovimiento) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+        Lote unLoteImplicado = unMovimiento.getLoteAsociado();
+        if (!unMovimiento.poseeEquipamientoOrigen())
+            throw new ExcepcionCargaParametros("No se puede anular un movimiento de ingreso. Dirijase a gestión de Ingresos para hacerlo.");
+        if (unLoteImplicado.poseeUnoOMasEventosRegularesPosterioresA(unMovimiento))
+            throw new ExcepcionCargaParametros("No se puede dar de baja un ingreso cuyo lote tenga eventos posteriores (Movimientos o transformaciones) en estados regulares.");
+        unMovimiento.anular();
+        MovimientoInternoMateriaPrima nuevoUltimoMovimiento = unLoteImplicado.calcularUltimoMovimientoRegular();
+        unLoteImplicado.setUltimoMovimientoRegular(nuevoUltimoMovimiento);
+        persistencia.modificarObjeto(unMovimiento);
+        persistencia.modificarObjeto(unLoteImplicado);
+    }    
+    
+public void registrarMovmimiento(Calendar fechaOrigen, LocalTime horaEntrada, LocalTime horaSalida, String unidadTransporte, String cantidadUnidades, String unidadMedidaPeso, String pesoEntrada, String pesoSalida, String nHojaRuta, String nRemito, String nPrecinto, String nombreConductor, String patenteChasis, String patenteAcoplado, Lote unLote, Equipamiento destino, Proveedor unProveedorDeServicioDeTransporte) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+        
+        if (this.usuarios.get(usuarioActivo.getId())== null)
+            throw new ExcepcionCargaParametros("Debe ingresar al sistema con un usuario valido.");
+        
+        if (fechaOrigen == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una fecha de origen valida.");
+        if (fechaOrigen.after(Calendar.getInstance()))
+            throw new ExcepcionCargaParametros("La fecha origen no puede exceder la fecha actual.");
+        
+        if (!Validaciones.esUnNumeroEnteroValido(cantidadUnidades))
+            throw new ExcepcionCargaParametros("Verifique la cantidad de unidades ingresadas.");
+        
+        if (unProveedorDeServicioDeTransporte == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un proveedor de servicio de transporte.");
+        if (!unProveedorDeServicioDeTransporte.seEncuentraActivo())
+            throw new ExcepcionCargaParametros("El proveedor seleccionado no se encuentra activo.");
+        
+        if (destino == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un equipamiento de destino.");
+        if (destino instanceof Bascula)
+            throw new ExcepcionCargaParametros("El destino no puede ser una bascula");
+        if (!destino.getBasculaAsociada().estaActivo())
+            throw new ExcepcionCargaParametros("El destino no posee una bascula activa.");
+        
+        if (unLote.getEquipamientoDondeReside() == null)
+            throw new ExcepcionCargaParametros("El lote seleccionado no reside en ningun equipamiento.");
+        
+        if (unLote.getEquipamientoDondeReside().equals(destino))
+            throw new ExcepcionCargaParametros("El destino y el origen no pueden ser el mismo lugar.");
+        
+        if (horaEntrada==null)
+            throw new ExcepcionCargaParametros("No se ha ingresado una hora de entrada.");
+        if (horaSalida==null)
+            throw new ExcepcionCargaParametros("No se ha ingresado una hora de salida.");
+        
+        if (nHojaRuta.equals(""))
+            throw new ExcepcionCargaParametros("No se ha ingresado un número de hoja de ruta.");
+        if (nRemito.equals(""))
+            throw new ExcepcionCargaParametros("No se ha ingresado un número de remito.");
+        if (nPrecinto.equals(""))
+            throw new ExcepcionCargaParametros("No se ha ingresado un número de precinto.");
+        if (nombreConductor.equals(""))
+            throw new ExcepcionCargaParametros("No se ha ingresado el nombre del conductor.");
+        
+        if (patenteChasis.equals(""))
+            throw new ExcepcionCargaParametros("No se ha ingresado la patente del chasis.");
+        if (!Validaciones.esUnaPatenteValida(patenteChasis))
+            throw new ExcepcionCargaParametros("No se ha ingresado una patente de chasis valida (XXX-XXX) o (XX-XXX-XX).");
+                
+        if (patenteAcoplado.equals(""))
+            throw new ExcepcionCargaParametros("No se ha ingresado la patente del acoplado.");
+        if (!Validaciones.esUnaPatenteValida(patenteAcoplado))
+            throw new ExcepcionCargaParametros("No se ha ingresado una patente de acoplado valida (XXX-XXX) o (XX-XXX-XX).");
+        
+        if (unidadTransporte.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("No se ha seleccionado una unidad de transporte");
+        if (unidadMedidaPeso.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("No se ha seleccionado una unidad de medida");
+        if (!Validaciones.esUnNumeroFraccionarioValido(pesoEntrada))
+            throw new ExcepcionCargaParametros("El peso de entrada no posee un formato valido (Utilice solo numeros y una coma)");
+        if (!Validaciones.esUnNumeroFraccionarioValido(pesoSalida))
+            throw new ExcepcionCargaParametros("El peso de salida no posee un formato valido (Utilice solo numeros y una coma)");
+        if (horaEntrada.isAfter(horaSalida))
             throw new ExcepcionCargaParametros("La hora de entrada no puede exceder la hora de salida.");
-        if (cantidadUnidades <= 0)
+        
+        pesoEntrada = pesoEntrada.replace(".", "");
+        pesoEntrada = pesoEntrada.replace(",", ".");
+        pesoSalida = pesoSalida.replace(".", "");
+        pesoSalida = pesoSalida.replace(",", ".");
+        float unPesoEntrada = Float.parseFloat(pesoEntrada);
+        float unPesoSalida = Float.parseFloat(pesoSalida);
+        float pesoNeto = unPesoEntrada - unPesoSalida;
+        if (pesoNeto <= 0)
+            throw new ExcepcionCargaParametros("El peso de salida no puede exceder el peso de entrada.");
+        if (!Validaciones.esUnNumeroEnteroValido(cantidadUnidades))
+            throw new ExcepcionCargaParametros("La cantidad de unidades ingresadas no es valida (Solo números).");
+        int unaCantidadDeUnidades = Integer.parseInt(cantidadUnidades);
+        if (unaCantidadDeUnidades <= 0)
             throw new ExcepcionCargaParametros("La cantidad de unidades ingresadas de "+unidadTransporte+" no puede ser negativa.");
-        if (pesoEntrada <=0 || pesoSalida <= 0)
-            throw new ExcepcionCargaParametros("El peso de entrada o de salida no pueden ser 0 o negativos.");
+        if (unPesoEntrada <=0 || unPesoSalida <= 0)
+            throw new ExcepcionCargaParametros("El peso de entrada o de salida no pueden ser 0 (cero) o negativos.");
+        
+        if (!destino.puedeAlbergar(pesoNeto, unidadMedidaPeso))
+            throw new ExcepcionCargaParametros("El destino donde residirá el lote no posee espacio suficiente.");
         
         
+        
+        MovimientoInternoMateriaPrima unMovimiento = new MovimientoInternoMateriaPrima(this.getUsuarioActivo(), horaEntrada, horaSalida, unidadTransporte, unaCantidadDeUnidades, unidadMedidaPeso, unPesoEntrada, unPesoSalida, nHojaRuta, nRemito, nPrecinto, nombreConductor, patenteChasis, patenteAcoplado, unLote, unLote.getEquipamientoDondeReside(), destino, unProveedorDeServicioDeTransporte);
+        persistencia.persistirObjeto(unMovimiento);
+        unLote.getEquipamientoDondeReside().removerLote(unLote);
+        destino.agregarLote(unLote);
+        
+        unLote.setEquipamientoDondeReside(destino);
+        unLote.agregarMovimiento(unMovimiento);
+        unLote.asignarUltimoMovimiento(unMovimiento);
+        
+        persistencia.modificarObjeto(unLote);//Ahora el lote tiene como clave foranea al equipamiento destino.
+        
+        this.movimientos.put(unMovimiento.getId(), unMovimiento);
+    }    
+
+    public void registrarEstacionamiento (ArrayList<Lote> lotes, Equipamiento unEquipamiento, Calendar unaFechaOrigen, String duracion) throws ExcepcionCargaParametros{
+        
+        if (lotes.isEmpty())
+            throw new ExcepcionCargaParametros("No se selecciono ningún lote.");
+        if (!unEquipamiento.poseeLotes(lotes))
+            throw new ExcepcionCargaParametros("No todos los lotes seleccionados estan presentes en ese equipamiento.");
+        if (!Validaciones.sonLotesDeYerbaCanchadaVerde(lotes))
+            throw new ExcepcionCargaParametros("No todos los lotes seleccionados son de yerba canchada verde.");
+        if (!Validaciones.sonLotesRegulares(lotes))
+            throw new ExcepcionCargaParametros("No todos los lotes seleccionados estan en estado regular.");
+        
+        
+        if (unEquipamiento == null)
+            throw new ExcepcionCargaParametros("No se selecciono una camara de estacionamiento.");
+        if (!(unEquipamiento instanceof CamaraEstacionamiento)) 
+            throw new ExcepcionCargaParametros("Debe seleccionar una camara de estacionamiento para realizar un estacionamiento.");
+
+        if (unaFechaOrigen == null)
+            throw new ExcepcionCargaParametros("No se especificó la fecha de origen.");
+        if (!Validaciones.esUnNumeroEnteroValido(duracion))
+            throw new ExcepcionCargaParametros("Verifique la cantidad de días ingresados (Solo numeros enteros).");
+        int unaDuracion = Integer.parseInt(duracion);
+        if (unaDuracion<0)
+            throw new ExcepcionCargaParametros("La duración de estacionamiento no puede ser negativa.");
+        if (unaDuracion>((CamaraEstacionamiento)unEquipamiento).getDuracionMaximaEstacionamiento())
+            throw new ExcepcionCargaParametros("La duración de estacionamiento no puede exceder la duracion maxima de estacionamiento de la camara.");
     }
+    
+
     
     public static float convertirUnidadPeso (String unidadMedidaEntrada, float peso, String unidadMedidaSalida) throws ExcepcionCargaParametros{
         switch (unidadMedidaEntrada){
@@ -530,7 +681,7 @@ public class Organizacion {
         //Solo se puede dar de baja un equipamiento si no posee ningun lote de entrada que no haya salido.
         if (unEquipamiento == null) 
             throw new ExcepcionCargaParametros("No se ha seleccionado ningun Equipamiento para dar de baja.");
-        if (unEquipamiento.poseeLotes())
+        if (unEquipamiento.poseeUnoOMasLotes())
             throw new ExcepcionCargaParametros("No se puede dar de baja un equipamiento que posea lotes en su interior.");
         switch (unEquipamiento.getClass().getSimpleName()){
             case "Bascula":
@@ -589,7 +740,7 @@ public class Organizacion {
                 throw new ExcepcionCargaParametros("No se puede dar de baja una Bascula que posee Equipamientos asociados.");
         }
             
-        if (unEstado.equals("Baja") && unEquipamiento.estaActivo() && unEquipamiento.poseeLotes())
+        if (unEstado.equals("Baja") && unEquipamiento.estaActivo() && unEquipamiento.poseeUnoOMasLotes())
             throw new ExcepcionCargaParametros("No se puede dar de baja un equipamiento que posee lotes en su interior.");
         
         
@@ -686,8 +837,7 @@ public class Organizacion {
         unaProvincia.agregarLocalidad(unaLocalidad);
     }    
     public void registrarProveedor(String unaRazonSocial, String unCuit, Localidad unaLocalidad) throws ExcepcionCargaParametros, SQLException{
-        if (!Validaciones.unCuitEsValido(unCuit))
-            throw new ExcepcionCargaParametros("El cuit debe estar en formato XX-XXXXXXXX-X.");
+        Validaciones.validarCuit(unCuit);
         if (unaRazonSocial.isEmpty())
             throw new ExcepcionCargaParametros("Debe ingresar una razon social para realizar el alta.");
         if (existeProveedor(unaRazonSocial, unCuit))
@@ -860,15 +1010,15 @@ public class Organizacion {
         if (criterioFechaEntrega && (fechaEntregaInferior == null || fechaEntregaSuperior == null))
             throw new ExcepcionCargaParametros("Verifique las fechas de Entrega Inferior y Superior ingresadas");
         ArrayList retorno = new ArrayList();
-        Iterator ordenesProduccion = this.ordenesProduccion.keySet().iterator();
-        while (ordenesProduccion.hasNext()){
-            int unId = (int) ordenesProduccion.next();
+        Iterator recorredorOrdenesProduccion = this.ordenesProduccion.keySet().iterator();
+        while (recorredorOrdenesProduccion.hasNext()){
+            int unId = (int) recorredorOrdenesProduccion.next();
             OrdenDeProduccion unaOrdenProduccion = this.ordenesProduccion.get(unId);
             boolean sePuedeAgregar = true;
             if (criterioDescripcion)
                 sePuedeAgregar = (unaOrdenProduccion.getDescripcion() != null && unaOrdenProduccion.getDescripcion().contains(unaDescripcion));
             if (sePuedeAgregar && criterioEstado)
-                sePuedeAgregar = unaOrdenProduccion.getEstado().equals(unEstado);
+                sePuedeAgregar = unaOrdenProduccion.getEstadoEvento().equals(unEstado);
             if (sePuedeAgregar && criterioFechaOrigen)
                 sePuedeAgregar = (unaOrdenProduccion.getFechaOrigenC().after(fechaOrigenInferior) && unaOrdenProduccion.getFechaOrigenC().before(fechaOrigenSuperior));
             if (sePuedeAgregar && criterioFechaEntrega)
@@ -889,6 +1039,186 @@ public class Organizacion {
             throw new ExcepcionCargaParametros("No se puede anular la orden de producción porque posee ordenes de compra implicadas en estado regular.");
         unaOrdenDeProduccion.anular();
         this.persistencia.modificarObjeto(unaOrdenDeProduccion);
+    }
+    
+    
+    
+    public ArrayList filtrarIngresos(Map<String, Boolean> criterios, String unEstado, String unaEtiqueta, OrdenDeProduccion unaOrdenProduccionSeleccionada, OrdenDeCompra unaOrdenCompraSeleccionada, Equipamiento unEquipamiento, Proveedor unProveedorTransporteSeleccionado, Proveedor unProveedorSeleccionado, Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior) throws ExcepcionCargaParametros {
+        ArrayList retorno = new ArrayList();
+        
+        Boolean criterioEstado = criterios.get("estado");
+        Boolean criterioEtiqueta = criterios.get("etiqueta");
+        Boolean criterioOrdenDeProduccionAsociada = criterios.get("ordenProduccion");
+        Boolean criterioOrdenDeCompra = criterios.get("ordenCompra");
+        Boolean criterioEquipamiento = criterios.get("equipamiento");
+        Boolean criterioProveedorTransporte = criterios.get("proveedorTransporte");
+        Boolean criterioProveedorOrdenCompra = criterios.get("proveedorOrdenCompra");
+        Boolean criterioFechaOrigen = criterios.get("fechaOrigen");
+        
+        if (criterioEstado && unEstado.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("No se ha seleccionado un estado.");
+        if (criterioEtiqueta && (unaEtiqueta == null || unaEtiqueta.isEmpty()))
+            throw new ExcepcionCargaParametros("No se ha ingresado una etiqueta para realizar el filtrado.");
+        if (criterioOrdenDeProduccionAsociada && unaOrdenProduccionSeleccionada == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de producción.");
+        if (criterioOrdenDeCompra && unaOrdenCompraSeleccionada == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de compra.");
+        if (criterioEquipamiento && unEquipamiento == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un equipamiento donde reside.");
+        if (criterioProveedorTransporte && unProveedorTransporteSeleccionado == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un proveedor de servicio de transporte.");
+        if (criterioProveedorOrdenCompra && unProveedorSeleccionado == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un proveedor asociado a un ingreso.");
+        if (criterioFechaOrigen && (fechaOrigenInferior == null || fechaOrigenSuperior == null))
+            throw new ExcepcionCargaParametros("Verifique las fechas de Origen Inferior y Superior ingresadas");
+        
+        Iterator ingresos = this.movimientosDeIngreso.keySet().iterator();
+        while (ingresos.hasNext()){
+            Boolean sePuedeAgregar = true;
+            int unId = (int) ingresos.next();
+            MovimientoInternoMateriaPrima unMovimiento = this.movimientosDeIngreso.get(unId);
+            if (sePuedeAgregar && criterioEstado)
+                sePuedeAgregar = unMovimiento.poseeEstado(unEstado);
+            if (sePuedeAgregar && criterioEtiqueta)
+                sePuedeAgregar = unMovimiento.poseeEtiqueta(unaEtiqueta);
+            if (sePuedeAgregar && criterioOrdenDeProduccionAsociada)
+                sePuedeAgregar = unMovimiento.poseeOrdenDeProduccionAsociada(unaOrdenProduccionSeleccionada);
+            if (sePuedeAgregar && criterioOrdenDeCompra)
+                sePuedeAgregar = unMovimiento.poseeOrdenDeCompraAsociada(unaOrdenCompraSeleccionada);
+            if (sePuedeAgregar && criterioEquipamiento)
+                sePuedeAgregar = unMovimiento.poseeEquipamientoDestino(unEquipamiento);
+            if (sePuedeAgregar && criterioProveedorTransporte)
+                sePuedeAgregar = unMovimiento.poseeProveedorTransporteAsociado(unProveedorTransporteSeleccionado);
+            if (sePuedeAgregar && criterioProveedorOrdenCompra)
+                sePuedeAgregar = unMovimiento.poseeProveedorAsociado(unProveedorSeleccionado);
+            if (sePuedeAgregar && criterioFechaOrigen){
+                fechaOrigenInferior.set(Calendar.HOUR, 0);
+                fechaOrigenInferior.set(Calendar.MINUTE, 0);
+                fechaOrigenInferior.set(Calendar.SECOND, 0);
+                
+                fechaOrigenSuperior.set(Calendar.HOUR_OF_DAY, 24);
+                fechaOrigenSuperior.set(Calendar.MINUTE, 59);
+                fechaOrigenSuperior.set(Calendar.SECOND, 59);
+                sePuedeAgregar = unMovimiento.origenEstaEntre(fechaOrigenInferior, fechaOrigenSuperior);
+            }
+            if (sePuedeAgregar)
+                retorno.add(unMovimiento);
+        }
+        return retorno;
+    }
+    
+public ArrayList filtrarMovimientos(Map<String, Boolean> criterios, String unEstado, String unaEtiqueta, OrdenDeProduccion unaOrdenProduccionSeleccionada, OrdenDeCompra unaOrdenCompraSeleccionada, Equipamiento unEquipamiento, Proveedor unProveedorTransporteSeleccionado, Proveedor unProveedorSeleccionado, Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior) throws ExcepcionCargaParametros {
+        ArrayList retorno = new ArrayList();
+        
+        Boolean criterioEstado = criterios.get("estado");
+        Boolean criterioEtiqueta = criterios.get("etiqueta");
+        Boolean criterioOrdenDeProduccionAsociada = criterios.get("ordenProduccion");
+        Boolean criterioOrdenDeCompra = criterios.get("ordenCompra");
+        Boolean criterioEquipamiento = criterios.get("equipamiento");
+        Boolean criterioProveedorTransporte = criterios.get("proveedorTransporte");
+        Boolean criterioProveedorOrdenCompra = criterios.get("proveedorOrdenCompra");
+        Boolean criterioFechaOrigen = criterios.get("fechaOrigen");
+        
+        if (criterioEstado && unEstado.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("No se ha seleccionado un estado.");
+        if (criterioEtiqueta && (unaEtiqueta == null || unaEtiqueta.isEmpty()))
+            throw new ExcepcionCargaParametros("No se ha ingresado una etiqueta para realizar el filtrado.");
+        if (criterioOrdenDeProduccionAsociada && unaOrdenProduccionSeleccionada == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de producción.");
+        if (criterioOrdenDeCompra && unaOrdenCompraSeleccionada == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de compra.");
+        if (criterioEquipamiento && unEquipamiento == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un equipamiento donde reside.");
+        if (criterioProveedorTransporte && unProveedorTransporteSeleccionado == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un proveedor de servicio de transporte.");
+        if (criterioProveedorOrdenCompra && unProveedorSeleccionado == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un proveedor asociado a un ingreso.");
+        if (criterioFechaOrigen && (fechaOrigenInferior == null || fechaOrigenSuperior == null))
+            throw new ExcepcionCargaParametros("Verifique las fechas de Origen Inferior y Superior ingresadas");
+        
+        Iterator recorredorMovimientos = this.movimientos.keySet().iterator();
+        while (recorredorMovimientos.hasNext()){
+            Boolean sePuedeAgregar = true;
+            int unId = (int) recorredorMovimientos.next();
+            MovimientoInternoMateriaPrima unMovimiento = this.movimientos.get(unId);
+            sePuedeAgregar = unMovimiento.poseeEquipamientoOrigen(); //Me aseguro de que solamente sean movimientos que no sean de ingreso.
+            if (sePuedeAgregar && criterioEstado)
+                sePuedeAgregar = unMovimiento.poseeEstado(unEstado);
+            if (sePuedeAgregar && criterioEtiqueta)
+                sePuedeAgregar = unMovimiento.poseeEtiqueta(unaEtiqueta);
+            if (sePuedeAgregar && criterioOrdenDeProduccionAsociada)
+                sePuedeAgregar = unMovimiento.poseeOrdenDeProduccionAsociada(unaOrdenProduccionSeleccionada);
+            if (sePuedeAgregar && criterioOrdenDeCompra)
+                sePuedeAgregar = unMovimiento.poseeOrdenDeCompraAsociada(unaOrdenCompraSeleccionada);
+            if (sePuedeAgregar && criterioEquipamiento)
+                sePuedeAgregar = unMovimiento.poseeEquipamientoDestino(unEquipamiento);
+            if (sePuedeAgregar && criterioProveedorTransporte)
+                sePuedeAgregar = unMovimiento.poseeProveedorTransporteAsociado(unProveedorTransporteSeleccionado);
+            if (sePuedeAgregar && criterioProveedorOrdenCompra)
+                sePuedeAgregar = unMovimiento.poseeProveedorAsociado(unProveedorSeleccionado);
+            if (sePuedeAgregar && criterioFechaOrigen){
+                fechaOrigenInferior.set(Calendar.HOUR, 0);
+                fechaOrigenInferior.set(Calendar.MINUTE, 0);
+                fechaOrigenInferior.set(Calendar.SECOND, 0);
+                
+                fechaOrigenSuperior.set(Calendar.HOUR_OF_DAY, 24);
+                fechaOrigenSuperior.set(Calendar.MINUTE, 59);
+                fechaOrigenSuperior.set(Calendar.SECOND, 59);
+                sePuedeAgregar = unMovimiento.origenEstaEntre(fechaOrigenInferior, fechaOrigenSuperior);
+            }
+            if (sePuedeAgregar)
+                retorno.add(unMovimiento);
+        }
+        return retorno;
+    }    
+
+public ArrayList filtrarLotes(Map<String, Boolean> criterios, Equipamiento unEquipamientoAFiltrar, String unaEtiqueta, OrdenDeProduccion unaOrdenProduccionSeleccionada, OrdenDeCompra unaOrdenCompraSeleccionada, Proveedor unProveedorSeleccionado, Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior) throws ExcepcionCargaParametros {
+        ArrayList retorno = new ArrayList();
+        
+        Boolean criterioEtiqueta = criterios.get("etiqueta");
+        Boolean criterioOrdenDeProduccionAsociada = criterios.get("ordenProduccion");
+        Boolean criterioOrdenDeCompra = criterios.get("ordenCompra");
+        Boolean criterioProveedorOrdenCompra = criterios.get("proveedorOrdenCompra");
+        Boolean criterioFechaOrigen = criterios.get("fechaOrigen");
+        
+        if (criterioEtiqueta && (unaEtiqueta == null || unaEtiqueta.isEmpty()))
+            throw new ExcepcionCargaParametros("No se ha ingresado una etiqueta para realizar el filtrado.");
+        if (criterioOrdenDeProduccionAsociada && unaOrdenProduccionSeleccionada == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de producción.");
+        if (criterioOrdenDeCompra && unaOrdenCompraSeleccionada == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de compra.");
+        if (criterioProveedorOrdenCompra && unProveedorSeleccionado == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un proveedor asociado a un ingreso.");
+        if (criterioFechaOrigen && (fechaOrigenInferior == null || fechaOrigenSuperior == null))
+            throw new ExcepcionCargaParametros("Verifique las fechas de Origen Inferior y Superior ingresadas");
+        if (!unEquipamientoAFiltrar.poseeUnoOMasLotes()){
+            throw new ExcepcionCargaParametros("El equipamiento que seleccionó no posee lotes");
+        }
+        Iterator lotesDeUnEquipamiento = unEquipamientoAFiltrar.getLotesAsociadosNoAnulados().iterator();
+        while (lotesDeUnEquipamiento.hasNext()){
+            Boolean sePuedeAgregar = true;
+            Lote unLote = (Lote) lotesDeUnEquipamiento.next();
+            
+            if (sePuedeAgregar && criterioOrdenDeProduccionAsociada)
+                sePuedeAgregar = unLote.poseeOrdenDeProduccionAsociada(unaOrdenProduccionSeleccionada);
+            if (sePuedeAgregar && criterioOrdenDeCompra)
+                sePuedeAgregar = unLote.poseeOrdenDeCompraAsociada(unaOrdenCompraSeleccionada);
+            if (sePuedeAgregar && criterioProveedorOrdenCompra)
+                sePuedeAgregar = unLote.poseeProveedorAsociado(unProveedorSeleccionado);
+            if (sePuedeAgregar && criterioFechaOrigen){
+                fechaOrigenInferior.set(Calendar.HOUR, 0);
+                fechaOrigenInferior.set(Calendar.MINUTE, 0);
+                fechaOrigenInferior.set(Calendar.SECOND, 0);
+                
+                fechaOrigenSuperior.set(Calendar.HOUR_OF_DAY, 24);
+                fechaOrigenSuperior.set(Calendar.MINUTE, 59);
+                fechaOrigenSuperior.set(Calendar.SECOND, 59);
+                sePuedeAgregar = unLote.ultimoMovimientoEstaEntre(fechaOrigenInferior, fechaOrigenSuperior);
+            }
+            if (sePuedeAgregar)
+                retorno.add(unLote);
+        }
+        return retorno;
     }
 
     public ArrayList filtrarOrdenesDeCompra(Map<String, Boolean> criterios, OrdenDeProduccion unaOrdenProduccionSeleccionada, Proveedor unProveedorSeleccionado, String unEstado, Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior) throws ExcepcionCargaParametros {
@@ -982,8 +1312,10 @@ public class Organizacion {
             throw new ExcepcionCargaParametros("La orden de compra no puede poseer un costo de compra negativo.");        
         if (Organizacion.convertirUnidadPeso(ordenProduccionSeleccionada.getUnidadDeMedida(), ordenProduccionSeleccionada.getCantidadAProducir(), unaUnidadMedida)< cantidadAComprar)
             throw new ExcepcionCargaParametros("No se puede registrar una compra por una cantidad de peso mayor a la indicada en la orden de producción.");
+        if (Organizacion.convertirUnidadPeso(ordenProduccionSeleccionada.getUnidadDeMedida(), ordenProduccionSeleccionada.getPesoRestanteAComprar(), unaUnidadMedida)< cantidadAComprar)
+            throw new ExcepcionCargaParametros("La orden de producción tiene un remanente a comprar menor al ingresado.");
         
-        OrdenDeCompra unaOrdenDeCompra = new OrdenDeCompra(cantidadAComprar, unaUnidadMedida, costoDeCompra, proveedorSeleccionado, ordenProduccionSeleccionada);
+        OrdenDeCompra unaOrdenDeCompra = new OrdenDeCompra(this.getUsuarioActivo(), cantidadAComprar, unaUnidadMedida, costoDeCompra, proveedorSeleccionado, ordenProduccionSeleccionada);
         persistencia.persistirObjeto(unaOrdenDeCompra);
         this.ordenesCompra.put(unaOrdenDeCompra.getId(), unaOrdenDeCompra);
         ordenProduccionSeleccionada.agregarOrdenDeCompra(unaOrdenDeCompra);

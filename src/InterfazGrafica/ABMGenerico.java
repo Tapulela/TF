@@ -7,9 +7,12 @@ package InterfazGrafica;
 
 import LogicaDeNegocio.Organizacion;
 import LogicaDeNegocio.Proveedor;
+import java.awt.Component;
+import java.awt.Toolkit;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 /**
  *
@@ -40,7 +43,9 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
 
 
     ABMGenerico(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
+        this.setUndecorated(true);
         initComponents();
+        this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
         this.organizacion = organizacion;
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
@@ -56,6 +61,7 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
         
         this.ventanaAnterior = ventanaAnterior;
         habilitarCamposIniciales();
+        ParametrosDeInterfaz.configurarVentana(this);
     }
     private void organizarElementos(){
         this.deshabilitarTodo();
@@ -74,7 +80,7 @@ public class ABMGenerico extends javax.swing.JFrame implements TransferenciaInst
                 break;
                 
         }
-        this.pack();
+        //this.pack();
         
     }
     /**

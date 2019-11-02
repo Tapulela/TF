@@ -8,20 +8,20 @@ package InterfazGrafica;
 import LogicaDeNegocio.Bascula;
 import LogicaDeNegocio.Equipamiento;
 import LogicaDeNegocio.ExcepcionCargaParametros;
+import LogicaDeNegocio.MovimientoInternoMateriaPrima;
 import LogicaDeNegocio.OrdenDeCompra;
 import LogicaDeNegocio.Organizacion;
 import LogicaDeNegocio.Proveedor;
 import Persistencia.ExcepcionPersistencia;
+import java.awt.Toolkit;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.text.NumberFormat;
 import java.time.LocalTime;
 import java.util.Calendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.text.PlainDocument;
 
 /**
  *
@@ -34,6 +34,8 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
      */
     private Organizacion organizacion;
     private JFrame ventanaAnterior;
+    
+    private MovimientoInternoMateriaPrima unMovimientoSeleccionado;
     private OrdenDeCompra unaOrdenDeCompraSeleccionada;
     private Equipamiento unEquipamientoSeleccionado;
     private Proveedor unProveedorDeTransporteSeleccionado;
@@ -46,6 +48,11 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
     private final String textoModificacion = "Modificar un CONCEPTO";
     
     
+    
+    
+    
+    
+    
     public void setUnaOrdenDeCompraSeleccionada(OrdenDeCompra unaOrdenDeCompraSeleccionada) {
         this.unaOrdenDeCompraSeleccionada = unaOrdenDeCompraSeleccionada;
     }
@@ -55,9 +62,15 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
 
 
 
-    GestionIngresoMP(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
+    public GestionIngresoMP(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
+        
+        
+        this.setUndecorated(true);
         initComponents();
+        this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
         this.organizacion = organizacion;
+                
+        
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
         
@@ -72,7 +85,25 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         
         this.ventanaAnterior = ventanaAnterior;
         habilitarCamposIniciales();
+    
+        //PRUEBA DE EDICION DE COMPONENTES
+        ParametrosDeInterfaz.configurarVentana(this);
+        
+        
+        //Prueba de campo formateado
+        
+        
+        //PRUEBA DE FILTRO DE TEXTO
+
+        FiltroTextosSoloNumeros filtroTexto = new FiltroTextosSoloNumeros();
+        ((PlainDocument) jTFCampo9.getDocument()).setDocumentFilter(filtroTexto);
+        ((PlainDocument) jTFCampo1.getDocument()).setDocumentFilter(filtroTexto);
+        
+        FiltroTextoPatente filtroTextoPatente = new FiltroTextoPatente();
+        ((PlainDocument) jTFCampo5.getDocument()).setDocumentFilter(filtroTextoPatente);
+        ((PlainDocument) jTFCampo6.getDocument()).setDocumentFilter(filtroTextoPatente);
     }
+    
     private void organizarElementos(){
         this.deshabilitarTodo();
         switch((String)jCBOperacion.getSelectedItem()){
@@ -90,9 +121,11 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
                 break;
                 
         }
-        this.pack();
+        //this.pack();
         
     }
+    
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -108,13 +141,6 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         jCBOperacion = new javax.swing.JComboBox<>();
         jBBuscar = new javax.swing.JButton();
         cabeceraDeVentana = new InterfazGrafica.CabeceraDeVentana();
-        jLOperacionSeleccionada = new javax.swing.JLabel();
-        jLStaticEtiqueta2 = new javax.swing.JLabel();
-        jLStaticEtiqueta1 = new javax.swing.JLabel();
-        jLStaticEtiqueta4 = new javax.swing.JLabel();
-        jLStaticEtiqueta3 = new javax.swing.JLabel();
-        jLStaticEtiqueta5 = new javax.swing.JLabel();
-        jBBuscarDestino = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         jLStaticEtiqueta6 = new javax.swing.JLabel();
         jLStaticCB1 = new javax.swing.JLabel();
@@ -130,9 +156,7 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         jLStaticCB2 = new javax.swing.JLabel();
         jCB2 = new javax.swing.JComboBox<>();
         jLStaticCampo2 = new javax.swing.JLabel();
-        jTFCampo2 = new javax.swing.JTextField();
         jLStaticCampo3 = new javax.swing.JLabel();
-        jTFCampo3 = new javax.swing.JTextField();
         jLStaticCampo4 = new javax.swing.JLabel();
         jTFCampo4 = new javax.swing.JTextField();
         jLStaticCampo5 = new javax.swing.JLabel();
@@ -145,6 +169,13 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         jTFCampo8 = new javax.swing.JTextField();
         jLStaticCampo9 = new javax.swing.JLabel();
         jTFCampo9 = new javax.swing.JTextField();
+        NumberFormat formateadorCampoFloat = NumberFormat.getInstance();
+        formateadorCampoFloat.setGroupingUsed(true);
+        formateadorCampoFloat.setMinimumFractionDigits(3);
+        formateadorCampoFloat.setParseIntegerOnly(false);
+        jTFCampo2 = new javax.swing.JFormattedTextField(formateadorCampoFloat);
+        jTFCampo3 = new javax.swing.JFormattedTextField(formateadorCampoFloat);
+        jPanel2 = new javax.swing.JPanel();
         jLStaticEtiqueta10 = new javax.swing.JLabel();
         jLStaticEtiqueta11 = new javax.swing.JLabel();
         jBBuscarOrdenCompra = new javax.swing.JButton();
@@ -154,9 +185,16 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         jLStaticEtiqueta7 = new javax.swing.JLabel();
         jBBuscarProveedor = new javax.swing.JButton();
         jLStaticEtiqueta13 = new javax.swing.JLabel();
+        jLStaticEtiqueta1 = new javax.swing.JLabel();
         jLStaticEtiqueta14 = new javax.swing.JLabel();
+        jLStaticEtiqueta4 = new javax.swing.JLabel();
         jLStaticEtiqueta15 = new javax.swing.JLabel();
+        jLStaticEtiqueta3 = new javax.swing.JLabel();
         jLStaticEtiqueta16 = new javax.swing.JLabel();
+        jLStaticEtiqueta5 = new javax.swing.JLabel();
+        jBBuscarDestino = new javax.swing.JButton();
+        jLOperacionSeleccionada = new javax.swing.JLabel();
+        jLStaticEtiqueta2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(153, 255, 153));
@@ -199,39 +237,6 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
             }
         });
 
-        jLOperacionSeleccionada.setText("Operación sobre un Concepto");
-        jLOperacionSeleccionada.setEnabled(false);
-        jLOperacionSeleccionada.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
-        jLStaticEtiqueta2.setText("Equipamiento seleccionado");
-        jLStaticEtiqueta2.setEnabled(false);
-        jLStaticEtiqueta2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
-        jLStaticEtiqueta1.setText("Equipamiento donde se registra el ingreso");
-        jLStaticEtiqueta1.setEnabled(false);
-        jLStaticEtiqueta1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
-        jLStaticEtiqueta4.setText("Báscula asociada");
-        jLStaticEtiqueta4.setEnabled(false);
-        jLStaticEtiqueta4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
-        jLStaticEtiqueta3.setText("un equipamiento");
-        jLStaticEtiqueta3.setEnabled(false);
-        jLStaticEtiqueta3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
-        jLStaticEtiqueta5.setText("una báscula");
-        jLStaticEtiqueta5.setEnabled(false);
-        jLStaticEtiqueta5.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
-        jBBuscarDestino.setText("Buscar un Equipamiento");
-        jBBuscarDestino.setEnabled(false);
-        jBBuscarDestino.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jBBuscarDestino.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jBBuscarDestinoActionPerformed(evt);
-            }
-        });
-
         jLStaticEtiqueta6.setText("Detalles de Ticket asociado");
         jLStaticEtiqueta6.setEnabled(false);
         jLStaticEtiqueta6.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
@@ -258,6 +263,7 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         jC1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jC1.setEnabled(false);
 
+        jC2.setEnabled(false);
         jC2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
         jLStaticCalendar2.setText("Hora de entrada");
@@ -268,6 +274,7 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         jLStaticCalendar3.setEnabled(false);
         jLStaticCalendar3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
+        jC3.setEnabled(false);
         jC3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
         jLStaticCB2.setText("Unidad de medida");
@@ -282,15 +289,9 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         jLStaticCampo2.setEnabled(false);
         jLStaticCampo2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jTFCampo2.setEnabled(false);
-        jTFCampo2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
         jLStaticCampo3.setText("Peso de salida");
         jLStaticCampo3.setEnabled(false);
         jLStaticCampo3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
-        jTFCampo3.setEnabled(false);
-        jTFCampo3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
         jLStaticCampo4.setText("Nombre del conductor");
         jLStaticCampo4.setEnabled(false);
@@ -320,19 +321,23 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         jTFCampo7.setEnabled(false);
         jTFCampo7.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLStaticCampo8.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLStaticCampo8.setText("Numero de Hoja de ruta");
         jLStaticCampo8.setEnabled(false);
+        jLStaticCampo8.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jTFCampo8.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jTFCampo8.setEnabled(false);
+        jTFCampo8.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLStaticCampo9.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLStaticCampo9.setText("Numero de remito");
         jLStaticCampo9.setEnabled(false);
+        jLStaticCampo9.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jTFCampo9.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jTFCampo9.setEnabled(false);
+        jTFCampo9.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jTFCampo2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jTFCampo3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -342,26 +347,25 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLStaticCampo5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jTFCampo5)
-                        .addGap(223, 223, 223))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLStaticCB1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jCB1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(jLStaticCampo1)
                         .addGap(36, 36, 36)
-                        .addComponent(jTFCampo1, javax.swing.GroupLayout.DEFAULT_SIZE, 223, Short.MAX_VALUE))
+                        .addComponent(jTFCampo1, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLStaticCampo5)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jTFCampo5))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLStaticCampo6)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jTFCampo6))
-                            .addComponent(jLStaticEtiqueta6)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addComponent(jLStaticEtiqueta6, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLStaticCalendar1)
                                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -370,35 +374,35 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
                                         .addComponent(jC2, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jC1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLStaticCalendar3)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jC3, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLStaticCB2)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jCB2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLStaticCampo2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTFCampo2, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jTFCampo2, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLStaticCampo3)
-                                .addGap(31, 31, 31)
-                                .addComponent(jTFCampo3, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jTFCampo3, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLStaticCampo4)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jTFCampo4, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLStaticCampo7)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jTFCampo7, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLStaticCampo8)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTFCampo8))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jTFCampo8, javax.swing.GroupLayout.DEFAULT_SIZE, 353, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLStaticCampo9)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jTFCampo9)))
@@ -464,7 +468,7 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLStaticCampo9)
                     .addComponent(jTFCampo9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(63, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jLStaticEtiqueta10.setText("Orden de compra seleccionada:");
@@ -513,17 +517,140 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         jLStaticEtiqueta13.setEnabled(false);
         jLStaticEtiqueta13.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
+        jLStaticEtiqueta1.setText("Equipamiento donde se registra el ingreso");
+        jLStaticEtiqueta1.setEnabled(false);
+        jLStaticEtiqueta1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
         jLStaticEtiqueta14.setText("un proveedor de transporte");
         jLStaticEtiqueta14.setEnabled(false);
         jLStaticEtiqueta14.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticEtiqueta4.setText("Báscula asociada");
+        jLStaticEtiqueta4.setEnabled(false);
+        jLStaticEtiqueta4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
         jLStaticEtiqueta15.setText("Etiqueta a utilizar en el lote ingresado:");
         jLStaticEtiqueta15.setEnabled(false);
         jLStaticEtiqueta15.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
+        jLStaticEtiqueta3.setText("un equipamiento");
+        jLStaticEtiqueta3.setEnabled(false);
+        jLStaticEtiqueta3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
         jLStaticEtiqueta16.setText("etiqueta");
         jLStaticEtiqueta16.setEnabled(false);
         jLStaticEtiqueta16.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticEtiqueta5.setText("una báscula");
+        jLStaticEtiqueta5.setEnabled(false);
+        jLStaticEtiqueta5.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jBBuscarDestino.setText("Buscar un Equipamiento");
+        jBBuscarDestino.setEnabled(false);
+        jBBuscarDestino.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jBBuscarDestino.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jBBuscarDestinoActionPerformed(evt);
+            }
+        });
+
+        jLOperacionSeleccionada.setText("Operación sobre un Concepto");
+        jLOperacionSeleccionada.setEnabled(false);
+        jLOperacionSeleccionada.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticEtiqueta2.setText("Equipamiento seleccionado");
+        jLStaticEtiqueta2.setEnabled(false);
+        jLStaticEtiqueta2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLOperacionSeleccionada)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta4)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLStaticEtiqueta5))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta2)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLStaticEtiqueta3))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta10)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLStaticEtiqueta12))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta11)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jBBuscarOrdenCompra))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta8)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLStaticEtiqueta9))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jBBuscarDestino, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jBBuscarProveedor))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta13)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLStaticEtiqueta14))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta15)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLStaticEtiqueta16)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLOperacionSeleccionada)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta11)
+                    .addComponent(jBBuscarOrdenCompra))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta10)
+                    .addComponent(jLStaticEtiqueta12))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta8)
+                    .addComponent(jLStaticEtiqueta9))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta1)
+                    .addComponent(jBBuscarDestino))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta2)
+                    .addComponent(jLStaticEtiqueta3))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta4)
+                    .addComponent(jLStaticEtiqueta5))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta7)
+                    .addComponent(jBBuscarProveedor))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta13)
+                    .addComponent(jLStaticEtiqueta14))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta15)
+                    .addComponent(jLStaticEtiqueta16))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -532,59 +659,23 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.DEFAULT_SIZE, 1785, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jBConcretarAccion)
-                        .addGap(18, 18, 18)
-                        .addComponent(jBCancelar))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                    .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLOperacionSeleccionada)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticEtiqueta4)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLStaticEtiqueta5))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticEtiqueta2)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLStaticEtiqueta3))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticEtiqueta10)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLStaticEtiqueta12))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticEtiqueta11)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jBBuscarOrdenCompra))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticEtiqueta8)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLStaticEtiqueta9))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticEtiqueta1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jBBuscarDestino, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticEtiqueta7)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jBBuscarProveedor))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticEtiqueta13)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLStaticEtiqueta14))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLStaticEtiqueta15)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLStaticEtiqueta16))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel12)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addComponent(jBBuscar)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(jBBuscar))
+                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(18, 18, 18)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jBConcretarAccion)
+                        .addGap(18, 18, 18)
+                        .addComponent(jBCancelar)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -600,50 +691,15 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
                             .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jBBuscar))
                         .addGap(18, 18, 18)
-                        .addComponent(jLOperacionSeleccionada)
-                        .addGap(18, 18, 18)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(219, 219, 219))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLStaticEtiqueta11)
-                            .addComponent(jBBuscarOrdenCompra))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLStaticEtiqueta10)
-                            .addComponent(jLStaticEtiqueta12))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLStaticEtiqueta8)
-                            .addComponent(jLStaticEtiqueta9))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLStaticEtiqueta1)
-                            .addComponent(jBBuscarDestino))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLStaticEtiqueta2)
-                            .addComponent(jLStaticEtiqueta3))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLStaticEtiqueta4)
-                            .addComponent(jLStaticEtiqueta5))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLStaticEtiqueta7)
-                            .addComponent(jBBuscarProveedor))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLStaticEtiqueta13)
-                            .addComponent(jLStaticEtiqueta14))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLStaticEtiqueta15)
-                            .addComponent(jLStaticEtiqueta16))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jBCancelar)
-                    .addComponent(jBConcretarAccion))
-                .addContainerGap())
+                            .addComponent(jBCancelar)
+                            .addComponent(jBConcretarAccion))
+                        .addContainerGap())))
         );
 
         pack();
@@ -661,7 +717,7 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
                     
                     break;
                 case "Baja":
-                    //Se va a dar de baja algo
+                    organizacion.anularIngresoDeMateriaPrima(unMovimientoSeleccionado);
                     break;
                 case "Modificacion":
                     //Se va a modificar
@@ -696,7 +752,7 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
     }//GEN-LAST:event_jCBOperacionItemStateChanged
 
     private void jBBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBBuscarActionPerformed
-        BuscarGenerico unaVentana = new BuscarGenerico(this.organizacion, this, this.trayectoriaActual);
+        BuscarIngresoMateriaPrima unaVentana = new BuscarIngresoMateriaPrima(this.organizacion, this, this.trayectoriaActual);
         this.dispose();
     }//GEN-LAST:event_jBBuscarActionPerformed
 
@@ -741,33 +797,6 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(GestionIngresoMP.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
         //</editor-fold>
         //</editor-fold>
         //</editor-fold>
@@ -829,9 +858,10 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
     private javax.swing.JLabel jLStaticEtiqueta9;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JTextField jTFCampo1;
-    private javax.swing.JTextField jTFCampo2;
-    private javax.swing.JTextField jTFCampo3;
+    private javax.swing.JFormattedTextField jTFCampo2;
+    private javax.swing.JFormattedTextField jTFCampo3;
     private javax.swing.JTextField jTFCampo4;
     private javax.swing.JTextField jTFCampo5;
     private javax.swing.JTextField jTFCampo6;
@@ -923,6 +953,17 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
                 jTFCampo5.setText("");
                 jTFCampo6.setText("");
                 jTFCampo7.setText("");
+                jTFCampo8.setText("");
+                jTFCampo9.setText("");
+                
+                jLStaticEtiqueta12.setText("");
+                jLStaticEtiqueta3.setText("");
+                jLStaticEtiqueta5.setText("");
+                jLStaticEtiqueta14.setText("");
+                jLStaticEtiqueta16.setText("");
+                
+                jC2.setText("");
+                jC3.setText("");
                 
                 jCB1.setSelectedItem("Seleccionar");
                 jCB2.setSelectedItem("Seleccionar");
@@ -931,6 +972,18 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
 
     @Override
     public void actualizarUnObjeto(Object unObjeto) {
+        
+        if (unObjeto instanceof MovimientoInternoMateriaPrima){
+            unMovimientoSeleccionado = (MovimientoInternoMateriaPrima) unObjeto;
+            unaOrdenDeCompraSeleccionada = unMovimientoSeleccionado.getLoteAsociado().getOrdenDeCompraAsociada();
+            unProveedorDeTransporteSeleccionado = unMovimientoSeleccionado.getProveedorTransporte();
+            unEquipamientoSeleccionado = unMovimientoSeleccionado.getEquipamientoDestino();
+            exhibirOrdenDeCompraYProveedor();
+            exhibirEquipamiento();
+            exhibirProveedorDeTransporte();
+            exhibirEtiqueta();
+        }
+                
         if (unObjeto instanceof OrdenDeCompra){
             try {
                 unaOrdenDeCompraSeleccionada = (OrdenDeCompra) unObjeto;
@@ -963,7 +1016,7 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         organizarElementos();
         jBConcretarAccion.setEnabled(true);
         jBCancelar.setEnabled(true);
-        this.pack();
+        //this.pack();
     }
 
     private void prepararAlta() {
@@ -1198,6 +1251,12 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
             jLStaticEtiqueta14.setText(unProveedorDeTransporteSeleccionado.getRazonSocial().substring(0, 30)+"...");
         else
             jLStaticEtiqueta14.setText(unProveedorDeTransporteSeleccionado.getRazonSocial());
+    }
+
+    private void exhibirEtiqueta() {
+        jLStaticEtiqueta15.setEnabled(true);
+        jLStaticEtiqueta16.setEnabled(true);
+        jLStaticEtiqueta16.setText(unMovimientoSeleccionado.getLoteAsociado().getEtiqueta());
     }
     
 
