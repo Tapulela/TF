@@ -80,24 +80,15 @@ public class Equipamiento {
         this.movimientosAsociadosDeSalidaActuales = new ArrayList();
     }
     
-    public float obtenerCapacidadDisponible(String unidadDeMedida) throws Exception{
+    public float obtenerCapacidadDisponible(String unidadDeMedida) throws ExcepcionCargaParametros{
         //Capacidad máxima menos todos los movimientos de entrada mas todos los movimientos de salida
         float retorno = this.capacidadMaxima;
-        float total_Entrada = 0;
-        float total_Salida = 0;
-        Iterator entradas = this.movimientosAsociadosDeEntradaActuales.iterator();
-        Iterator salidas = this.movimientosAsociadosDeSalidaActuales.iterator();
-        while (entradas.hasNext()){
-            MovimientoInternoMateriaPrima unMovimientoDeEntrada = (MovimientoInternoMateriaPrima) entradas.next();
-            if (unMovimientoDeEntrada.estaRegular())
-                total_Entrada = total_Entrada + unMovimientoDeEntrada.getPesoNeto(unidadDeMedida);
+        Iterator recorredorLotes = this.lotesEnExistenciaActuales.iterator();
+        while (recorredorLotes.hasNext()){
+            Lote unLote = (Lote) recorredorLotes.next();
+            retorno = retorno - Organizacion.convertirUnidadPeso(unLote.getUnidadDeMedida(), unLote.getCantidad(), this.unidadDeMedida);
         }
-        while (salidas.hasNext()){
-            MovimientoInternoMateriaPrima unMovimientoDeSalida = (MovimientoInternoMateriaPrima) salidas.next();
-            if (unMovimientoDeSalida.estaRegular())
-                total_Salida = total_Salida + unMovimientoDeSalida.getPesoNeto((unidadDeMedida));
-        }
-        retorno = total_Entrada - total_Salida;
+        
         return retorno;
     }
     
@@ -260,7 +251,7 @@ public class Equipamiento {
         this.basculaAsociada = unaBascula;
     }
 
-    public boolean poseeLotes() {
+    public boolean poseeUnoOMasLotes() {
         return !this.lotesEnExistenciaActuales.isEmpty();
     }
 
@@ -270,7 +261,7 @@ public class Equipamiento {
 
     public void cambiarDeBascula(Bascula unaBascula) throws ExcepcionCargaParametros {
         
-        if (!estaActivo())
+        if (!unaBascula.estaActivo())
             throw new ExcepcionCargaParametros("La bascula no se encuentra activa para ser asociada.");
         if (this.basculaAsociada == null)
             throw new ExcepcionCargaParametros("El equipamiento no posee una Bascula asociada");
@@ -307,6 +298,46 @@ public class Equipamiento {
             return this.getBasculaAsociada().getNombre();
         else
             return "No posee";
+    }
+
+    public boolean puedeAlbergar(float unPesoAVerificar, String unidadMedidaPeso) throws ExcepcionCargaParametros {
+        float capacidadDisponible = Organizacion.convertirUnidadPeso(this.unidadDeMedida, this.capacidadMaxima, unidadMedidaPeso) - this.getCantidadAlmacenada(unidadMedidaPeso);
+        return (capacidadDisponible >= unPesoAVerificar);
+    }
+    
+    public ArrayList getLotesAsociadosNoAnulados(){
+        ArrayList retorno = new ArrayList();
+        Iterator lotes = this.lotesEnExistenciaActuales.iterator();
+        while (lotes.hasNext()){
+            Lote unLote = (Lote) lotes.next();
+            if (!unLote.estaAnulado())
+                retorno.add(unLote);
+        }        
+        return retorno;
+    }
+    
+    private float getCantidadAlmacenada(String unaUnidadMedida) throws ExcepcionCargaParametros {
+        float retorno = 0;
+        Iterator lotesNoAnulados = getLotesAsociadosNoAnulados().iterator();
+        while (lotesNoAnulados.hasNext()){
+            Lote unLote = (Lote) lotesNoAnulados.next();
+            retorno = retorno + Organizacion.convertirUnidadPeso(unLote.getUnidadDeMedida(), unLote.getCantidad(), unaUnidadMedida);
+        }
+        return retorno;
+    }
+
+    public void removerLote(Lote unLote) {
+        this.lotesEnExistenciaActuales.remove(unLote);
+    }
+
+    boolean poseeLotes(ArrayList<Lote> lotes) {
+        boolean estanTodosDentro = true;
+        Iterator recorredorLotes = lotes.iterator();
+        while (recorredorLotes.hasNext() && estanTodosDentro){
+            Lote unLote = (Lote) recorredorLotes.next();
+            estanTodosDentro = this.lotesEnExistenciaActuales.contains(unLote);
+        }
+        return estanTodosDentro;
     }
     
 }

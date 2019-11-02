@@ -88,7 +88,7 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="cabeceraDeVentana" min="-2" pref="189" max="-2" attributes="0"/>
+              <Component id="cabeceraDeVentana" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jLabel12" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -127,7 +127,7 @@
                   <Component id="jLCantidadAProducir" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jTFCantidadAProducir" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace type="unrelated" max="32767" attributes="0"/>
+              <EmptySpace pref="76" max="32767" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jBCancelar" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jBConcretarAccion" alignment="3" min="-2" max="-2" attributes="0"/>

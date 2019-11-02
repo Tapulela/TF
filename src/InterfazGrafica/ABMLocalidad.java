@@ -12,6 +12,8 @@ import LogicaDeNegocio.Pais;
 import LogicaDeNegocio.Proveedor;
 import LogicaDeNegocio.Provincia;
 import Persistencia.ExcepcionPersistencia;
+import java.awt.Component;
+import java.awt.Toolkit;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -19,6 +21,7 @@ import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 /**
  *
@@ -49,13 +52,15 @@ public class ABMLocalidad extends javax.swing.JFrame implements TransferenciaIns
 
 
     ABMLocalidad(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
+        this.setUndecorated(true);
         initComponents();
+        this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
         this.organizacion = organizacion;
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
         
         trayectoriaActual = trayectoriaAnterior+" - Gestión de localidades";
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestión de localidades", this.trayectoriaActual);
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestión de localidades", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         
         
 
@@ -66,7 +71,9 @@ public class ABMLocalidad extends javax.swing.JFrame implements TransferenciaIns
         
         this.ventanaAnterior = ventanaAnterior;
         habilitarCamposIniciales();
+        ParametrosDeInterfaz.configurarVentana(this);
     }
+    
     private void organizarElementos(){
         this.deshabilitarTodo();
         switch((String)jCBOperacion.getSelectedItem()){
@@ -84,7 +91,7 @@ public class ABMLocalidad extends javax.swing.JFrame implements TransferenciaIns
                 break;
                 
         }
-        this.pack();
+        //this.pack();
         
     }
     /**
@@ -370,7 +377,7 @@ public class ABMLocalidad extends javax.swing.JFrame implements TransferenciaIns
         jCB3.setSelectedItem(unaLocalidad.getProvinciaAsociada());
         jTFCampo2.setText(unaLocalidad.getCodigoPostal());
         organizarElementos();
-        this.pack();
+        //this.pack();
     }//GEN-LAST:event_jCB1ItemStateChanged
 
     private void jCB2ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCB2ItemStateChanged
@@ -527,7 +534,7 @@ public class ABMLocalidad extends javax.swing.JFrame implements TransferenciaIns
         organizarElementos();
         jBConcretarAccion.setEnabled(true);
         jBCancelar.setEnabled(true);
-        this.pack();
+        //this.pack();
     }
 
     private void prepararAlta() {

@@ -6,11 +6,14 @@
 package InterfazGrafica;
 
 
+import static InterfazGrafica.UtilidadesInterfazGrafica.establecerAlineacionDeTabla;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.OrdenDeCompra;
 import LogicaDeNegocio.OrdenDeProduccion;
 import LogicaDeNegocio.Organizacion;
 import LogicaDeNegocio.Proveedor;
+import java.awt.Component;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -20,6 +23,8 @@ import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -55,14 +60,16 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
 
     public BuscarOrdenCompra(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior)  {
         
+        this.setUndecorated(true);
         initComponents();
+        this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
         this.setVisible(true); 
         this.ventanaAnterior = ventanaAnterior;
         this.ventanaAnterior.setFocusable(false);
         this.organizacion = organizacion;
         this.trayectoriaActual = trayectoriaAnterior + " - Busqueda de Ordenes de Compra";
         
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Busqueda de una Orden de Compra", this.trayectoriaActual);
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Busqueda de una Orden de Compra", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         jTable1.setRowHeight(30);
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
@@ -75,19 +82,16 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
         criteriosSeleccionados.put(criterio3, false);
         criteriosSeleccionados.put(criterio4, false);
         criteriosSeleccionados.put(criterio5, false);
-        if (ventanaAnterior instanceof ABMProveedor){   
-            ABMProveedor abmProveedor = (ABMProveedor) ventanaAnterior;
-            if (abmProveedor.getOperacionActual().equals("Baja")){
-                //Si voy a dar de baja, solo puedo seleccionar proveedor activo.
-                jCBCriterio3.doClick();
-                jCBCriterio3.setEnabled(false);
-            } 
-        }
+
         if (ventanaAnterior instanceof GestionIngresoMP){   
             //Si voy a dar registrar un ingreso, solo puedo elegir ordenes de compra activas.
-            jCBCriterio3.doClick();
-            jCBCriterio3.setEnabled(false);
+                jCBCriterio3.doClick();
+                jCBCriterio3.setEnabled(false);
+                datoCriterio3.setSelectedItem("Activo");
+                datoCriterio3.setEnabled(false);
         }        
+        establecerAlineacionDeTabla(jTable1, SwingConstants.CENTER);
+        ParametrosDeInterfaz.configurarVentana(this);
     }
 
     /**
@@ -411,7 +415,6 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
         this.ventanaAnterior.setFocusable(true);
         this.dispose();
     }//GEN-LAST:event_jBConcretarAccionActionPerformed
-
     private void jBCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBCancelarActionPerformed
 
         this.limpiarCampos();
@@ -432,7 +435,12 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         try {
             ArrayList listaFiltrada = null;
-            listaFiltrada = this.organizacion.filtrarOrdenesDeCompra(this.criteriosSeleccionados, unaOrdenProduccionSeleccionada, unProveedorSeleccionado, (String)datoCriterio3.getSelectedItem(), dato1Criterio5.getCalendar(), dato2Criterio5.getCalendar());
+            if (this.ventanaAnterior instanceof GestionIngresoMP){
+                listaFiltrada = this.organizacion.filtrarOrdenesDeCompraConProveedorAsociado(this.criteriosSeleccionados, unaOrdenProduccionSeleccionada, unProveedorSeleccionado, (String)datoCriterio3.getSelectedItem(), dato1Criterio5.getCalendar(), dato2Criterio5.getCalendar());
+            }else{
+                listaFiltrada = this.organizacion.filtrarOrdenesDeCompra(this.criteriosSeleccionados, unaOrdenProduccionSeleccionada, unProveedorSeleccionado, (String)datoCriterio3.getSelectedItem(), dato1Criterio5.getCalendar(), dato2Criterio5.getCalendar());
+
+            }
             
             ((DefaultTableModel)this.jTable1.getModel()).setRowCount(0);
             Iterator proveedores = listaFiltrada.iterator();

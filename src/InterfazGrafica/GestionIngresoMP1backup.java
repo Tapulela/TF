@@ -46,7 +46,7 @@ public class GestionIngresoMP1backup extends javax.swing.JFrame implements Trans
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
         
         trayectoriaActual = trayectoriaAnterior+" - Gestión de ALGUN CONCEPTO";
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestión de ALGUN CONCEPTO", this.trayectoriaActual);
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestión de ALGUN CONCEPTO", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         
         
 

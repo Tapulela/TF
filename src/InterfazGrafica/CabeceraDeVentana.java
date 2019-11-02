@@ -22,11 +22,13 @@ public class CabeceraDeVentana extends javax.swing.JPanel {
         this.setBackground(ParametrosDeInterfaz.colorFondo);
     }
     
-    public void configurarCabecera (JFrame ventanaAnterior, JFrame ventanaActual, String nombreVentana, String trayectoria){
+    public void configurarCabecera (JFrame ventanaAnterior, JFrame ventanaActual, String nombreVentana, String trayectoria, String unNombreDeUsuario){
         this.ventanaActual = ventanaActual;
         this.ventanaAnterior = ventanaAnterior;
+        
         setNombreVentana(nombreVentana);
-        setTrayectoria(trayectoria);
+        setTrayectoria("<html>"+trayectoria+"</html>");
+        setNombreUsuario(unNombreDeUsuario);
     }
 
     public void setVentanaAnterior(JFrame ventanaAnterior) {
@@ -51,6 +53,7 @@ public class CabeceraDeVentana extends javax.swing.JPanel {
         jLTrayectoriaVentanas = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLCabeceraNombreVentana = new javax.swing.JLabel();
+        jLCabeceraNombreUsuario = new javax.swing.JLabel();
 
         setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
@@ -67,13 +70,18 @@ public class CabeceraDeVentana extends javax.swing.JPanel {
         });
 
         jLTrayectoriaVentanas.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLTrayectoriaVentanas.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLTrayectoriaVentanas.setText("Trayectoria de Ventanas");
+        jLTrayectoriaVentanas.setVerticalAlignment(javax.swing.SwingConstants.TOP);
 
         jLabel2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLabel2.setText("Sistema de Gestión de Producción de Yerba");
 
         jLCabeceraNombreVentana.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLCabeceraNombreVentana.setText("Nombre de Ventana");
+
+        jLCabeceraNombreUsuario.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLCabeceraNombreUsuario.setText("Usuario");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -92,30 +100,38 @@ public class CabeceraDeVentana extends javax.swing.JPanel {
                         .addComponent(jBVolver)
                         .addGap(18, 18, 18)
                         .addComponent(jLTrayectoriaVentanas)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLCabeceraNombreUsuario)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel2)
                             .addComponent(jLCabeceraNombreVentana))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jBVolver)
-                            .addComponent(jLTrayectoriaVentanas)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLCabeceraNombreUsuario)
+                                    .addComponent(jBVolver))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(jLTrayectoriaVentanas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addComponent(jLabel3))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
     public void setNombreVentana(String unNombre){
         jLCabeceraNombreVentana.setText(unNombre);
     }
+    public void setNombreUsuario(String unNombreDeUsuario){
+        jLCabeceraNombreUsuario.setText("Usuario: "+unNombreDeUsuario);
+    }    
     public void setTrayectoria (String unaTrayectoria){
         jLTrayectoriaVentanas.setText(unaTrayectoria);
     }
@@ -127,9 +143,14 @@ public class CabeceraDeVentana extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jBVolver;
+    private javax.swing.JLabel jLCabeceraNombreUsuario;
     private javax.swing.JLabel jLCabeceraNombreVentana;
     private javax.swing.JLabel jLTrayectoriaVentanas;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     // End of variables declaration//GEN-END:variables
+
+    void invisibilizarVolver() {
+        jBVolver.setVisible(false);
+    }
 }

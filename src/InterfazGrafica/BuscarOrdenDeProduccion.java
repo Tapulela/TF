@@ -6,9 +6,12 @@
 package InterfazGrafica;
 
 
+import static InterfazGrafica.UtilidadesInterfazGrafica.establecerAlineacionDeTabla;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.OrdenDeProduccion;
 import LogicaDeNegocio.Organizacion;
+import java.awt.Component;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -18,7 +21,10 @@ import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
+import sun.swing.SwingAccessor;
 
 /**
  *
@@ -42,14 +48,16 @@ public class BuscarOrdenDeProduccion extends javax.swing.JFrame {
 
     public BuscarOrdenDeProduccion(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
         
+        this.setUndecorated(true);
         initComponents();
+        this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
         this.setVisible(true); 
         this.ventanaAnterior = ventanaAnterior;
         this.ventanaAnterior.setFocusable(false);
         this.organizacion = organizacion;
         this.trayectoriaActual = trayectoriaAnterior + " - Busqueda de Orden de Producción";
         
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Busqueda de una orden de producción", this.trayectoriaActual);
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Busqueda de una orden de producción", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         jTable1.setRowHeight(30);
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
@@ -89,8 +97,9 @@ public class BuscarOrdenDeProduccion extends javax.swing.JFrame {
             jCBEstado.setSelectedItem("Regular");
             jCBEstado.setEnabled(false);
         }        
+        establecerAlineacionDeTabla(jTable1, SwingConstants.CENTER);
+        ParametrosDeInterfaz.configurarVentana(this);
     }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

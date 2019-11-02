@@ -33,14 +33,37 @@
 
 --v1.10
 --	Adicion de ROLES
-
+--	Agregado proveedor de servicio de transporte a movimientos
+-- 	Agregado de secuencia de evento para numerar la ocurrencia de
+--		Ordenes de produccion
+--		Ordenes de Compra
+--		Movimientos
+--		Posiblemente transformaciones
+--	Tengo que agregar una referencia a usuarios en ordenes de produccion y de compra.
 
 --PRIMERO SE DEBEN ELIMINAR TODOS LOS USUARIOS
-DELETE from usuarios;
 
+DELETE FROM MOVIMIENTOS_INTERNOS_MP;
+DELETE FROM ORDENES_COMPRA;
+DELETE FROM ORDENES_PRODUCCION;
+DELETE from usuarios;
+DELETE from usuarios;
 --Borrar toda la base de datos, para luego poder realizar todas las definiciones con los contadores incrementales en 0.
 DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;
+
+
+--CREAR SECUENCIA DE EVENTOS.
+
+	
+CREATE SEQUENCE evento_id_seq;
+ 
+/*CREATE TABLE table_name (
+    ID_Evento integer NOT NULL DEFAULT nextval('evento_id_seq')
+);*/--EJEMPLO PARA AGREGAR A UNA TABLA LA COLUMNA CON EL SECUENCIADOR
+ 
+ALTER SEQUENCE evento_id_seq
+OWNED BY NONE;
 
 --ESTABLECER EL FORMATO DD/MM/AAAA:
 SET DATESTYLE TO 'European';
@@ -72,6 +95,18 @@ language plpgsql;
 
 --CREAR LAS TABLAS
 
+create table USUARIOS (
+	ID SERIAL, 
+	Nombre_Usuario varchar(100),
+	Nombre varchar(100) NOT NULL,
+	Apellido varchar(100) NOT NULL,
+	DNI varchar(100) UNIQUE NOT NULL,
+	Estado varchar(30) NOT NULL,
+	Rol varchar(100),
+	primary key(ID));
+	
+alter table USUARIOS add column rol_asociado oid;
+
 create table PAISES (
 	ID SERIAL, 
 	Nombre varchar(100) UNIQUE NOT NULL,
@@ -93,6 +128,7 @@ create table LOCALIDADES (
 
 create table ORDENES_PRODUCCION (
 	ID SERIAL, 
+	ID_Evento integer NOT NULL DEFAULT nextval('evento_id_seq'),
 	Cantidad_A_Producir float, 
 	Unidad_De_Medida varchar(30), 
 	Fecha_Origen date, 
@@ -103,6 +139,7 @@ create table ORDENES_PRODUCCION (
 
 create table ORDENES_COMPRA (
 	ID SERIAL,
+	ID_Evento integer NOT NULL DEFAULT nextval('evento_id_seq'),
 	Fecha_Origen date NOT NULL,
 	Cantidad float NOT NULL,
 	Unidad_De_Medida varchar(30) NOT NULL,
@@ -114,7 +151,7 @@ create table PROVEEDORES (
 	ID SERIAL,
 	Razon_Social varchar(60), 
 	CUIT varchar(30) NOT NULL, 
-	Estado varchar(30), 
+	Estado varchar(30) NOT NULL, 
 	primary key (ID), 
 	UNIQUE(CUIT),
 	UNIQUE(Razon_Social));
@@ -131,9 +168,10 @@ create table LOTES (
 
 create table MOVIMIENTOS_INTERNOS_MP(
 	ID SERIAL,
-	Fecha_Origen TIMESTAMPTZ NOT NULL,
-	Fecha_Entrada TIMESTAMPTZ NOT NULL,
-	Fecha_Salida TIMESTAMPTZ NOT NULL,
+	ID_Evento integer NOT NULL DEFAULT nextval('evento_id_seq'),
+	Fecha_Origen date NOT NULL,
+	Hora_Entrada TIMESTAMPTZ NOT NULL,
+	Hora_Salida TIMESTAMPTZ NOT NULL,
 	Tipo_Unidad_Transporte varchar(60) NOT NULL,
 	cantidad_Unidades int NOT NULL,
 	Unidad_De_Medida_Peso varchar(30) NOT NULL,
@@ -185,6 +223,10 @@ alter table public.LOCALIDADES add constraint FK_PROVINCIAS_ID foreign key (IdPr
 alter table PROVEEDORES add column IdLocalidad int NOT NULL;
 alter table public.PROVEEDORES add constraint FK_LOCALIDADES_ID foreign key (IdLocalidad) references LOCALIDADES(ID) on update cascade;
 
+--ORDENES DE PRODUCCION
+alter table ORDENES_PRODUCCION add column IdUsuario int NOT NULL;
+alter table public.ORDENES_PRODUCCION add constraint FK_USUARIOS_ID foreign key (IdUsuario) references USUARIOS(ID) on update cascade on delete cascade;
+
 
 --ORDENES DE COMPRA
 
@@ -198,15 +240,31 @@ alter table public.ORDENES_COMPRA add constraint FK_PROVEEDORES_ID foreign key (
 alter table ORDENES_COMPRA add column IdOrdenProduccion int NOT NULL;
 alter table public.ORDENES_COMPRA add constraint FK_ORDENES_PRODUCCION_ID foreign key (IdOrdenProduccion) references ORDENES_PRODUCCION(ID) on update cascade;
 
+alter table ORDENES_COMPRA add column IdUsuario int NOT NULL;
+alter table public.ORDENES_COMPRA add constraint FK_USUARIOS_ID foreign key (IdUsuario) references USUARIOS(ID) on update cascade on delete cascade;
+
 --LOTES
 
 
 alter table LOTES add column IdOrdenCompra int NOT NULL; --NO PUEDE SER NULL.
 alter table public.LOTES add constraint FK_ORDENES_COMPRA_ID foreign key (IdOrdenCompra) references ORDENES_COMPRA(ID) on update cascade;
 
+alter table LOTES add column IdEquipamiento int; --NO PUEDE SER NULL.
+alter table public.LOTES add constraint FK_EQUIPAMIENTO_RESIDENCIA_ID foreign key (IdEquipamiento) references EQUIPAMIENTOS(ID) on update cascade on delete cascade;
 
 
+/*alter table LOTES add column IdMovimientoInternoMpIngreso int; --PUEDE Y DEBE SER NULL PARA PODER DAR DE ALTA EL LOTE, GENERAR SU ETIQUETA Y LUEGO GENERAR EL MOVIMIENTO PARA LUEGO VINCULARLO.
+alter table public.LOTES add constraint FK_PRIMERO_MOVIMIENTO_ID foreign key (IdMovimientoInternoMpIngreso) references MOVIMIENTOS_INTERNOS_MP(ID) on update cascade;
+
+alter table LOTES add column IdMovimientoInternoMpUltimo int; --ES EL ULTIMO MOVIMIENTO. DEBE SER NULL POR EL MISMO MOTIVO DESCRITO EN EL MOVIMIENTO DE INGRESO.
+alter table public.LOTES add constraint FK_ULTIMO_MOVIMIENTO_ID foreign key (IdMovimientoInternoMpUltimo) references MOVIMIENTOS_INTERNOS_MP(ID) on update cascade;*/
+
+--POR MOTIVOS DE REFERENCIA BIDIRECCIONAL, NO PUEDO UTILIZAR ESTAS CLAVES FORANEAS EN JAVA. (YA QUE RECUPERO PRIMERO TODOS LOS LOTES Y POSTERIORMENTE LOS MOVIMIENTOS)
+--POR ELLO SI EVENTUALMENTE REQUIERO ELIMINAR ESTAS LLAVES FORANEAS SOY LIBRE DE HACERLO. LAS DEJO PORQUE EN LA BD PUEDE SER UTIL
 --MOVIMIENTOS_INTERNOS_MP
+
+alter table MOVIMIENTOS_INTERNOS_MP add column IdUsuario int;
+alter table public.MOVIMIENTOS_INTERNOS_MP add constraint FK_USUARIOS_ID foreign key (IdUsuario) references USUARIOS(ID) on update cascade on delete cascade;
 
 alter table MOVIMIENTOS_INTERNOS_MP add column IdLote int NOT NULL;
 alter table public.MOVIMIENTOS_INTERNOS_MP add constraint FK_LOTES_ID foreign key (IdLote) references LOTES(ID) on update cascade;
@@ -214,11 +272,15 @@ alter table public.MOVIMIENTOS_INTERNOS_MP add constraint FK_LOTES_ID foreign ke
 alter table MOVIMIENTOS_INTERNOS_MP add column IdBascula int NOT NULL;
 alter table public.MOVIMIENTOS_INTERNOS_MP add constraint FK_BASCULAS_ID foreign key (IdBascula) references EQUIPAMIENTOS(ID) on update cascade;
 
+alter table MOVIMIENTOS_INTERNOS_MP add column IdProveedorTransporte int NOT NULL;
+alter table public.MOVIMIENTOS_INTERNOS_MP add constraint FK_PROVEEDORES_ID foreign key (IdProveedorTransporte) references PROVEEDORES(ID) on update cascade;
+
 alter table MOVIMIENTOS_INTERNOS_MP add column IdEquipamientoOrigen int;
 alter table public.MOVIMIENTOS_INTERNOS_MP add constraint FK_ORIGEN_ID foreign key (IdEquipamientoOrigen) references EQUIPAMIENTOS(ID) on update cascade;
 
 alter table MOVIMIENTOS_INTERNOS_MP add column IdEquipamientoDestino int;
 alter table public.MOVIMIENTOS_INTERNOS_MP add constraint FK_DESTINO_ID foreign key (IdEquipamientoDestino) references EQUIPAMIENTOS(ID) on update cascade;
+
 --alter table public.MOVIMIENTOS_INTERNOS_MP add constraint CK_MIMP_IdBascula check (SELECT MOVIMIENTOS_INTERNOS_MP.IdBascula IN (SELECT ID from EQUIPAMIENTOS where EQUIPAMIENTOS.Tipo_Equipamiento='Bascula'));
 --NO SE PUEDEN REALIZAR SUB-CONSULTAS EN RESTRICCION CHECK. AMERITA TRIGGERS OBLIGATORIAMENTE.
 
@@ -226,20 +288,7 @@ alter table public.MOVIMIENTOS_INTERNOS_MP add constraint FK_DESTINO_ID foreign 
 
 --ORDENES DE PRODUCCION
 
-insert into ORDENES_PRODUCCION (Cantidad_A_Producir, Unidad_De_Medida, Fecha_Origen, Fecha_Entrega, Estado) values (400, 'Tonelada', '01/09/2019', '04/01/2020', 'Regular');
-insert into ORDENES_PRODUCCION (Cantidad_A_Producir, Unidad_De_Medida, Fecha_Origen, Fecha_Entrega, Estado) values (400, 'Tonelada', '01/09/2019', '04/01/2020', 'Regular');
 
---PAIS
-
-insert into PAISES (Nombre, Estado) values ('ARGENTINA', 'Activo');
-insert into PROVINCIAS (Nombre, Estado, IdPais) values ('MISIONES', 'Activo', 1);
-insert into LOCALIDADES (Nombre, Estado, IdProvincia, Codigo_Postal) values ('APOSTOLES', 'Activo', 1, 'N3350XAD');
-insert into LOCALIDADES (Nombre, Estado, IdProvincia, Codigo_Postal) values ('POSADAS', 'Activo', 1, '3300');
-
---PROVEEDORES
-
-insert into PROVEEDORES (Razon_Social, CUIT, Estado, idLocalidad) values ('Cosechero Feliz', '20-54655814-02', 'Activo', 1);
-insert into PROVEEDORES (Razon_Social, CUIT, Estado, idLocalidad) values ('Siembra soleada', '20-54655815-02', 'Activo', 2);
 
 --LOTES
 
@@ -370,16 +419,7 @@ CREATE TRIGGER insercion_MIMP BEFORE INSERT OR UPDATE ON MOVIMIENTOS_INTERNOS_MP
 
 --TABLA DE USUARIOS
 
-create table USUARIOS (
-	ID SERIAL, 
-	Nombre varchar(100) NOT NULL,
-	Apellido varchar(100) NOT NULL,
-	DNI varchar(100) UNIQUE NOT NULL,
-	Estado varchar(30) NOT NULL,
-	Rol varchar(100),
-	primary key(ID));
-	
-alter table USUARIOS add column rol_asociado oid;
+
 	
 	
 
@@ -390,7 +430,8 @@ DECLARE aux varchar;
 	BEGIN
 		aux = 'c'||NEW.DNI;
 		execute 'CREATE ROLE '||aux||' LOGIN PASSWORD '||$$'$$||NEW.DNI||$$'$$||' IN ROLE '||NEW.Rol;
-		UPDATE USUARIOS set rol_asociado= (SELECT oid from pg_roles where (rolname = aux)) where DNI = NEW.DNI;
+		UPDATE USUARIOS set rol_asociado= (SELECT oid from pg_roles where (rolname = aux)) where ID = NEW.ID;
+		UPDATE USUARIOS set Nombre_Usuario = aux WHERE ID = NEW.ID;
 		RETURN NULL;
 	END;
 $BODY$
@@ -420,8 +461,7 @@ CREATE TRIGGER borrado_cuentas after DELETE on USUARIOS
 
 
 
-INSERT INTO USUARIOS (Nombre, Apellido, DNI, Rol, Estado) VALUES ('Juanjo', 'Bolano', 39, 'GerenteAreaProduccion', 'Activo');
-INSERT INTO USUARIOS (Nombre, Apellido, DNI, Rol, Estado) VALUES ('Fede', 'Bolano', 40, 'OperadorBalanza', 'Activo');
+
 
 DO
 $BODY$
@@ -480,6 +520,48 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO GerenteAreaProduccion;
 GRANT INSERT, UPDATE ON LOTES to OperadorBalanza;
 GRANT CONNECT ON DATABASE postgres TO OperadorBalanza;
 
+
+
+
+
+CREATE OR REPLACE FUNCTION sp_perteneceARol(usuario varchar, rol varchar) returns boolean as
+$BODY$
+DECLARE retorno boolean;
+DECLARE oid_rol_actual oid;
+DECLARE oid_rol_perteneciente oid;
+BEGIN
+	retorno = false;
+	oid_rol_actual = (SELECT oid from pg_roles where rolname = (usuario));
+	oid_rol_perteneciente = (SELECT oid from pg_roles where rolname=rol);
+	if oid_rol_perteneciente IS NOT NULL then
+		if (oid_rol_actual in (SELECT member from pg_auth_members where roleid=oid_rol_perteneciente)) then
+			retorno = true;
+		end if;
+	end if;
+	return retorno;
+END;
+$BODY$
+language plpgsql SECURITY DEFINER;
+
+INSERT INTO USUARIOS (Nombre, Apellido, DNI, Rol, Estado) VALUES ('Juan Jose', 'Bolano', 39, 'gerenteareaproduccion', 'Activo');
+INSERT INTO USUARIOS (Nombre, Apellido, DNI, Rol, Estado) VALUES ('Fede', 'Bazyluk', 40, 'operadorbalanza', 'Activo');
+INSERT INTO USUARIOS (Nombre, Apellido, DNI, Rol, Estado) VALUES ('Fabian', 'Enrique', 41, 'gerenteareaproduccion', 'Activo');
+
+
+
+
+/*
+DO
+$BODY$
+begin
+	RAISE NOTICE '%',sp_perteneceARol('c39','gerenteareaproduccion');
+end;
+$BODY$
+*/
+
+
+
+
 /*
 REVOKE ALL PRIVILEGES ON ALL TABLES in schema public FROM GerenteAreaProduccion;
 REVOKE ALL PRIVILEGES ON ALL SEQUENCES in schema public FROM GerenteAreaProduccion;
@@ -508,3 +590,125 @@ GRANT INSERT, UPDATE ON LOTES to OperadorBalanza;
 GRANT CONNECT ON DATABASE postgres TO OperadorBalanza;
 
 */
+
+
+
+--AUDITORIA
+
+--Insercion y Actualizacion de movimientos
+
+create table AUDITORIA_ORDENES_PRODUCCION  (
+	ID SERIAL,
+	ID_Evento integer NOT NULL,
+	Fecha Date,
+	Cantidad_A_Producir_Antiguo float,
+	Cantidad_A_Producir_Nuevo float,
+	Unidad_De_Medida_Antiguo varchar(30),
+	Unidad_De_Medida_Nuevo varchar(30),
+	Fecha_Origen_Antiguo date,
+	Fecha_Origen_Nuevo date, 
+	Fecha_Entrega_Antiguo date, 
+	Fecha_Entrega_Nuevo date, 
+	Estado_Antiguo varchar(30),
+	Estado_Nuevo varchar(30),
+	Descripcion_Antiguo varchar(250),
+	Descripcion_Nuevo varchar(250),
+	primary key(ID));
+	
+
+alter table public.AUDITORIA_ORDENES_PRODUCCION add column IdUsuario int NOT NULL;
+alter table public.AUDITORIA_ORDENES_PRODUCCION add constraint FK_USUARIOS_ID foreign key (IdUsuario) references USUARIOS(ID) on update cascade on delete cascade;	
+	
+	
+	
+
+CREATE OR REPLACE FUNCTION public.funcion_trigger_Auditoria_Ordenes_Produccion()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    VOLATILE
+    COST 100
+AS 
+$BODY$
+	Begin
+		IF (cast(TG_TABLE_NAME as varchar) = 'ordenes_produccion') then
+			IF (cast (TG_OP as varchar)='INSERT') then
+				insert into public.AUDITORIA_ORDENES_PRODUCCION (
+					IdUsuario,
+					ID_Evento,
+					Fecha,
+					Cantidad_A_Producir_Nuevo,
+					Unidad_De_Medida_Nuevo,
+					Fecha_Origen_Nuevo, 
+					Fecha_Entrega_Nuevo, 
+					Estado_Nuevo,
+					Descripcion_Nuevo) 
+				values (
+					new.IdUsuario,
+					new.Id_Evento,
+					(SELECT CURRENT_DATE),
+					new.Cantidad_A_Producir,
+					new.Unidad_De_Medida,
+					new.Fecha_Origen,
+					new.Fecha_Entrega,
+					new.Estado,
+					NEW.Descripcion
+					);
+			ELSIF (cast(TG_OP as varchar)='UPDATE') then
+				insert into public.AUDITORIA_ORDENES_PRODUCCION (
+					IdUsuario,
+					ID_Evento,
+					Fecha,
+					Cantidad_A_Producir_Antiguo,
+					Cantidad_A_Producir_Nuevo,
+					Unidad_De_Medida_Antiguo,
+					Unidad_De_Medida_Nuevo,
+					Fecha_Origen_Antiguo,
+					Fecha_Origen_Nuevo, 
+					Fecha_Entrega_Antiguo,
+					Fecha_Entrega_Nuevo, 
+					Estado_Antiguo,
+					Estado_Nuevo,
+					Descripcion_Antiguo,
+					Descripcion_Nuevo) 
+				values (
+					new.IdUsuario,
+					new.Id_Evento,
+					(SELECT CURRENT_DATE),
+					old.Cantidad_A_Producir,
+					new.Cantidad_A_Producir,
+					old.Unidad_De_Medida,
+					new.Unidad_De_Medida,
+					old.Fecha_Origen,
+					new.Fecha_Origen,
+					old.Fecha_Entrega,
+					new.Fecha_Entrega,
+					old.Estado,
+					new.Estado,
+					old.Descripcion,
+					NEW.Descripcion
+					);
+			END IF;
+		END IF;
+		RETURN NULL;
+	End
+$BODY$ SECURITY DEFINER;
+
+CREATE TRIGGER trigger_auditoria_ordenes_produccion AFTER INSERT OR UPDATE ON ORDENES_PRODUCCION 
+	FOR EACH ROW EXECUTE PROCEDURE funcion_trigger_Auditoria_Ordenes_Produccion();
+	
+insert into ORDENES_PRODUCCION (idUsuario, Cantidad_A_Producir, Unidad_De_Medida, Fecha_Origen, Fecha_Entrega, Estado) values (1, 400, 'Tonelada', '01/09/2019', '04/01/2020', 'Regular');
+insert into ORDENES_PRODUCCION (idUsuario, Cantidad_A_Producir, Unidad_De_Medida, Fecha_Origen, Fecha_Entrega, Estado) values (1, 400, 'Tonelada', '01/09/2019', '04/01/2020', 'Regular');
+insert into ORDENES_PRODUCCION (idUsuario, Cantidad_A_Producir, Unidad_De_Medida, Fecha_Origen, Fecha_Entrega, Estado) values (3, 300, 'Tonelada', '01/09/2019', '04/01/2020', 'Regular');
+insert into ORDENES_PRODUCCION (idUsuario, Cantidad_A_Producir, Unidad_De_Medida, Fecha_Origen, Fecha_Entrega, Estado) values (3, 300, 'Tonelada', '01/09/2019', '04/01/2020', 'Regular');
+
+--PAIS
+
+insert into PAISES (Nombre, Estado) values ('ARGENTINA', 'Activo');
+insert into PROVINCIAS (Nombre, Estado, IdPais) values ('MISIONES', 'Activo', 1);
+insert into LOCALIDADES (Nombre, Estado, IdProvincia, Codigo_Postal) values ('APOSTOLES', 'Activo', 1, 'N3350XAD');
+insert into LOCALIDADES (Nombre, Estado, IdProvincia, Codigo_Postal) values ('POSADAS', 'Activo', 1, '3300');
+
+--PROVEEDORES
+
+insert into PROVEEDORES (Razon_Social, CUIT, Estado, idLocalidad) values ('Cosechero Feliz', '20-54655814-02', 'Activo', 1);
+insert into PROVEEDORES (Razon_Social, CUIT, Estado, idLocalidad) values ('Siembra soleada', '20-54655815-02', 'Activo', 2);	

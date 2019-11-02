@@ -10,6 +10,9 @@ import LogicaDeNegocio.Equipamiento;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.Organizacion;
 import Reportes.GeneradorDeReportes;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Toolkit;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +21,7 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import net.sf.jasperreports.engine.JRException;
 
 
@@ -42,9 +46,11 @@ public class ReportesEquipamiento extends javax.swing.JFrame {
     }
 
     public ReportesEquipamiento(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
+        this.setUndecorated(true);
         initComponents();
+        this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
         this.trayectoriaActual = trayectoriaAnterior + " - Reportes de Equipamiento";
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Reporte de Equipamientos", this.trayectoriaActual);
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Reporte de Equipamientos", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         setIconImage(new ImageIcon(getClass().getResource("../InterfazGrafica/Assets/Icono.png")).getImage());
         
         this.setVisible(true); 
@@ -60,6 +66,19 @@ public class ReportesEquipamiento extends javax.swing.JFrame {
         criteriosSeleccionados.put("FechaUltimoMantenimiento", false);
         criteriosSeleccionados.put("Estado", false);
         criteriosSeleccionados.put("BasculaAsociada", false);
+        
+        
+        configurarInterfaz(this.getContentPane().getComponents());
+        
+    }
+    private void configurarInterfaz(Component[] componentes){
+        for (int i=0; i<componentes.length ;i++ ){
+            Component unComponente = componentes[i];
+            unComponente.setFont(ParametrosDeInterfaz.fuentePorDefecto);
+            if (unComponente instanceof JPanel){
+                configurarInterfaz(((JPanel) unComponente).getComponents());
+            }
+        }
     }
 
     /**

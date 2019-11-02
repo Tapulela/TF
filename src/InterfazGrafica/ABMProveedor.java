@@ -11,6 +11,7 @@ import LogicaDeNegocio.Organizacion;
 import LogicaDeNegocio.Proveedor;
 import Persistencia.ExcepcionPersistencia;
 import java.awt.Component;
+import java.awt.Toolkit;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,6 +20,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 /**
  *
@@ -59,12 +61,14 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
 
 
     ABMProveedor(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
+        this.setUndecorated(true);
         initComponents();
+        this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
         this.organizacion = organizacion;
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
         trayectoriaActual = trayectoriaAnterior+" - Gestionar Proveedores";
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestion de Proveedores", this.trayectoriaActual);
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Gestion de Proveedores", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         
         cargarLocalidades();
 
@@ -72,6 +76,7 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
         jBBuscar.setVisible(false);
         
         this.ventanaAnterior = ventanaAnterior;
+        ParametrosDeInterfaz.configurarVentana(this);
     }
     private void organizarElementos(){
         this.deshabilitarTodo();
@@ -91,7 +96,7 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
                 break;
                 
         }
-        this.pack();
+        //this.pack();
         
     }
     /**

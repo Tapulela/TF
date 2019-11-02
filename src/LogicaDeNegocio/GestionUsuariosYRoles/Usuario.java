@@ -12,14 +12,16 @@ package LogicaDeNegocio.GestionUsuariosYRoles;
 public class Usuario {
     private int id;
     private String nombre;
+    private String nombreUsuario;
     private String Apellido;
     private String Estado;
     private String dni;
     private String rol;
 
-    public Usuario(int id, String nombre, String Apellido, String Estado, String dni, String rol) {
+    public Usuario(int id, String nombre, String Apellido, String Estado, String dni, String rol, String nombreUsuario) {
         this.id = id;
         this.nombre = nombre;
+        this.nombreUsuario = nombreUsuario;
         this.Apellido = Apellido;
         this.Estado = Estado;
         this.dni = dni;
@@ -73,6 +75,10 @@ public class Usuario {
 
     public void setDni(String dni) {
         this.dni = dni;
+    }
+
+    public boolean seIdentifica(String unNombre) {
+        return this.nombreUsuario.equals(unNombre);
     }
     
     

@@ -5,6 +5,7 @@
  */
 package LogicaDeNegocio;
 
+import LogicaDeNegocio.GestionUsuariosYRoles.Usuario;
 import java.util.Calendar;
 
 /**
@@ -15,4 +16,8 @@ public class Molienda extends Transformacion {
     private int id;
     private String sector;
     private String turno;
+
+    public Molienda(int id, Usuario unUsuario, Calendar fechaOrigen, String unEstado, int idEvento, String estado) {
+        super(id, unUsuario, fechaOrigen, unEstado, idEvento, estado);
+    }
 }

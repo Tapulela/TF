@@ -5,11 +5,14 @@
  */
 package InterfazGrafica;
 
+import static InterfazGrafica.UtilidadesInterfazGrafica.establecerAlineacionDeTabla;
 import LogicaDeNegocio.Bascula;
 import LogicaDeNegocio.Equipamiento;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.Organizacion;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Toolkit;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +23,8 @@ import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -44,13 +49,16 @@ public class BuscarEquipamiento extends javax.swing.JFrame {
 
     public BuscarEquipamiento(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
         
+        this.setUndecorated(true);
         initComponents();
+        this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
+        
         this.setVisible(true); 
         this.ventanaAnterior = ventanaAnterior;
         this.ventanaAnterior.setFocusable(false);
         this.organizacion = organizacion;
         this.trayectoriaActual = trayectoriaAnterior + " - Busqueda de Equipamiento";
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Busqueda de un equipamiento", this.trayectoriaActual);
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Busqueda de un equipamiento", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         jTable1.setRowHeight(30);
         jTable1.getColumnModel().getColumn(0).setPreferredWidth(60);
         jTable1.getColumnModel().getColumn(0).setMaxWidth(60);
@@ -87,6 +95,8 @@ public class BuscarEquipamiento extends javax.swing.JFrame {
             jComboBox2.setSelectedItem("Activo");
             jComboBox2.setEnabled(false);
         }
+        establecerAlineacionDeTabla(jTable1, SwingConstants.CENTER);
+        ParametrosDeInterfaz.configurarVentana(this);
     }
 
     /**
@@ -476,7 +486,6 @@ public class BuscarEquipamiento extends javax.swing.JFrame {
         this.ventanaAnterior.setFocusable(true);
         this.dispose();
     }//GEN-LAST:event_jBConcretarAccionActionPerformed
-
     private void jBCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBCancelarActionPerformed
 
         this.limpiarCampos();

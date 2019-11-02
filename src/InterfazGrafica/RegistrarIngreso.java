@@ -56,7 +56,7 @@ public class RegistrarIngreso extends javax.swing.JFrame implements Transferenci
         this.organizacion = organizacion;
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
         this.trayectoriaActual = trayectoriaAnterior + " - Gestion de Movimientos";
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Registro de Ingreso de Materia prima", this.trayectoriaActual);
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Registro de Ingreso de Materia prima", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
         
         

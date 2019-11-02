@@ -5,6 +5,7 @@
  */
 package LogicaDeNegocio;
 
+import LogicaDeNegocio.GestionUsuariosYRoles.Usuario;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.Iterator;
  *
  * @author usuario
  */
-public class OrdenDeCompra {
+public class OrdenDeCompra extends Evento {
     public static final String ESTADO_REGULAR = "Regular";
     public static final String ESTADO_ANULADO = "Anulado";
     private int id;
@@ -29,7 +30,8 @@ public class OrdenDeCompra {
     private Proveedor proveedorAsociado;
     private OrdenDeProduccion ordenDeProduccionAsociada;
 
-    public OrdenDeCompra(int id, java.sql.Date fechaOrigen, float cantidadAComprar, String unidadDeMedida, float costoPorUnidad, String estado, Proveedor proveedorAsociado, OrdenDeProduccion unaOrdenDeProduccion) {
+    public OrdenDeCompra(int id, Usuario unUsuario, java.sql.Date fechaOrigen, float cantidadAComprar, String unidadDeMedida, float costoPorUnidad, String estado, Proveedor proveedorAsociado, OrdenDeProduccion unaOrdenDeProduccion, int idEvento) {
+        super(idEvento, estado, unUsuario);
         this.id = id;
         this.fechaOrigen = Calendar.getInstance();
         this.fechaOrigen.setTime(fechaOrigen);
@@ -40,9 +42,11 @@ public class OrdenDeCompra {
         this.proveedorAsociado = proveedorAsociado;
         this.ordenDeProduccionAsociada = unaOrdenDeProduccion;
         this.lotesAsociados = new ArrayList();
+        
     }
     
-    public OrdenDeCompra(float cantidadComprada, String unidadDeMedida, float costoPorUnidad, Proveedor proveedorAsociado, OrdenDeProduccion ordenDeProduccionAsociada) {
+    public OrdenDeCompra(Usuario unUsuario, float cantidadComprada, String unidadDeMedida, float costoPorUnidad, Proveedor proveedorAsociado, OrdenDeProduccion ordenDeProduccionAsociada) {
+        super(Evento.ESTADO_REGULAR, unUsuario);
         this.fechaOrigen = Calendar.getInstance();
         this.cantidadAComprar = cantidadComprada;
         this.unidadDeMedida = unidadDeMedida;
@@ -51,9 +55,12 @@ public class OrdenDeCompra {
         this.estado = ESTADO_REGULAR;
         this.ordenDeProduccionAsociada = ordenDeProduccionAsociada;
         this.lotesAsociados = new ArrayList();
+        
 
     }
-        
+
+    
+    
 
     public int getId() {
         return id;
@@ -63,7 +70,7 @@ public class OrdenDeCompra {
         this.id = id;
     }
 
-    public Date getFechaOrigen() {
+    public java.sql.Date getFechaOrigen() {
         return new Date(this.fechaOrigen.getTimeInMillis());
     }
 
@@ -95,7 +102,7 @@ public class OrdenDeCompra {
         this.costoPorUnidad = costoPorUnidad;
     }
 
-    public String getEstado() {
+    public String getEstadoEvento() {
         return estado;
     }
 
@@ -157,6 +164,7 @@ public class OrdenDeCompra {
     }
     
     public void anular(){
+        super.anularEsteEvento();
         this.estado = ESTADO_ANULADO;
     }
 
@@ -177,7 +185,7 @@ public class OrdenDeCompra {
         if (this.proveedorAsociado != null){
             unProveedor = this.proveedorAsociado.getRazonSocial();
         }
-        Object[] vec ={this.getId(), ( new SimpleDateFormat( "dd-MM-yyyy" ) ).format( this.fechaOrigen.getTime() ), this.getCantidadAComprar(), this.getUnidadDeMedida(), this.getCostoPorUnidad(),this.getEstado(), this.getOrdenDeProduccionAsociada().getId(), unProveedor};
+        Object[] vec ={this.getId(), ( new SimpleDateFormat( "dd-MM-yyyy" ) ).format( this.fechaOrigen.getTime() ), this.getCantidadAComprar(), this.getUnidadDeMedida(), this.getCostoPorUnidad(),this.getEstadoEvento(), this.getOrdenDeProduccionAsociada().getId(), unProveedor};
         return vec;
     }
     

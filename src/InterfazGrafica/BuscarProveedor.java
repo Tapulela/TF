@@ -6,14 +6,19 @@
 package InterfazGrafica;
 
 
+import static InterfazGrafica.UtilidadesInterfazGrafica.establecerAlineacionDeTabla;
 import LogicaDeNegocio.Organizacion;
 import LogicaDeNegocio.Proveedor;
+import java.awt.Component;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -38,14 +43,18 @@ public class BuscarProveedor extends javax.swing.JFrame {
 
     public BuscarProveedor(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
         
+        this.setUndecorated(true);
         initComponents();
+        this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
         this.setVisible(true); 
         this.ventanaAnterior = ventanaAnterior;
         this.ventanaAnterior.setFocusable(false);
         this.organizacion = organizacion;
         this.trayectoriaActual = trayectoriaAnterior + " - Busqueda de Proveedor";
         
-        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Busqueda de un Proveedor", this.trayectoriaActual);
+        
+        
+        cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Busqueda de un Proveedor", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
         jTable1.setRowHeight(30);
         setIconImage(new ImageIcon(getClass().getResource(ParametrosDeInterfaz.rutaIcono)).getImage());
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
@@ -84,8 +93,9 @@ public class BuscarProveedor extends javax.swing.JFrame {
                 jComboBox2.setEnabled(false);            
             
         }        
+        establecerAlineacionDeTabla(jTable1, SwingConstants.CENTER);
+        ParametrosDeInterfaz.configurarVentana(this);
     }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

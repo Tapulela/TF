@@ -7,6 +7,7 @@ package LogicaDeNegocio;
 
 
 
+import LogicaDeNegocio.GestionUsuariosYRoles.Usuario;
 import java.util.Calendar;
 
 /**
@@ -16,4 +17,8 @@ import java.util.Calendar;
 public class Estacionamiento extends Transformacion {
     private int id;
     private Calendar fechaExtraccion;
+
+    public Estacionamiento(int id, Usuario unUsuario, Calendar fechaOrigen, String unEstado, int idEvento, String estado) {
+        super(id, unUsuario, fechaOrigen, unEstado, idEvento, estado);
+    }
 }
