@@ -7,7 +7,9 @@ package LogicaDeNegocio;
 
 import LogicaDeNegocio.Bascula;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
 
 /**
  *
@@ -42,6 +44,17 @@ public class CamaraEstacionamiento extends Equipamiento{
 
     public void setDuracionMaximaEstacionamiento(float duracionMaximaEstacionamiento) {
         this.duracionMaximaEstacionamiento = duracionMaximaEstacionamiento;
+    }
+
+    public ArrayList getLotesDeYerbaCanchadaVerdeNoAnuladosYAprobados() {
+        ArrayList retorno = new ArrayList();
+        Iterator lotesNoAnulados = this.getLotesAsociadosNoAnulados().iterator();
+        while (lotesNoAnulados.hasNext()){
+            Lote unLote = (Lote) lotesNoAnulados.next();
+            if (unLote.esDeYerbaCancadaVerde() && unLote.poseeAnalisisDeYCVRegularYAprobado())
+                retorno.add(unLote);
+        }
+        return retorno;
     }
     
 

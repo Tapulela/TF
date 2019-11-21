@@ -49,7 +49,7 @@ public class ABMPais extends javax.swing.JFrame implements TransferenciaInstanci
 
 
 
-    ABMPais(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
+    public ABMPais(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
         this.setUndecorated(true);
         initComponents();
         this.setSize(Toolkit.getDefaultToolkit().getScreenSize());

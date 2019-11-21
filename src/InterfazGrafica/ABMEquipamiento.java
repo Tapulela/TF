@@ -5,6 +5,7 @@
  */
 package InterfazGrafica;
 
+import InterfazGrafica.Busqueda.BuscarEquipamiento;
 import LogicaDeNegocio.Bascula;
 import LogicaDeNegocio.CamaraEstacionamiento;
 import LogicaDeNegocio.Equipamiento;
@@ -25,7 +26,7 @@ import javax.swing.JPanel;
  *
  * @author usuario
  */
-public class ABMEquipamiento extends javax.swing.JFrame implements TransferenciaInstancias {
+public class ABMEquipamiento extends JFrame implements TransferenciaInstancias{
     
     /**
      * Creates new form CargaEquipamientos
@@ -44,7 +45,7 @@ public class ABMEquipamiento extends javax.swing.JFrame implements Transferencia
 
 
 
-    ABMEquipamiento(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
+    public ABMEquipamiento(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
         this.setUndecorated(true);
         initComponents();
         this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
@@ -66,6 +67,11 @@ public class ABMEquipamiento extends javax.swing.JFrame implements Transferencia
         this.ventanaAnterior = ventanaAnterior;
         ParametrosDeInterfaz.configurarVentana(this);
     }
+
+    
+    
+    
+    
     private void organizarElementos(){
         this.cargaBasculas();
         this.deshabilitarTodo();
@@ -175,7 +181,7 @@ public class ABMEquipamiento extends javax.swing.JFrame implements Transferencia
         jLUnidadMedida.setEnabled(false);
 
         jCBTipoEquipamiento.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jCBTipoEquipamiento.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Molino", "Camara Est. Acel.", "Deposito", "Bascula" }));
+        jCBTipoEquipamiento.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Molino", "Camara Est. Acel.", "Deposito", "Bascula", "Laboratorio" }));
         jCBTipoEquipamiento.setEnabled(false);
         jCBTipoEquipamiento.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -405,40 +411,23 @@ public class ABMEquipamiento extends javax.swing.JFrame implements Transferencia
                     switch ((String)jCBTipoEquipamiento.getSelectedItem()){
                         case "Molino":
                             unaBasculaAsociada = this.organizacion.getUnaBascula((String) jCBBascula.getSelectedItem());
-                            try {
-                                this.organizacion.registrarEquipamiento((String) jCBTipoEquipamiento.getSelectedItem(), jTFNombre.getText(), jTFDireccion.getText(), jCFechaAdquisicion.getCalendar(), jCFechaUltimoMantenimiento.getCalendar(), Float.parseFloat(jTFCapacidadMax.getText()),(String) jCBUnidadMedida.getSelectedItem(), unaBasculaAsociada, 0);
-                            } catch (NumberFormatException e){
-                                JOptionPane.showMessageDialog(null, "Por favor, ingrese una capacidad Maxima en formato valido (Solo numeros y un punto)");
-                                return;
-                            }
+                            this.organizacion.registrarEquipamiento((String) jCBTipoEquipamiento.getSelectedItem(), jTFNombre.getText(), jTFDireccion.getText(), jCFechaAdquisicion.getCalendar(), jCFechaUltimoMantenimiento.getCalendar(), jTFCapacidadMax.getText(),(String) jCBUnidadMedida.getSelectedItem(), unaBasculaAsociada, "0");
                             break;
                         case "Deposito":
                             unaBasculaAsociada = this.organizacion.getUnaBascula((String) jCBBascula.getSelectedItem());
-                            try {
-                                this.organizacion.registrarEquipamiento((String) jCBTipoEquipamiento.getSelectedItem(), jTFNombre.getText(), jTFDireccion.getText(), jCFechaAdquisicion.getCalendar(), jCFechaUltimoMantenimiento.getCalendar(), Float.parseFloat(jTFCapacidadMax.getText()),(String) jCBUnidadMedida.getSelectedItem(), unaBasculaAsociada, 0);
-                            }catch (NumberFormatException e){
-                                JOptionPane.showMessageDialog(null, "Por favor, ingrese una capacidad Maxima en formato valido (Solo numeros y un punto)");
-                                return;
-                            }
+                            this.organizacion.registrarEquipamiento((String) jCBTipoEquipamiento.getSelectedItem(), jTFNombre.getText(), jTFDireccion.getText(), jCFechaAdquisicion.getCalendar(), jCFechaUltimoMantenimiento.getCalendar(), jTFCapacidadMax.getText(),(String) jCBUnidadMedida.getSelectedItem(), unaBasculaAsociada, "0");
                             break;
                         case "Bascula":
-                            unaBasculaAsociada = this.organizacion.getUnaBascula((String) jCBBascula.getSelectedItem());
-                            try {
-                                this.organizacion.registrarEquipamiento((String) jCBTipoEquipamiento.getSelectedItem(), jTFNombre.getText(), jTFDireccion.getText(), jCFechaAdquisicion.getCalendar(), jCFechaUltimoMantenimiento.getCalendar(), Float.parseFloat(jTFCapacidadMax.getText()),(String) jCBUnidadMedida.getSelectedItem(), unaBasculaAsociada, 0);
-                            }catch (NumberFormatException e){
-                                JOptionPane.showMessageDialog(null, "Por favor, ingrese una capacidad Maxima en formato valido (Solo numeros y un punto)");
-                                return;
-                            }
+                            this.organizacion.registrarEquipamiento((String) jCBTipoEquipamiento.getSelectedItem(), jTFNombre.getText(), jTFDireccion.getText(), jCFechaAdquisicion.getCalendar(), jCFechaUltimoMantenimiento.getCalendar(), jTFCapacidadMax.getText(),(String) jCBUnidadMedida.getSelectedItem(), unaBasculaAsociada, "0");
                             cargaBasculas();//Actualizar lista de basculas disponibles
                             break;
                         case "Camara Est. Acel.":
                             unaBasculaAsociada = this.organizacion.getUnaBascula((String) jCBBascula.getSelectedItem());
-                            try {
-                                this.organizacion.registrarEquipamiento("Camara de estacionamiento acelerado", jTFNombre.getText(), jTFDireccion.getText(), jCFechaAdquisicion.getCalendar(), jCFechaUltimoMantenimiento.getCalendar(), Float.parseFloat(jTFCapacidadMax.getText()),(String) jCBUnidadMedida.getSelectedItem(), unaBasculaAsociada, Float.parseFloat((String)jTFDuracionMax.getText()));
-                            } catch (NumberFormatException e){
-                                JOptionPane.showMessageDialog(null, "Por favor, ingrese una capacidad Maxima y duracion maxima de estacionamiento en formato valido (Solo numeros y un punto)");
-                                return;
-                            }
+                            this.organizacion.registrarEquipamiento("Camara de estacionamiento acelerado", jTFNombre.getText(), jTFDireccion.getText(), jCFechaAdquisicion.getCalendar(), jCFechaUltimoMantenimiento.getCalendar(), jTFCapacidadMax.getText(),(String) jCBUnidadMedida.getSelectedItem(), unaBasculaAsociada, (String)jTFDuracionMax.getText());
+                            break;
+                        case "Laboratorio":
+                            unaBasculaAsociada = this.organizacion.getUnaBascula((String) jCBBascula.getSelectedItem());
+                            this.organizacion.registrarEquipamiento("Laboratorio", jTFNombre.getText(), jTFDireccion.getText(), jCFechaAdquisicion.getCalendar(), jCFechaUltimoMantenimiento.getCalendar(), jTFCapacidadMax.getText(),(String) jCBUnidadMedida.getSelectedItem(), unaBasculaAsociada, (String)jTFDuracionMax.getText());
                             break;
                     }
                     break;
@@ -564,6 +553,12 @@ public class ABMEquipamiento extends javax.swing.JFrame implements Transferencia
     // End of variables declaration//GEN-END:variables
 
     private void deshabilitarTodo(){
+        
+        jLUnidadMedida.setVisible(false);
+        jCBUnidadMedida.setVisible(false);
+        jLCapacidadMax.setVisible(false);
+        jTFCapacidadMax.setVisible(false);
+                
         jLOperacion.setEnabled(false);
         jLTipoEquipamiento.setEnabled(false);
         jLNombre.setEnabled(false);
@@ -726,23 +721,42 @@ public class ABMEquipamiento extends javax.swing.JFrame implements Transferencia
     private void habilitarParametrosAdicionalesSegunEquipamiento(){
         switch ((String)jCBTipoEquipamiento.getSelectedItem()){
             case "Molino":
+                jLUnidadMedida.setVisible(true);
+                jCBUnidadMedida.setVisible(true);
+                jLCapacidadMax.setVisible(true);
+                jTFCapacidadMax.setVisible(true);
+                
                 jCBBascula.setVisible(true);
                 jLBascula.setVisible(true);
                 jCBBascula.setEnabled(true);
                 jLBascula.setEnabled(true);
                 break;
             case "Deposito":
+                jLUnidadMedida.setVisible(true);
+                jCBUnidadMedida.setVisible(true);
+                jLCapacidadMax.setVisible(true);
+                jTFCapacidadMax.setVisible(true);
+                
                 jCBBascula.setVisible(true);
                 jLBascula.setVisible(true);
                 jCBBascula.setEnabled(true);
                 jLBascula.setEnabled(true);
                 break;
             case "Bascula":
+                jLUnidadMedida.setVisible(true);
+                jCBUnidadMedida.setVisible(true);
+                jLCapacidadMax.setVisible(true);
+                jTFCapacidadMax.setVisible(true);
 
                 jCBBascula.setEnabled(false);
                 jLBascula.setEnabled(false);
                 break;
             case "Camara Est. Acel.":
+                jLUnidadMedida.setVisible(true);
+                jCBUnidadMedida.setVisible(true);
+                jLCapacidadMax.setVisible(true);
+                jTFCapacidadMax.setVisible(true);
+                
                 jCBBascula.setVisible(true);
                 jLBascula.setVisible(true);
                 jCBBascula.setEnabled(true);
@@ -753,6 +767,9 @@ public class ABMEquipamiento extends javax.swing.JFrame implements Transferencia
                 jTFDuracionMax.setEnabled(true);
                 jLDias.setVisible(true);
                 jLDias.setEnabled(true);
+                break;
+            case "Laboratorio":
+                
                 break;
         }
     }

@@ -28,7 +28,6 @@ public class MovimientoInternoMateriaPrima extends Evento{
     
     
     private int id;
-    private Calendar fechaOrigen;
     private LocalTime horaEntrada;
     private LocalTime horaSalida;
     private String unidadTransporte;
@@ -53,11 +52,9 @@ public class MovimientoInternoMateriaPrima extends Evento{
     
 
     public MovimientoInternoMateriaPrima(int id, Usuario unOperador, java.sql.Date fechaOrigen, java.sql.Time horaEntrada, java.sql.Time horaSalida, String unidadTransporte, int cantidadUnidades, String unidadDeMedidaPeso, float pesoEntrada, float pesoSalida, String nHojaRuta, String nRemito, String precinto, String nombreConductor, String patenteChasis, String patenteAcoplado, String unEstado,Lote loteAMover, Equipamiento origen,Equipamiento destino, Bascula unaBasculaAsociada, Proveedor unProveedor, int idEvento) {
-        super(idEvento, unEstado, unOperador);
+        super(idEvento, unEstado, unOperador, fechaOrigen);
         this.id = id;
         
-        this.fechaOrigen = Calendar.getInstance();
-        this.fechaOrigen.setTime(fechaOrigen);
         this.horaEntrada = horaEntrada.toLocalTime();
         this.horaSalida = horaSalida.toLocalTime();
 
@@ -83,7 +80,6 @@ public class MovimientoInternoMateriaPrima extends Evento{
     
     public MovimientoInternoMateriaPrima(Usuario unOperador, LocalTime horaEntrada, LocalTime horaSalida, String unidadTransporte, int cantidadUnidades, String unidadDeMedidaPeso, float pesoEntrada, float pesoSalida, String nHojaRuta, String nRemito, String precinto, String nombreConductor, String patenteChasis, String patenteAcoplado, Lote loteAMover, Equipamiento origen, Equipamiento destino, Proveedor unProveedorDeTransporte) {
         super(Evento.ESTADO_REGULAR, unOperador);
-        this.fechaOrigen = Calendar.getInstance();
         this.horaEntrada = horaEntrada;
         this.horaSalida = horaSalida;
         this.unidadTransporte = unidadTransporte;
@@ -132,19 +128,9 @@ public class MovimientoInternoMateriaPrima extends Evento{
     }
 
 
-    public java.sql.Date getFechaOrigen() {
-        return new Date(this.fechaOrigen.getTimeInMillis());
-    }
-    public Calendar getFechaOrigenC() {
-        return fechaOrigen;
-    }    
-
-    public void setFechaOrigen(Calendar fechaOrigen) {
-        this.fechaOrigen = fechaOrigen;
-    }
 
     public java.sql.Timestamp getHoraEntrada() {
-        LocalDate localDate = LocalDateTime.ofInstant(this.fechaOrigen.toInstant(), fechaOrigen.getTimeZone().toZoneId()).toLocalDate();
+        LocalDate localDate = LocalDateTime.ofInstant(this.getFechaOrigenC().toInstant(), this.getFechaOrigenC().getTimeZone().toZoneId()).toLocalDate();
         return Timestamp.valueOf(horaEntrada.atDate(localDate));
     }
 
@@ -153,7 +139,7 @@ public class MovimientoInternoMateriaPrima extends Evento{
     }
 
     public java.sql.Timestamp getHoraSalida() {
-        LocalDate localDate = LocalDateTime.ofInstant(this.fechaOrigen.toInstant(), fechaOrigen.getTimeZone().toZoneId()).toLocalDate();
+        LocalDate localDate = LocalDateTime.ofInstant(this.getFechaOrigenC().toInstant(), this.getFechaOrigenC().getTimeZone().toZoneId()).toLocalDate();
         return Timestamp.valueOf(horaSalida.atDate(localDate));
     }
 
@@ -323,17 +309,19 @@ public class MovimientoInternoMateriaPrima extends Evento{
         return this.proveedorTransporte.equals(unProveedorTransporte);
     }
 
-    public boolean origenEstaEntre(Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior) {
-        return (this.fechaOrigen.after(fechaOrigenInferior) && this.fechaOrigen.before(fechaOrigenSuperior));
-    }
-
     public boolean poseeEquipamientoDestino(Equipamiento unEquipamiento) {
         return this.equipamientoDestino.equals(unEquipamiento);
     }
 
-    public Object[] devolverVector() {
-        String fecha = ( new SimpleDateFormat( "dd/MM/yyyy" ) ).format( Calendar.getInstance().getTime() );
+    public Object[] devolverVectorIngreso() {
+        String fecha = ( new SimpleDateFormat( "dd/MM/yyyy" ) ).format( this.getFechaOrigenC().getTime() );
         Object[] vec ={this.getId(), this.getEstadoEvento(), this.getLoteAsociado().getOrdenDeProduccionAsociada().getId(), this.getLoteAsociado().getOrdenDeCompraAsociada().getId(),this.getEquipamientoDestino().getNombre(), this.proveedorTransporte.getRazonSocial(), fecha, this.loteAsociado.getEtiqueta()};
+        return vec;
+    }
+    
+    public Object[] devolverVectorMovimiento() {
+        String fecha = ( new SimpleDateFormat( "dd/MM/yyyy" ) ).format( this.getFechaOrigenC().getTime() );
+        Object[] vec ={this.getId(), this.getEstadoEvento(), this.getLoteAsociado().getOrdenDeProduccionAsociada().getId(), this.getLoteAsociado().getOrdenDeCompraAsociada().getId(),this.getEquipamientoOrigen().getNombre(), this.getEquipamientoDestino().getNombre(), this.proveedorTransporte.getRazonSocial(), fecha, this.loteAsociado.getEtiqueta()};
         return vec;
     }
 

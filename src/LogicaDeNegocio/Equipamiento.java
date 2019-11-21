@@ -174,13 +174,6 @@ public class Equipamiento {
         this.estado = estado;
     }
 
-    public ArrayList getMovimientosAsociadosDeEntradaActuales() {
-        return movimientosAsociadosDeEntradaActuales;
-    }
-
-    public void setMovimientosAsociadosDeEntradaActuales(ArrayList movimientosAsociadosDeEntradaActuales) {
-        this.movimientosAsociadosDeEntradaActuales = movimientosAsociadosDeEntradaActuales;
-    }
 
     public ArrayList getMovimientosAsociadosDeSalidaActuales() {
         return movimientosAsociadosDeSalidaActuales;
@@ -232,6 +225,8 @@ public class Equipamiento {
             retorno = "Camara Est. Acel.";
         if (this instanceof Bascula)
             retorno = "Bascula";
+        if (this instanceof Laboratorio)
+            retorno = "Laboratorio";
         return retorno;
     }
     
@@ -338,6 +333,17 @@ public class Equipamiento {
             estanTodosDentro = this.lotesEnExistenciaActuales.contains(unLote);
         }
         return estanTodosDentro;
+    }
+
+    boolean fechaAdquisicionEstaEntre(Calendar fechaAdquisicionLimiteInferior, Calendar fechaAdquisicionLimiteSuperior) {
+        fechaAdquisicionLimiteInferior.set(Calendar.HOUR, 0);
+        fechaAdquisicionLimiteInferior.set(Calendar.MINUTE, 0);
+        fechaAdquisicionLimiteInferior.set(Calendar.SECOND, 0);
+
+        fechaAdquisicionLimiteSuperior.set(Calendar.HOUR_OF_DAY, 24);
+        fechaAdquisicionLimiteSuperior.set(Calendar.MINUTE, 59);
+        fechaAdquisicionLimiteSuperior.set(Calendar.SECOND, 59);        
+        return (this.fechaAdquisicion.after(fechaAdquisicionLimiteInferior) && this.fechaAdquisicion.before(fechaAdquisicionLimiteSuperior));
     }
     
 }

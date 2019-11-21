@@ -18,7 +18,8 @@ public class Validaciones {
     public static final Pattern CUIT = Pattern.compile("\\d{2}[-]\\d{8}[-]\\d");
     public static final Pattern DNI = Pattern.compile("\\d{8,9}");
 //    public static final Pattern NUMERO_FRACCIONARIO = Pattern.compile("\\d+.?\\d*");
-    public static final Pattern NUMERO_FRACCIONARIO = Pattern.compile("\\d+.+,?\\d*");
+//    public static final Pattern NUMERO_FRACCIONARIO = Pattern.compile("\\d+.+,?\\d*");
+    public static final Pattern NUMERO_FRACCIONARIO = Pattern.compile("\\d{1,3}([.]\\d{3})*,?\\d*");
     public static final Pattern CODIGO_POSTAL_NUEVO = Pattern.compile("[A-Z]\\d{4}[A-Z]{3}");
     public static final Pattern CODIGO_POSTAL_VIEJO = Pattern.compile("\\d{4}");
     public static final Pattern PATENTE_VIEJA = Pattern.compile("[A-Z]{3}-\\d{3}");
@@ -86,4 +87,29 @@ public class Validaciones {
         }
         return sonRegulares;
     }
+    
+    public static boolean sonLotesAnalizados(ArrayList<Lote> lotes) {
+        boolean sonAnalizados = true;
+        Iterator recorredorLotes = lotes.iterator();
+        while (recorredorLotes.hasNext() && sonAnalizados){
+            Lote unLote = (Lote) recorredorLotes.next();
+            sonAnalizados = unLote.poseeAnalisisDeYCVRegularYAprobado();
+        }
+        return sonAnalizados;
+    }
+
+    public static void validarIntervaloDePorcentajesEnCriterio(float limiteInferior, float limiteSuperior, String unCampo) throws ExcepcionCargaParametros {
+        if (limiteInferior > limiteSuperior)
+            throw new ExcepcionCargaParametros("el limite inferior en "+unCampo+" no puede ser mayor al limite superior.");
+        if (limiteInferior<0)
+            throw new ExcepcionCargaParametros("el limite inferior en "+unCampo+" no puede ser menor a 0%.");
+        if (limiteInferior>100)
+            throw new ExcepcionCargaParametros("el limite inferior en "+unCampo+" no puede ser mayor a 100%.");
+        if (limiteSuperior<0)
+            throw new ExcepcionCargaParametros("el limite superior en "+unCampo+" no puede ser menor a 0%.");
+        if (limiteSuperior>100)
+            throw new ExcepcionCargaParametros("el limite superior en "+unCampo+" no puede ser mayor a 100%.");
+    }
+
+    
 }

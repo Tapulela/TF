@@ -5,6 +5,7 @@
  */
 package InterfazGrafica;
 
+import InterfazGrafica.Busqueda.BuscarProveedor;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.Localidad;
 import LogicaDeNegocio.Organizacion;
@@ -60,7 +61,7 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
 
 
 
-    ABMProveedor(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
+    public ABMProveedor(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
         this.setUndecorated(true);
         initComponents();
         this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
