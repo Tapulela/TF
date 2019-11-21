@@ -17,7 +17,7 @@ public class Molienda extends Transformacion {
     private String sector;
     private String turno;
 
-    public Molienda(int id, Usuario unUsuario, Calendar fechaOrigen, String unEstado, int idEvento, String estado) {
-        super(id, unUsuario, fechaOrigen, unEstado, idEvento, estado);
+    public Molienda(int id, Usuario unUsuario, java.sql.Date fechaOrigen, String estado, int idEvento, Molino unMolino) {
+        super(id, unUsuario, fechaOrigen, estado, idEvento, unMolino);
     }
 }

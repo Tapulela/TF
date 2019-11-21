@@ -5,15 +5,30 @@
  */
 package InterfazGrafica;
 
+import InterfazGrafica.Busqueda.BuscarEstacionamiento;
+import InterfazGrafica.Busqueda.BuscarEquipamiento;
+import LogicaDeNegocio.CamaraEstacionamiento;
+import LogicaDeNegocio.Estacionamiento;
+import LogicaDeNegocio.ExcepcionCargaParametros;
+import LogicaDeNegocio.Lote;
 import LogicaDeNegocio.Organizacion;
 import LogicaDeNegocio.Proveedor;
+import Persistencia.ExcepcionPersistencia;
 import java.awt.Component;
 import java.awt.Toolkit;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.function.UnaryOperator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -26,15 +41,23 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
      */
     private Organizacion organizacion;
     private JFrame ventanaAnterior;
-    private Proveedor unObjetoSeleccionado;
+    private Estacionamiento unObjetoSeleccionado;
     private String trayectoriaActual;
     private String operacionActual;
+    
+    private CamaraEstacionamiento unaCamara;
     
     private final String textoAlta = "Registrar un estacionamiento";
     private final String textoBaja = "Anular un estacionamiento";
     private final String textoModificacion = "Modificar un CONCEPTO";
     
-    public void setUnObjetoSeleccionado(Proveedor unObjetoSeleccionado) {
+    private ArrayList lotesTabla1 = new ArrayList();
+    private ArrayList lotesTabla2 = new ArrayList();
+    
+    private Lote loteSeleccionadoDeTabla1 = null;
+    private Lote loteSeleccionadoDeTabla2 = null;
+    
+    public void setUnObjetoSeleccionado(Estacionamiento unObjetoSeleccionado) {
         this.unObjetoSeleccionado = unObjetoSeleccionado;
     }
     public GestionEstacionamientos() {
@@ -43,7 +66,7 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
 
 
 
-    GestionEstacionamientos(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
+    public GestionEstacionamientos(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
         this.setUndecorated(true);
         initComponents();
         this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
@@ -59,6 +82,8 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
         this.setVisible(true); 
         jBBuscar.setVisible(false);
         
+        jTable1.setRowHeight(30);
+        jTable2.setRowHeight(30);
         
         this.ventanaAnterior = ventanaAnterior;
         habilitarCamposIniciales();
@@ -70,10 +95,10 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
     private void organizarElementos(){
         this.deshabilitarTodo();
         switch((String)jCBOperacion.getSelectedItem()){
-            case "Alta":
+            case "Registrar":
                 prepararAlta();
                 break;
-            case "Baja":
+            case "Anular":
                 prepararBaja();
                 break;
             case "Modificacion":
@@ -110,7 +135,7 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
         jLStaticCalendar1 = new javax.swing.JLabel();
         jC1 = new com.toedter.calendar.JDateChooser();
         jLOperacionSeleccionada = new javax.swing.JLabel();
-        jBBuscar1 = new javax.swing.JButton();
+        jBBuscarCamara = new javax.swing.JButton();
         jLStaticEtiqueta2 = new javax.swing.JLabel();
         jLStaticEtiqueta7 = new javax.swing.JLabel();
         jLStaticEtiqueta5 = new javax.swing.JLabel();
@@ -118,13 +143,15 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
         jTable1 = new javax.swing.JTable();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable2 = new javax.swing.JTable();
-        jBConcretarAccion1 = new javax.swing.JButton();
-        jBConcretarAccion2 = new javax.swing.JButton();
-        jBConcretarAccion3 = new javax.swing.JButton();
-        jBConcretarAccion4 = new javax.swing.JButton();
+        jB1 = new javax.swing.JButton();
+        jB2 = new javax.swing.JButton();
+        jB3 = new javax.swing.JButton();
+        jB4 = new javax.swing.JButton();
         jLStaticEtiqueta3 = new javax.swing.JLabel();
         jLStaticEtiqueta4 = new javax.swing.JLabel();
         jLStaticEtiqueta8 = new javax.swing.JLabel();
+        jLStaticCalendar2 = new javax.swing.JLabel();
+        jC2 = new com.toedter.calendar.JDateChooser();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(153, 255, 153));
@@ -151,7 +178,7 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
         jLabel12.setText("Seleccione una operacion");
 
         jCBOperacion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jCBOperacion.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Alta", "Baja", "Modificacion" }));
+        jCBOperacion.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Registrar", "Anular" }));
         jCBOperacion.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jCBOperacionItemStateChanged(evt);
@@ -168,7 +195,7 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
         });
 
         jLStaticEtiqueta9.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticEtiqueta9.setText("Verifique que los lotes ingresados son los correctos, luego presione aceptar.");
+        jLStaticEtiqueta9.setText("Verifique que los lotes ingresados son los correctos, luego presione el botón .");
         jLStaticEtiqueta9.setEnabled(false);
 
         jLStaticEtiqueta1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
@@ -193,12 +220,12 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
         jLOperacionSeleccionada.setText("Operación sobre un Concepto");
         jLOperacionSeleccionada.setEnabled(false);
 
-        jBBuscar1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jBBuscar1.setText("Buscar una Camara");
-        jBBuscar1.setEnabled(false);
-        jBBuscar1.addActionListener(new java.awt.event.ActionListener() {
+        jBBuscarCamara.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jBBuscarCamara.setText("Buscar una Camara");
+        jBBuscarCamara.setEnabled(false);
+        jBBuscarCamara.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jBBuscar1ActionPerformed(evt);
+                jBBuscarCamaraActionPerformed(evt);
             }
         });
 
@@ -258,7 +285,7 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
 
             },
             new String [] {
-                "ID", "Etiqueta", "O.P.", "Campo3"
+                "ID", "Etiqueta", "O.P.", "O.C."
             }
         ) {
             Class[] types = new Class [] {
@@ -288,39 +315,39 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
             jTable2.getColumnModel().getColumn(0).setMaxWidth(80);
         }
 
-        jBConcretarAccion1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jBConcretarAccion1.setText(">");
-        jBConcretarAccion1.setEnabled(false);
-        jBConcretarAccion1.addActionListener(new java.awt.event.ActionListener() {
+        jB1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jB1.setText(">");
+        jB1.setEnabled(false);
+        jB1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jBConcretarAccion1ActionPerformed(evt);
+                jB1ActionPerformed(evt);
             }
         });
 
-        jBConcretarAccion2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jBConcretarAccion2.setText(">>");
-        jBConcretarAccion2.setEnabled(false);
-        jBConcretarAccion2.addActionListener(new java.awt.event.ActionListener() {
+        jB2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jB2.setText(">>");
+        jB2.setEnabled(false);
+        jB2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jBConcretarAccion2ActionPerformed(evt);
+                jB2ActionPerformed(evt);
             }
         });
 
-        jBConcretarAccion3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jBConcretarAccion3.setText("<");
-        jBConcretarAccion3.setEnabled(false);
-        jBConcretarAccion3.addActionListener(new java.awt.event.ActionListener() {
+        jB3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jB3.setText("<");
+        jB3.setEnabled(false);
+        jB3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jBConcretarAccion3ActionPerformed(evt);
+                jB3ActionPerformed(evt);
             }
         });
 
-        jBConcretarAccion4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jBConcretarAccion4.setText("<<");
-        jBConcretarAccion4.setEnabled(false);
-        jBConcretarAccion4.addActionListener(new java.awt.event.ActionListener() {
+        jB4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jB4.setText("<<");
+        jB4.setEnabled(false);
+        jB4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jBConcretarAccion4ActionPerformed(evt);
+                jB4ActionPerformed(evt);
             }
         });
 
@@ -336,6 +363,13 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
         jLStaticEtiqueta8.setText("(Maximo: # días)");
         jLStaticEtiqueta8.setEnabled(false);
 
+        jLStaticCalendar2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCalendar2.setText("fecha de extracción");
+        jLStaticCalendar2.setEnabled(false);
+
+        jC2.setEnabled(false);
+        jC2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -347,10 +381,10 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 640, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jBConcretarAccion1, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jBConcretarAccion2, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jBConcretarAccion3, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jBConcretarAccion4, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jB1, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jB2, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jB3, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jB4, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 640, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -366,22 +400,27 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                         .addComponent(jC1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jLStaticEtiqueta8))
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLStaticEtiqueta8)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLStaticCalendar2)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jC2, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))))
                             .addComponent(jLOperacionSeleccionada)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLStaticEtiqueta1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jBBuscar1))
+                                .addComponent(jBBuscarCamara))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLStaticEtiqueta3)
                                 .addGap(18, 18, 18)
                                 .addComponent(jLStaticEtiqueta4))
-                            .addComponent(jLStaticEtiqueta2)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLStaticEtiqueta7)
-                                .addGap(569, 569, 569)
-                                .addComponent(jLStaticEtiqueta5)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                            .addComponent(jLStaticEtiqueta2))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLStaticEtiqueta5)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -392,39 +431,43 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLStaticEtiqueta1)
-                    .addComponent(jBBuscar1))
+                    .addComponent(jBBuscarCamara))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLStaticEtiqueta3)
                     .addComponent(jLStaticEtiqueta4))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jC1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLStaticCalendar1))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLStaticCampo1)
-                    .addComponent(jTFCampo1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLStaticEtiqueta8))
-                .addGap(18, 18, 18)
-                .addComponent(jLStaticEtiqueta2)
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLStaticEtiqueta7)
-                    .addComponent(jLStaticEtiqueta5))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(52, 52, 52)
-                        .addComponent(jBConcretarAccion1)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jC1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLStaticCalendar1)
+                            .addComponent(jC2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
-                        .addComponent(jBConcretarAccion2)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLStaticCampo1)
+                            .addComponent(jTFCampo1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLStaticEtiqueta8))
                         .addGap(18, 18, 18)
-                        .addComponent(jBConcretarAccion3)
+                        .addComponent(jLStaticEtiqueta2)
                         .addGap(18, 18, 18)
-                        .addComponent(jBConcretarAccion4))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 345, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLStaticEtiqueta7)
+                            .addComponent(jLStaticEtiqueta5))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(52, 52, 52)
+                                .addComponent(jB1)
+                                .addGap(18, 18, 18)
+                                .addComponent(jB2)
+                                .addGap(18, 18, 18)
+                                .addComponent(jB3)
+                                .addGap(18, 18, 18)
+                                .addComponent(jB4))
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 345, Short.MAX_VALUE)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                    .addComponent(jLStaticCalendar2))
                 .addContainerGap())
         );
 
@@ -441,7 +484,7 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
                         .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(jBBuscar)
-                        .addGap(589, 634, Short.MAX_VALUE))
+                        .addGap(589, 641, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLStaticEtiqueta9)
                         .addGap(0, 0, Short.MAX_VALUE))
@@ -482,21 +525,29 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
 
     private void jBConcretarAccionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBConcretarAccionActionPerformed
        
-        switch ((String)jCBOperacion.getSelectedItem()){
-            case "Alta":
-                //SE VA A DAR DE ALTA ALGO
-                break;
-            case "Baja":
-                //Se va a dar de baja algo
-                break;
-            case "Modificacion":
-                //Se va a modificar 
-                break;
+        try {
+            switch ((String)jCBOperacion.getSelectedItem()){
+                case "Registrar":
+                    this.organizacion.registrarEstacionamiento(lotesTabla2, unaCamara, jC1.getCalendar(), jTFCampo1.getText());
+                    break;
+                case "Anular":
+                    this.organizacion.anularEstacionamiento(this.unObjetoSeleccionado);
+                    break;
+                case "Modificacion":
+                    //Se va a modificar
+                    break;
+            }
+            JOptionPane.showMessageDialog(null, "Operación realizada con exito.");
+            deshabilitarTodo();
+            limpiarCampos();
+            habilitarCamposIniciales();
+        } catch (ExcepcionCargaParametros ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error en la Base de datos: "+ ex.getMessage());
+        } catch (ExcepcionPersistencia ex) {
+            JOptionPane.showMessageDialog(null, "Error en la persistencia: "+ ex.getMessage());
         }
-        JOptionPane.showMessageDialog(null, "Operación realizada con exito.");
-        deshabilitarTodo();
-        limpiarCampos();
-        habilitarCamposIniciales();
         
     }//GEN-LAST:event_jBConcretarAccionActionPerformed
 
@@ -515,42 +566,68 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
     }//GEN-LAST:event_jCBOperacionItemStateChanged
 
     private void jBBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBBuscarActionPerformed
-        BuscarGenerico unaVentana = new BuscarGenerico(this.organizacion, this, this.trayectoriaActual);
+        BuscarEstacionamiento unaVentana = new BuscarEstacionamiento(this.organizacion, this, this.trayectoriaActual);
         this.dispose();
     }//GEN-LAST:event_jBBuscarActionPerformed
 
-    private void jBBuscar1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBBuscar1ActionPerformed
+    private void jBBuscarCamaraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBBuscarCamaraActionPerformed
         BuscarEquipamiento unaVentana = new BuscarEquipamiento(this.organizacion, this, this.trayectoriaActual);
         this.dispose();
-    }//GEN-LAST:event_jBBuscar1ActionPerformed
+    }//GEN-LAST:event_jBBuscarCamaraActionPerformed
 
     private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
+        if (!jTable1.isEnabled())
+            return;
         int id = Integer.parseInt(jTable1.getValueAt(jTable1.getSelectedRow(), 0).toString());
-        this.unObjetoSeleccionado = this.organizacion.getProveedores().get(id);
-        //actualizarObjetoSeleccionado();
-        //habilitarBotones();
-
+        this.loteSeleccionadoDeTabla1 = this.organizacion.getLotes().get(id);
     }//GEN-LAST:event_jTable1MouseClicked
 
     private void jTable2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable2MouseClicked
-        // TODO add your handling code here:
+        if (!jTable2.isEnabled())
+            return;
+        int id = Integer.parseInt(jTable2.getValueAt(jTable2.getSelectedRow(), 0).toString());
+        this.loteSeleccionadoDeTabla2 = this.organizacion.getLotes().get(id);
     }//GEN-LAST:event_jTable2MouseClicked
 
-    private void jBConcretarAccion1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBConcretarAccion1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jBConcretarAccion1ActionPerformed
+    private void jB1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB1ActionPerformed
+        if (loteSeleccionadoDeTabla1 != null){
+            
+            this.lotesTabla1.remove(loteSeleccionadoDeTabla1);
+            this.lotesTabla2.add(loteSeleccionadoDeTabla1);
+            loteSeleccionadoDeTabla1 = null;
+            actualizarTablas();
+        }
+            
+    }//GEN-LAST:event_jB1ActionPerformed
 
-    private void jBConcretarAccion2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBConcretarAccion2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jBConcretarAccion2ActionPerformed
+    private void jB2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB2ActionPerformed
+        if (!lotesTabla1.isEmpty()){
+            this.lotesTabla2.addAll(lotesTabla1);
+            this.lotesTabla1.removeAll(lotesTabla1);
+            loteSeleccionadoDeTabla2 = null;
+            loteSeleccionadoDeTabla1 = null;
+            actualizarTablas();
+        }
+    }//GEN-LAST:event_jB2ActionPerformed
 
-    private void jBConcretarAccion3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBConcretarAccion3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jBConcretarAccion3ActionPerformed
+    private void jB3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB3ActionPerformed
+        if (loteSeleccionadoDeTabla2 != null){
+            this.lotesTabla2.remove(loteSeleccionadoDeTabla2);
+            this.lotesTabla1.add(loteSeleccionadoDeTabla2);
+            loteSeleccionadoDeTabla2 = null;
+            actualizarTablas();
+        }
+    }//GEN-LAST:event_jB3ActionPerformed
 
-    private void jBConcretarAccion4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBConcretarAccion4ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jBConcretarAccion4ActionPerformed
+    private void jB4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB4ActionPerformed
+        if (!lotesTabla2.isEmpty()){
+            this.lotesTabla1.addAll(lotesTabla2);
+            this.lotesTabla2.removeAll(lotesTabla2);
+            loteSeleccionadoDeTabla2 = null;
+            loteSeleccionadoDeTabla1 = null;
+            actualizarTablas();
+        }
+    }//GEN-LAST:event_jB4ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -620,18 +697,20 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private InterfazGrafica.CabeceraDeVentana cabeceraDeVentana;
+    private javax.swing.JButton jB1;
+    private javax.swing.JButton jB2;
+    private javax.swing.JButton jB3;
+    private javax.swing.JButton jB4;
     private javax.swing.JButton jBBuscar;
-    private javax.swing.JButton jBBuscar1;
+    private javax.swing.JButton jBBuscarCamara;
     private javax.swing.JButton jBCancelar;
     private javax.swing.JButton jBConcretarAccion;
-    private javax.swing.JButton jBConcretarAccion1;
-    private javax.swing.JButton jBConcretarAccion2;
-    private javax.swing.JButton jBConcretarAccion3;
-    private javax.swing.JButton jBConcretarAccion4;
     private com.toedter.calendar.JDateChooser jC1;
+    private com.toedter.calendar.JDateChooser jC2;
     private javax.swing.JComboBox<String> jCBOperacion;
     private javax.swing.JLabel jLOperacionSeleccionada;
     private javax.swing.JLabel jLStaticCalendar1;
+    private javax.swing.JLabel jLStaticCalendar2;
     private javax.swing.JLabel jLStaticCampo1;
     private javax.swing.JLabel jLStaticEtiqueta1;
     private javax.swing.JLabel jLStaticEtiqueta2;
@@ -652,7 +731,13 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
 
     private void deshabilitarTodo(){
         //TAMBIEN SE HACEN INVISIBLE LOS ELEMENTOS QUE SEAN NECESARIOS
+        
+        UtilidadesInterfazGrafica.deshabilitarCamposEditablesContenedor(jPanel1.getComponents());
+        
         jBBuscar.setVisible(false);
+        jBBuscarCamara.setEnabled(false);
+        jC2.setVisible(false);
+        jLStaticCalendar2.setVisible(false);
         
         jLOperacionSeleccionada.setEnabled(false);
         
@@ -671,11 +756,21 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
         jLStaticEtiqueta9.setEnabled(false);
         
         jLStaticCalendar1.setEnabled(false);
+        jLStaticCalendar2.setEnabled(false);
         
         jC1.setEnabled(false);
+        jC2.setEnabled(false);
         
         jCBOperacion.setEnabled(false);
         jBBuscar.setEnabled(false);
+        
+        jB1.setEnabled(false);
+        jB2.setEnabled(false);
+        jB3.setEnabled(false);
+        jB4.setEnabled(false);
+        
+        desHabilitarTablas();
+        
         jBConcretarAccion.setEnabled(false);
         jBCancelar.setEnabled(false);
         
@@ -684,34 +779,60 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
     private void limpiarCampos() {
                 this.operacionActual = "";
                 jLStaticEtiqueta7.setText("Operación:");
-                
+                jLStaticEtiqueta4.setText("");
+                jLStaticEtiqueta8.setText("(Máximo: # días)");
                 jTFCampo1.setText("");
 
                 this.unObjetoSeleccionado = null;
+                
+                this.loteSeleccionadoDeTabla1 = null;
+                this.loteSeleccionadoDeTabla2 = null;
+                this.lotesTabla1 = new ArrayList();
+                this.lotesTabla2 = new ArrayList();
+                habilitarTablas();
+                limpiarTablas();
+                desHabilitarTablas();
     }
 
     @Override
     public void actualizarUnObjeto(Object unObjeto) {
-        Proveedor unProveedor = (Proveedor) unObjeto;
-        this.unObjetoSeleccionado = unProveedor;
-        jTFCampo1.setText(unProveedor.getRazonSocial());
+        if (unObjeto instanceof CamaraEstacionamiento){
+            this.unaCamara = (CamaraEstacionamiento) unObjeto;
+            exhibirCamaraSeleccionada();
+            cargarLotesDisponibles();
+            habilitarSeleccionDeLotes();
+            habilitarTablas();
+            actualizarTablas();
+        }
         
-        organizarElementos();
+         if (unObjeto instanceof Estacionamiento){
+            this.unObjetoSeleccionado = (Estacionamiento) unObjeto;
+            this.lotesTabla2 = this.unObjetoSeleccionado.getLotesImplicados();
+            habilitarTablas();
+            actualizarTablas();
+            //desHabilitarTablas();
+            exhibirUnEstacionamiento();
+        }
+        
+        //organizarElementos();
         jBConcretarAccion.setEnabled(true);
         jBCancelar.setEnabled(true);
-        this.pack();
     }
 
     private void prepararAlta() {
         this.operacionActual = "Alta";
-        jBConcretarAccion.setText("Dar de alta");
+        jBConcretarAccion.setText("Registrar un Estacionamiento");
+        jLStaticEtiqueta9.setText("Verifique que los lotes ingresados son los correctos, luego presione el botón "+jBConcretarAccion.getText()+".");
         jLOperacionSeleccionada.setText(this.textoAlta);
         
+        jBBuscarCamara.setEnabled(true);
         jLOperacionSeleccionada.setEnabled(true);
         
         jLStaticCampo1.setEnabled(true);
         
         jTFCampo1.setEnabled(true);
+        
+        jC1.setCalendar(Calendar.getInstance());
         
         //jLEstado.setEnabled(true); EL ESTADO NO SE ELIGE CUANDO SE DA DE ALTA.
         
@@ -728,8 +849,6 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
         
         jLStaticCalendar1.setEnabled(true);
         
-        jC1.setEnabled(true);
-        
         jBConcretarAccion.setEnabled(true);
         jBCancelar.setEnabled(true);
         
@@ -739,7 +858,6 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
     
     private void prepararBaja() {
         this.operacionActual = "Baja";
-        
         jBBuscar.setEnabled(true);
         jBBuscar.setVisible(true);
         
@@ -765,8 +883,9 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
         if (this.unObjetoSeleccionado == null)
             return;
         jBConcretarAccion.setEnabled(true);
-        jBConcretarAccion.setText("Dar de baja");
-        
+        jBConcretarAccion.setText("Anular un estacionamiento");
+        jLStaticEtiqueta9.setText("Verifique que los lotes ingresados son los correctos, luego presione el botón "+jBConcretarAccion.getText()+".");
+
     }
 
     private void prepararModificacion() {
@@ -816,6 +935,60 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
         jCBOperacion.setEnabled(true);
         this.jCBOperacion.setSelectedItem("Seleccionar");
     }
+
+    private void habilitarSeleccionDeLotes() {
+        jB1.setEnabled(true);
+        jB2.setEnabled(true);
+        jB3.setEnabled(true);
+        jB4.setEnabled(true);
+        jTable1.setEnabled(true);
+        jTable2.setEnabled(true);
+    }
+
+    private void cargarLotesDisponibles() {
+        this.lotesTabla1 = this.unaCamara.getLotesDeYerbaCanchadaVerdeNoAnuladosYAprobados();
+    }
+
+    private void actualizarTablas() {
+        ((DefaultTableModel)this.jTable1.getModel()).setRowCount(0);
+        ((DefaultTableModel)this.jTable2.getModel()).setRowCount(0);
+        Iterator recorredorLotesTabla1 = this.lotesTabla1.iterator();
+        while (recorredorLotesTabla1.hasNext()){
+            Lote unLote = (Lote) recorredorLotesTabla1.next();
+            ((DefaultTableModel)this.jTable1.getModel()).addRow(unLote.devolverVectorEstacionamiento());
+        }
+        Iterator recorredorLotesTabla2 = this.lotesTabla2.iterator();
+        while (recorredorLotesTabla2.hasNext()){
+            Lote unLote = (Lote) recorredorLotesTabla2.next();
+            ((DefaultTableModel)this.jTable2.getModel()).addRow(unLote.devolverVectorEstacionamiento());
+        }
+    }
+
+    private void exhibirCamaraSeleccionada() {
+        jLStaticEtiqueta4.setText(this.unaCamara.getNombre());
+        jLStaticEtiqueta8.setText("(Máximo: "+unaCamara.getDuracionMaximaEstacionamiento()+" días)");
+    }
+
+    private void limpiarTablas() {
+        ((DefaultTableModel)this.jTable1.getModel()).setRowCount(0);
+        ((DefaultTableModel)this.jTable2.getModel()).setRowCount(0);
+    }
+
+    private void exhibirUnEstacionamiento() {
+        jC2.setVisible(true);
+        jLStaticCalendar2.setVisible(true);
+        jC1.setCalendar(this.unObjetoSeleccionado.getFechaOrigenC());
+        jC2.setCalendar(this.unObjetoSeleccionado.getFechaExtraccionC());
+    }
+
+    private void desHabilitarTablas() {
+        jTable1.setEnabled(false);
+        jTable2.setEnabled(false);
+    }
+    private void habilitarTablas() {
+        jTable1.setEnabled(true);
+        jTable2.setEnabled(true);
+    }    
     
 
 }

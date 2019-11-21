@@ -6,7 +6,10 @@
 package LogicaDeNegocio;
 
 import LogicaDeNegocio.GestionUsuariosYRoles.Usuario;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -22,23 +25,35 @@ public class Evento implements Comparable{
     private int idEvento;
     
     private Usuario usuarioAsociado;
+    private Calendar fechaOrigen;
 
     private String estadoEvento;
 
-    public Evento(int idEvento, String estado, Usuario unUsuario) { //Para recuperar en la bd
+    public Evento(int idEvento, String estado, Usuario unUsuario, java.sql.Date fechaOrigen) { //Para recuperar en la bd
         this.idEvento = idEvento;
-        this.estadoEvento = estado;
+        this.fechaOrigen = Calendar.getInstance();
+        this.fechaOrigen.setTime(fechaOrigen);
+        if (estado.contains(ESTADO_ANULADO)){
+            this.estadoEvento = ESTADO_ANULADO;
+        }else{
+            this.estadoEvento = ESTADO_REGULAR;
+        }
         this.usuarioAsociado = unUsuario;
     }
 
     public Evento(String estado, Usuario unUsuario) {
-        this.estadoEvento = estado;
+        if (estado.contains(ESTADO_ANULADO)){
+            this.estadoEvento = ESTADO_ANULADO;
+        }else{
+            this.estadoEvento = ESTADO_REGULAR;
+        }
+        this.fechaOrigen = Calendar.getInstance();
         this.usuarioAsociado = unUsuario;
     }
     
     
     
-
+    
     
     public boolean poseeEventosPosterioresRegulares(ArrayList<Evento> eventosPosteriores){
         boolean seEncontroEventoPosteriorRegular = false;
@@ -60,6 +75,8 @@ public class Evento implements Comparable{
         }
         return retorno;
     }
+    
+    
 
     public int getIdEvento() {
         return idEvento;
@@ -69,6 +86,13 @@ public class Evento implements Comparable{
         this.idEvento = id;
     }
 
+    public java.sql.Date getFechaOrigen() {
+        return new Date(this.fechaOrigen.getTimeInMillis());
+    }
+    
+    public Calendar getFechaOrigenC() {
+        return this.fechaOrigen;
+    }
 
 
     public String getEstadoEvento() {
@@ -100,6 +124,7 @@ public class Evento implements Comparable{
     }
     
     
+    
 
     @Override
     public int compareTo(Object t) {
@@ -113,4 +138,53 @@ public class Evento implements Comparable{
     }
     
     
+    public Object[] devolverVectorEvento() {
+        String unTipoDeEvento = "------";
+        int unId = 0;
+        String unaFechaDeOrigen = ( new SimpleDateFormat( "dd/MM/yyyy" ) ).format( this.fechaOrigen.getTime() );
+        if (this instanceof MovimientoInternoMateriaPrima){
+            MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) this;
+            unId = unMovimiento.getId();
+            if (!unMovimiento.poseeEquipamientoOrigen())
+                unTipoDeEvento = "Ingreso de M.P.";
+            else
+                unTipoDeEvento = "Movimiento de Lote";
+        }
+        if (this instanceof Estacionamiento){
+            Estacionamiento unEstacionamiento = (Estacionamiento) this;
+            unId = unEstacionamiento.getId();
+            unTipoDeEvento = "Estacionamiento";
+        }
+        if (this instanceof OrdenDeCompra){
+            OrdenDeCompra unaOrdenDeCompra = (OrdenDeCompra) this;
+            unId = unaOrdenDeCompra.getId();
+            unTipoDeEvento = "Compra";
+        }
+        if (this instanceof AnalisisLaboratorio){
+            AnalisisLaboratorio unAnalisis = (AnalisisLaboratorio) this;
+            unId = unAnalisis.getId();
+            unTipoDeEvento = "Analisis de Laboratorio";
+        }
+        //Object[] vec ={unId, unTipoDeEvento, unaFechaDeOrigen, this.estadoEvento};
+        Object[] vec ={this.idEvento, unTipoDeEvento, unaFechaDeOrigen, this.estadoEvento};
+        return vec;
+    }
+
+    public boolean poseeEstadoEvento(String estadoSeleccionado) {
+        return this.estadoEvento.equals(estadoSeleccionado);
+    }
+
+    public boolean fechaOrigenEstaEntre(Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior) {
+        fechaOrigenInferior.set(Calendar.HOUR_OF_DAY, 0);
+        fechaOrigenInferior.set(Calendar.MINUTE, 0);
+        fechaOrigenInferior.set(Calendar.SECOND, 0);
+        fechaOrigenInferior.set(Calendar.MILLISECOND, 0);
+        
+
+        
+        fechaOrigenSuperior.set(Calendar.HOUR_OF_DAY, 23);
+        fechaOrigenSuperior.set(Calendar.MINUTE, 59);
+        fechaOrigenSuperior.set(Calendar.SECOND, 59);        
+        return ((this.getFechaOrigenC().compareTo(fechaOrigenInferior)>=0 )&& this.getFechaOrigenC().compareTo(fechaOrigenSuperior)<=0);
+    }
 }

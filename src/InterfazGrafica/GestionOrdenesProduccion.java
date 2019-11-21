@@ -5,21 +5,22 @@
  */
 package InterfazGrafica;
 
+import InterfazGrafica.Busqueda.BuscarOrdenDeProduccion;
+import LogicaDeNegocio.CriterioAnalisisLaboratorio;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.OrdenDeProduccion;
 import LogicaDeNegocio.Organizacion;
 import Persistencia.ExcepcionPersistencia;
-import java.awt.Component;
 import java.awt.Toolkit;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Iterator;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -35,6 +36,13 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
     private OrdenDeProduccion unaOrdenDeProduccionSeleccionada;
     private String trayectoriaActual;
     private String operacionActual;
+    
+    private ArrayList criteriosTabla1 = new ArrayList();
+    private ArrayList criteriosTabla2 = new ArrayList();
+    
+    private CriterioAnalisisLaboratorio criterioSeleccionadoDeTabla1 = null;
+    private CriterioAnalisisLaboratorio criterioSeleccionadoDeTabla2 = null;
+    
     public void setUnaOrdenDeProduccionSeleccionada(OrdenDeProduccion unaOrdenSeleccionada) {
         this.unaOrdenDeProduccionSeleccionada = unaOrdenSeleccionada;
     }
@@ -44,7 +52,7 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
 
 
 
-    GestionOrdenesProduccion(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
+    public GestionOrdenesProduccion(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
         this.setUndecorated(true);
         initComponents();
         this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
@@ -62,6 +70,8 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         
         this.ventanaAnterior = ventanaAnterior;
         ParametrosDeInterfaz.configurarVentana(this);
+        cargarCriteriosDisponibles();
+        
     }
     private void organizarElementos(){
         this.deshabilitarTodo();
@@ -92,57 +102,41 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLOperacion = new javax.swing.JLabel();
-        jCBUnidadMedida = new javax.swing.JComboBox<>();
-        jLEstaticoFechaOrigen = new javax.swing.JLabel();
-        jLFechaEntrega = new javax.swing.JLabel();
-        jLCantidadAProducir = new javax.swing.JLabel();
-        jTFCantidadAProducir = new javax.swing.JTextField();
-        jLUnidadMedida = new javax.swing.JLabel();
         jBConcretarAccion = new javax.swing.JButton();
         jBCancelar = new javax.swing.JButton();
-        jCFechaEntrega = new com.toedter.calendar.JDateChooser();
+        cabeceraDeVentana = new InterfazGrafica.CabeceraDeVentana();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jPanel1 = new javax.swing.JPanel();
+        jLFechaEntrega = new javax.swing.JLabel();
+        jBBuscar = new javax.swing.JButton();
+        jLUnidadMedida = new javax.swing.JLabel();
+        jCBUnidadMedida = new javax.swing.JComboBox<>();
+        jTFCantidadAProducir = new javax.swing.JTextField();
+        jLDescripcion = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
         jCBOperacion = new javax.swing.JComboBox<>();
-        jBBuscar = new javax.swing.JButton();
-        jLEstado = new javax.swing.JLabel();
-        jLDescripcion = new javax.swing.JLabel();
+        jLCantidadAProducir = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTADescripcion = new javax.swing.JTextArea();
-        cabeceraDeVentana = new InterfazGrafica.CabeceraDeVentana();
-        jCBEstado = new javax.swing.JLabel();
+        jCFechaEntrega = new com.toedter.calendar.JDateChooser();
+        jLEstaticoFechaOrigen = new javax.swing.JLabel();
+        jLOperacion = new javax.swing.JLabel();
         jLFechaOrigen = new javax.swing.JLabel();
+        jCBEstado = new javax.swing.JLabel();
+        jLEstado = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
+        jLOperacion1 = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTable2 = new javax.swing.JTable();
+        jB1 = new javax.swing.JButton();
+        jB2 = new javax.swing.JButton();
+        jB3 = new javax.swing.JButton();
+        jB4 = new javax.swing.JButton();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(153, 255, 153));
-
-        jLOperacion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLOperacion.setText("Carga de Orden de Producción");
-        jLOperacion.setEnabled(false);
-
-        jCBUnidadMedida.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jCBUnidadMedida.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Kilogramo", "Tonelada" }));
-        jCBUnidadMedida.setEnabled(false);
-
-        jLEstaticoFechaOrigen.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLEstaticoFechaOrigen.setText("Fecha de Origen");
-        jLEstaticoFechaOrigen.setEnabled(false);
-
-        jLFechaEntrega.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLFechaEntrega.setText("Fecha de Entrega de producto terminado");
-        jLFechaEntrega.setEnabled(false);
-
-        jLCantidadAProducir.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLCantidadAProducir.setText("Cantidad a Producir");
-        jLCantidadAProducir.setEnabled(false);
-
-        jTFCantidadAProducir.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jTFCantidadAProducir.setText("Ingrese una cantidad");
-        jTFCantidadAProducir.setEnabled(false);
-
-        jLUnidadMedida.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLUnidadMedida.setText("Unidad de Medida");
-        jLUnidadMedida.setEnabled(false);
 
         jBConcretarAccion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jBConcretarAccion.setText("Aceptar");
@@ -162,19 +156,9 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
             }
         });
 
-        jCFechaEntrega.setEnabled(false);
-        jCFechaEntrega.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-
-        jLabel12.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLabel12.setText("Seleccione una operacion");
-
-        jCBOperacion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jCBOperacion.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Registrar", "Anular" }));
-        jCBOperacion.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                jCBOperacionItemStateChanged(evt);
-            }
-        });
+        jLFechaEntrega.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLFechaEntrega.setText("Fecha de Entrega de producto terminado");
+        jLFechaEntrega.setEnabled(false);
 
         jBBuscar.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jBBuscar.setText("Buscar una Orden de Produccion");
@@ -185,25 +169,306 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
             }
         });
 
-        jLEstado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLEstado.setText("Estado");
-        jLEstado.setEnabled(false);
+        jLUnidadMedida.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLUnidadMedida.setText("Unidad de Medida");
+        jLUnidadMedida.setEnabled(false);
+
+        jCBUnidadMedida.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCBUnidadMedida.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Kilogramo", "Tonelada" }));
+        jCBUnidadMedida.setEnabled(false);
+
+        jTFCantidadAProducir.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jTFCantidadAProducir.setText("Ingrese una cantidad");
+        jTFCantidadAProducir.setEnabled(false);
 
         jLDescripcion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLDescripcion.setText("Descripción");
         jLDescripcion.setEnabled(false);
+
+        jLabel12.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLabel12.setText("Seleccione una operacion");
+
+        jCBOperacion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCBOperacion.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Registrar", "Modificacion", "Anular" }));
+        jCBOperacion.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBOperacionItemStateChanged(evt);
+            }
+        });
+
+        jLCantidadAProducir.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLCantidadAProducir.setText("Cantidad a Producir");
+        jLCantidadAProducir.setEnabled(false);
 
         jTADescripcion.setColumns(20);
         jTADescripcion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jTADescripcion.setRows(5);
         jScrollPane1.setViewportView(jTADescripcion);
 
-        jCBEstado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jCBEstado.setEnabled(false);
+        jCFechaEntrega.setEnabled(false);
+        jCFechaEntrega.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLEstaticoFechaOrigen.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLEstaticoFechaOrigen.setText("Fecha de Origen");
+        jLEstaticoFechaOrigen.setEnabled(false);
+
+        jLOperacion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLOperacion.setText("Carga de Orden de Producción");
+        jLOperacion.setEnabled(false);
 
         jLFechaOrigen.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLFechaOrigen.setText("Fecha de Origen");
         jLFechaOrigen.setEnabled(false);
+
+        jCBEstado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCBEstado.setEnabled(false);
+
+        jLEstado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLEstado.setText("Estado");
+        jLEstado.setEnabled(false);
+
+        jLOperacion1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLOperacion1.setText("Criterios de Analisis asociados");
+        jLOperacion1.setEnabled(false);
+
+        jTable2.setAutoCreateRowSorter(true);
+        jTable2.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "ID", "Nombre", "Descripción"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.Object.class, java.lang.Object.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jTable2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTable2MouseClicked(evt);
+            }
+        });
+        jScrollPane3.setViewportView(jTable2);
+        if (jTable2.getColumnModel().getColumnCount() > 0) {
+            jTable2.getColumnModel().getColumn(0).setMinWidth(70);
+            jTable2.getColumnModel().getColumn(0).setPreferredWidth(70);
+            jTable2.getColumnModel().getColumn(0).setMaxWidth(70);
+        }
+
+        jB1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jB1.setText(">");
+        jB1.setEnabled(false);
+        jB1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jB1ActionPerformed(evt);
+            }
+        });
+
+        jB2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jB2.setText(">>");
+        jB2.setEnabled(false);
+        jB2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jB2ActionPerformed(evt);
+            }
+        });
+
+        jB3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jB3.setText("<");
+        jB3.setEnabled(false);
+        jB3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jB3ActionPerformed(evt);
+            }
+        });
+
+        jB4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jB4.setText("<<");
+        jB4.setEnabled(false);
+        jB4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jB4ActionPerformed(evt);
+            }
+        });
+
+        jTable1.setAutoCreateRowSorter(true);
+        jTable1.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "ID", "Nombre", "Descripción"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.Object.class, java.lang.Object.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTable1MouseClicked(evt);
+            }
+        });
+        jScrollPane4.setViewportView(jTable1);
+        if (jTable1.getColumnModel().getColumnCount() > 0) {
+            jTable1.getColumnModel().getColumn(0).setMinWidth(70);
+            jTable1.getColumnModel().getColumn(0).setPreferredWidth(70);
+            jTable1.getColumnModel().getColumn(0).setMaxWidth(70);
+        }
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLOperacion1)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 691, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jB1, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jB2, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jB3, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jB4, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 692, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLOperacion1)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(52, 52, 52)
+                        .addComponent(jB1)
+                        .addGap(18, 18, 18)
+                        .addComponent(jB2)
+                        .addGap(18, 18, 18)
+                        .addComponent(jB3)
+                        .addGap(18, 18, 18)
+                        .addComponent(jB4))
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 345, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLUnidadMedida)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jCBUnidadMedida, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jLCantidadAProducir)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jTFCantidadAProducir, javax.swing.GroupLayout.PREFERRED_SIZE, 267, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLFechaEntrega)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jCFechaEntrega, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLEstaticoFechaOrigen)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jLFechaOrigen)
+                                        .addGap(37, 37, 37)
+                                        .addComponent(jLEstado)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jCBEstado, javax.swing.GroupLayout.PREFERRED_SIZE, 251, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(5, 5, 5))
+                            .addComponent(jLOperacion)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel12)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(jBBuscar))
+                            .addComponent(jLDescripcion)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 589, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel12)
+                    .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jBBuscar))
+                .addGap(18, 18, 18)
+                .addComponent(jLOperacion)
+                .addGap(18, 18, 18)
+                .addComponent(jLDescripcion)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(24, 24, 24)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLEstaticoFechaOrigen)
+                        .addComponent(jLFechaOrigen))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(2, 2, 2)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLEstado)
+                            .addComponent(jCBEstado, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(25, 25, 25)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLFechaEntrega)
+                    .addComponent(jCFechaEntrega, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLUnidadMedida)
+                    .addComponent(jCBUnidadMedida, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLCantidadAProducir)
+                    .addComponent(jTFCantidadAProducir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        jScrollPane2.setViewportView(jPanel1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -218,41 +483,7 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
                         .addGap(18, 18, 18)
                         .addComponent(jBCancelar))
                     .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(jLUnidadMedida)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jCBUnidadMedida, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jLCantidadAProducir)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jTFCantidadAProducir, javax.swing.GroupLayout.PREFERRED_SIZE, 267, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(jLFechaEntrega)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jCFechaEntrega, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(jLEstaticoFechaOrigen)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jLFechaOrigen)
-                                        .addGap(37, 37, 37)
-                                        .addComponent(jLEstado)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jCBEstado, javax.swing.GroupLayout.PREFERRED_SIZE, 251, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addGap(5, 5, 5))
-                            .addComponent(jLOperacion)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel12)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(jBBuscar))
-                            .addComponent(jLDescripcion)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 589, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -261,37 +492,8 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
                 .addContainerGap()
                 .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel12)
-                    .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jBBuscar))
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 625, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
-                .addComponent(jLOperacion)
-                .addGap(18, 18, 18)
-                .addComponent(jLDescripcion)
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(24, 24, 24)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLEstaticoFechaOrigen)
-                        .addComponent(jLFechaOrigen))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(2, 2, 2)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLEstado)
-                            .addComponent(jCBEstado, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(25, 25, 25)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLFechaEntrega)
-                    .addComponent(jCFechaEntrega, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLUnidadMedida)
-                    .addComponent(jCBUnidadMedida, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLCantidadAProducir)
-                    .addComponent(jTFCantidadAProducir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 76, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jBCancelar)
                     .addComponent(jBConcretarAccion))
@@ -305,13 +507,13 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         try {
             switch ((String)jCBOperacion.getSelectedItem()){
                 case "Registrar":
-                    this.organizacion.registrarOrdenDeProduccion(Calendar.getInstance(),Float.parseFloat(jTFCantidadAProducir.getText()), (String) jCBUnidadMedida.getSelectedItem(), jCFechaEntrega.getCalendar(), jTADescripcion.getText());
+                    this.organizacion.registrarOrdenDeProduccion(Calendar.getInstance(),Float.parseFloat(jTFCantidadAProducir.getText()), (String) jCBUnidadMedida.getSelectedItem(), jCFechaEntrega.getCalendar(), jTADescripcion.getText(), criteriosTabla2);
                     break;
                 case "Anular":
                     this.organizacion.anularOrdenDeProduccion(unaOrdenDeProduccionSeleccionada);
                     break;
                 case "Modificacion":
-                    
+                    this.organizacion.modificarOrdenDeProduccion(unaOrdenDeProduccionSeleccionada, criteriosTabla2);
                     break;
             }
             JOptionPane.showMessageDialog(null, "Operacion realizada con exito.");
@@ -344,6 +546,60 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         BuscarOrdenDeProduccion unaVentana = new BuscarOrdenDeProduccion(this.organizacion, this, this.trayectoriaActual);
         this.dispose();
     }//GEN-LAST:event_jBBuscarActionPerformed
+
+    private void jTable2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable2MouseClicked
+        if (!jTable2.isEnabled())
+        return;
+        int id = Integer.parseInt(jTable2.getValueAt(jTable2.getSelectedRow(), 0).toString());
+        this.criterioSeleccionadoDeTabla2 = this.organizacion.getCriteriosAnalisisLaboratorio().get(id);
+    }//GEN-LAST:event_jTable2MouseClicked
+
+    private void jB1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB1ActionPerformed
+        if (criterioSeleccionadoDeTabla1 != null){
+
+            this.criteriosTabla1.remove(criterioSeleccionadoDeTabla1);
+            this.criteriosTabla2.add(criterioSeleccionadoDeTabla1);
+            criterioSeleccionadoDeTabla1 = null;
+            actualizarTablas();
+        }
+
+    }//GEN-LAST:event_jB1ActionPerformed
+
+    private void jB2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB2ActionPerformed
+        if (!criteriosTabla1.isEmpty()){
+            this.criteriosTabla2.addAll(criteriosTabla1);
+            this.criteriosTabla1.removeAll(criteriosTabla1);
+            criterioSeleccionadoDeTabla2 = null;
+            criterioSeleccionadoDeTabla1 = null;
+            actualizarTablas();
+        }
+    }//GEN-LAST:event_jB2ActionPerformed
+
+    private void jB3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB3ActionPerformed
+        if (criterioSeleccionadoDeTabla2 != null){
+            this.criteriosTabla2.remove(criterioSeleccionadoDeTabla2);
+            this.criteriosTabla1.add(criterioSeleccionadoDeTabla2);
+            criterioSeleccionadoDeTabla2 = null;
+            actualizarTablas();
+        }
+    }//GEN-LAST:event_jB3ActionPerformed
+
+    private void jB4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB4ActionPerformed
+        if (!criteriosTabla2.isEmpty()){
+            this.criteriosTabla1.addAll(criteriosTabla2);
+            this.criteriosTabla2.removeAll(criteriosTabla2);
+            criterioSeleccionadoDeTabla2 = null;
+            criterioSeleccionadoDeTabla1 = null;
+            actualizarTablas();
+        }
+    }//GEN-LAST:event_jB4ActionPerformed
+
+    private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
+        if (!jTable1.isEnabled())
+        return;
+        int id = Integer.parseInt(jTable1.getValueAt(jTable1.getSelectedRow(), 0).toString());
+        this.criterioSeleccionadoDeTabla1 = this.organizacion.getCriteriosAnalisisLaboratorio().get(id);
+    }//GEN-LAST:event_jTable1MouseClicked
 
     /**
      * @param args the command line arguments
@@ -389,6 +645,10 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private InterfazGrafica.CabeceraDeVentana cabeceraDeVentana;
+    private javax.swing.JButton jB1;
+    private javax.swing.JButton jB2;
+    private javax.swing.JButton jB3;
+    private javax.swing.JButton jB4;
     private javax.swing.JButton jBBuscar;
     private javax.swing.JButton jBCancelar;
     private javax.swing.JButton jBConcretarAccion;
@@ -403,11 +663,19 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
     private javax.swing.JLabel jLFechaEntrega;
     private javax.swing.JLabel jLFechaOrigen;
     private javax.swing.JLabel jLOperacion;
+    private javax.swing.JLabel jLOperacion1;
     private javax.swing.JLabel jLUnidadMedida;
     private javax.swing.JLabel jLabel12;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTextArea jTADescripcion;
     private javax.swing.JTextField jTFCantidadAProducir;
+    private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTable2;
     // End of variables declaration//GEN-END:variables
 
     private void deshabilitarTodo(){
@@ -433,35 +701,38 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         jCBUnidadMedida.setEnabled(false);
         jTADescripcion.setEnabled(false);
         
+        desHabilitarTablas();
+        
         jBConcretarAccion.setEnabled(false);
         jBCancelar.setEnabled(false);
         
     }
     
     private void limpiarCampos() {
-                this.operacionActual = "";
-                jLOperacion.setText("Operacion:");
-                
-                jTFCantidadAProducir.setText("");
-                jTADescripcion.setText("");
-                jLDescripcion.setEnabled(false);
-                jLOperacion.setEnabled(false);
-                jBBuscar.setVisible(false);
-                jLEstaticoFechaOrigen.setEnabled(false);
-                jLFechaOrigen.setEnabled(false);
-                jLFechaEntrega.setEnabled(false);
-                jCFechaEntrega.setEnabled(false);
-                jLCantidadAProducir.setEnabled(false);
-                jTFCantidadAProducir.setEnabled(false);
-                jLUnidadMedida.setEnabled(false);
-                jCBUnidadMedida.setEnabled(false);
-                jBConcretarAccion.setEnabled(false);
-                jBCancelar.setEnabled(false);
-                jCBOperacion.setSelectedItem("Seleccionar");
-                jLEstado.setEnabled(false);
-                jCBEstado.setEnabled(false);
-                this.jCBOperacion.setEnabled(true);
-                this.unaOrdenDeProduccionSeleccionada = null;
+        this.operacionActual = "";
+        jLOperacion.setText("Operacion:");
+
+        jTFCantidadAProducir.setText("");
+        jTADescripcion.setText("");
+        jLDescripcion.setEnabled(false);
+        jLOperacion.setEnabled(false);
+        jBBuscar.setVisible(false);
+        jLEstaticoFechaOrigen.setEnabled(false);
+        jLFechaOrigen.setEnabled(false);
+        jLFechaEntrega.setEnabled(false);
+        jCFechaEntrega.setEnabled(false);
+        jLCantidadAProducir.setEnabled(false);
+        jTFCantidadAProducir.setEnabled(false);
+        jLUnidadMedida.setEnabled(false);
+        jCBUnidadMedida.setEnabled(false);
+        jBConcretarAccion.setEnabled(false);
+        jBCancelar.setEnabled(false);
+        jCBOperacion.setSelectedItem("Seleccionar");
+        jLEstado.setEnabled(false);
+        jCBEstado.setEnabled(false);
+        this.jCBOperacion.setEnabled(true);
+        this.unaOrdenDeProduccionSeleccionada = null;
+        limpiarTablas();
     }
 
     @Override
@@ -474,7 +745,9 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         jCFechaEntrega.setCalendar(unaOrdenProduccion.getFechaEntregaProductoTerminadoC());
         jCBUnidadMedida.setSelectedItem(unaOrdenProduccion.getUnidadDeMedida());
         jTFCantidadAProducir.setText(""+unaOrdenProduccion.getCantidadAProducir());
-        
+        this.criteriosTabla2 = unaOrdenProduccion.getCriteriosDeAnalisisAsociados();
+        this.criteriosTabla1 = organizacion.getCriteriosActivos();
+        this.criteriosTabla1.removeAll(criteriosTabla2);
         organizarElementos();
         jBConcretarAccion.setEnabled(true);
         jBCancelar.setEnabled(true);
@@ -504,6 +777,10 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         
         jLFechaOrigen.setText(( new SimpleDateFormat( "dd-MM-yyyy" ) ).format( Calendar.getInstance().getTime() ));
         
+        actualizarTablas();
+        habilitarTablas();
+        habilitarSeleccionDeCriterios();
+
         jBConcretarAccion.setText("Dar de Alta una Orden de Producción");
         jLOperacion.setText("Alta de una Orden de Producción.");
         jLOperacion.setEnabled(true);
@@ -541,6 +818,13 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         jBConcretarAccion.setText("Guardar cambios");
         if (this.unaOrdenDeProduccionSeleccionada == null)
             return;
+        
+        actualizarTablas();
+        habilitarTablas();
+        habilitarSeleccionDeCriterios();
+
+
+        /*
         jLOperacion.setEnabled(true);
         jLEstado.setEnabled(true);
         jLEstaticoFechaOrigen.setEnabled(true);
@@ -556,7 +840,9 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         jCFechaEntrega.setEnabled(true);
         jTFCantidadAProducir.setEnabled(true);
         jCBUnidadMedida.setEnabled(true);
+        */
         
+        UtilidadesInterfazGrafica.habilitarEtiquetasContenedor(jPanel1.getComponents());
         jBConcretarAccion.setEnabled(true);
         
     }
@@ -565,5 +851,45 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         return operacionActual;
     }
     
+    private void actualizarTablas() {
+        ((DefaultTableModel)this.jTable1.getModel()).setRowCount(0);
+        ((DefaultTableModel)this.jTable2.getModel()).setRowCount(0);
+        Iterator recorredorLotesTabla1 = this.criteriosTabla1.iterator();
+        while (recorredorLotesTabla1.hasNext()){
+            CriterioAnalisisLaboratorio unCriterio = (CriterioAnalisisLaboratorio) recorredorLotesTabla1.next();
+            ((DefaultTableModel)this.jTable1.getModel()).addRow(unCriterio.devolverVectorPantallaOrdenProduccion());
+        }
+        Iterator recorredorLotesTabla2 = this.criteriosTabla2.iterator();
+        while (recorredorLotesTabla2.hasNext()){
+            CriterioAnalisisLaboratorio unCriterio = (CriterioAnalisisLaboratorio) recorredorLotesTabla2.next();
+            ((DefaultTableModel)this.jTable2.getModel()).addRow(unCriterio.devolverVectorPantallaOrdenProduccion());
+        }
+    }
+    private void limpiarTablas() {
+        ((DefaultTableModel)this.jTable1.getModel()).setRowCount(0);
+        ((DefaultTableModel)this.jTable2.getModel()).setRowCount(0);
+    }
+    
+    private void cargarCriteriosDisponibles() {
+        this.criteriosTabla1 = organizacion.getCriteriosActivos();
+    }
+    
+    private void desHabilitarTablas() {
+        jTable1.setEnabled(false);
+        jTable2.setEnabled(false);
+    }
+    private void habilitarTablas() {
+        jTable1.setEnabled(true);
+        jTable2.setEnabled(true);
+    }    
+
+    private void habilitarSeleccionDeCriterios() {
+        jB1.setEnabled(true);
+        jB2.setEnabled(true);
+        jB3.setEnabled(true);
+        jB4.setEnabled(true);
+        jTable1.setEnabled(true);
+        jTable2.setEnabled(true);
+    }
 
 }

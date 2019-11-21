@@ -23,7 +23,7 @@ public class Lote {
     
     public static final String TIPO_LOTE_YERBA_CANCHADA_VERDE = "YCV";
     public static final String TIPO_LOTE_YERBA_CANCHADA_ESTACIONADA = "YCE";
-    public static final String TIPO_LOTE_YERBA_CANCHADA_MOLIDA = "YCM";
+    public static final String TIPO_LOTE_YERBA_CANCHADA_MOLIDA = "YM";
     
     private int id;
     private String etiqueta;
@@ -37,9 +37,12 @@ public class Lote {
     private Equipamiento equipamientoDondeReside;
     private MovimientoInternoMateriaPrima movimientoDeIngreso;
     private MovimientoInternoMateriaPrima ultimoMovimientoRegular;
+    private AnalisisLaboratorio analisisDeIngreso;
     
     private ArrayList movimientosAsociados;
     private ArrayList transformacionesAsociadas;
+    private ArrayList estacionamientosAsociados;
+    private ArrayList analisisAsociados;
     
     private ArrayList<Evento> eventosImplicadosPosteriores;
     
@@ -63,7 +66,9 @@ public class Lote {
         
         this.movimientosAsociados = new ArrayList();
         this.transformacionesAsociadas = new ArrayList();
-        eventosImplicadosPosteriores = new ArrayList<>();
+        this.estacionamientosAsociados = new ArrayList();
+        this.analisisAsociados = new ArrayList();
+        this.eventosImplicadosPosteriores = new ArrayList();
     }
 
     public Lote(float cantidad, String tipo_Lote, String unidadDeMedida, Calendar fechaAdquisicion, OrdenDeCompra ordenDeCompraAsociada, Equipamiento equipamientoDondeReside) {
@@ -79,7 +84,16 @@ public class Lote {
         this.transformacionesAsociadas = new ArrayList();
         
         eventosImplicadosPosteriores = new ArrayList();
+        this.transformacionesAsociadas = new ArrayList();
+        this.estacionamientosAsociados = new ArrayList();
+        this.analisisAsociados = new ArrayList();
     }
+
+    public ArrayList<Evento> getEventosImplicadosPosteriores() {
+        return eventosImplicadosPosteriores;
+    }
+
+    
 
     public MovimientoInternoMateriaPrima getMovimientoDeIngreso() {
         return movimientoDeIngreso;
@@ -156,6 +170,11 @@ public class Lote {
         this.cantidad = cantidad;
     }
 
+    public AnalisisLaboratorio getAnalisisDeIngreso() {
+        return analisisDeIngreso;
+    }
+    
+
     public String getUnidadDeMedida() {
         return unidadDeMedida;
     }
@@ -218,6 +237,12 @@ public class Lote {
         this.eventosImplicadosPosteriores.add(unEvento);
     }
     
+    public void agregarEstacionamiento (Estacionamiento unEstacionamiento){
+        this.estacionamientosAsociados.add(unEstacionamiento);
+        this.transformacionesAsociadas.add(unEstacionamiento);
+        agregarEvento(unEstacionamiento);
+    }
+    
     public boolean poseeUnoOMasEventosRegularesPosterioresA(Evento unEventoAComparar){
         boolean seEncontroEventoRegularPosterior = false;
         Iterator eventos = this.eventosImplicadosPosteriores.iterator();
@@ -252,10 +277,11 @@ public class Lote {
 
     public MovimientoInternoMateriaPrima calcularUltimoMovimientoRegular() {
         MovimientoInternoMateriaPrima retorno = null;
+        int idEvento = 0;
         Iterator movimientos = this.movimientosAsociados.iterator();
         while (movimientos.hasNext()){
             MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) movimientos.next();
-            if (unMovimiento.estaRegular())
+            if (unMovimiento.estaRegular() && unMovimiento.getIdEvento()>idEvento)
                 retorno = unMovimiento;
         }
         return retorno;
@@ -285,7 +311,18 @@ public class Lote {
 
     public boolean ultimoMovimientoEstaEntre(Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior) {
         Calendar fechaUltimoMovimiento = this.ultimoMovimientoRegular.getFechaOrigenC();
-        return (fechaUltimoMovimiento.after(fechaOrigenInferior) && fechaUltimoMovimiento.before(fechaOrigenSuperior));
+        
+        fechaOrigenInferior.set(Calendar.HOUR, 0);
+        fechaOrigenInferior.set(Calendar.MINUTE, 0);
+        fechaOrigenInferior.set(Calendar.SECOND, 0);
+        fechaOrigenInferior.set(Calendar.MILLISECOND, 0);
+
+        fechaOrigenSuperior.set(Calendar.HOUR_OF_DAY, 24);
+        fechaOrigenSuperior.set(Calendar.MINUTE, 59);
+        fechaOrigenSuperior.set(Calendar.SECOND, 59);
+        
+        return ((fechaUltimoMovimiento.compareTo(fechaOrigenInferior)>=0 )&& fechaUltimoMovimiento.compareTo(fechaOrigenSuperior)<=0);
+        //return (fechaUltimoMovimiento.after(fechaOrigenInferior) && fechaUltimoMovimiento.before(fechaOrigenSuperior));
     }
     
     public Object[] devolverVector() {
@@ -293,6 +330,11 @@ public class Lote {
         Object[] vec ={this.getId(), this.getEstado(), ordenDeProduccionAsociada.getId(), ordenDeCompraAsociada.getId(), this.ordenDeCompraAsociada.getProveedorAsociado().getRazonSocial(), fechaLlegada, etiqueta};
         return vec;
     }    
+    
+    public Object[] devolverVectorEstacionamiento() {
+                Object[] vec ={this.getId(), etiqueta, ordenDeProduccionAsociada.getId(), ordenDeCompraAsociada.getId()};
+        return vec;
+    }   
 
     public void anular() {
         this.estado = ESTADO_ANULADO;
@@ -301,6 +343,46 @@ public class Lote {
     boolean esDeYerbaCancadaVerde() {
         return this.tipo_Lote.equals(TIPO_LOTE_YERBA_CANCHADA_VERDE);
     }
+
+    void estacionar() {
+        this.tipo_Lote = TIPO_LOTE_YERBA_CANCHADA_ESTACIONADA;
+    }
+
+    void anularEstacionamiento() {
+        this.tipo_Lote = TIPO_LOTE_YERBA_CANCHADA_VERDE;
+    }
+
+    public void agregarAnalisis(AnalisisLaboratorio unAnalisis) {
+        if (this.analisisAsociados.isEmpty()){
+            this.analisisDeIngreso = unAnalisis;
+        }
+        this.analisisAsociados.add(unAnalisis);
+        agregarEvento(unAnalisis);
+    }
+
+    void removerAnalisis(AnalisisLaboratorio unAnalisis) {
+        this.analisisAsociados.remove(unAnalisis);
+        removerEvento(unAnalisis);
+    }
+
+    private void removerEvento(Evento unEvento) {
+        this.eventosImplicadosPosteriores.remove(unEvento);
+    }
+
+    public ArrayList getAnalisisAsociados() {
+        return analisisAsociados;
+    }
+
+    public boolean poseeAnalisisDeYCVRegularYAprobado() {
+        boolean seEncontro = false;
+        Iterator analisis = this.analisisAsociados.iterator();
+        while (analisis.hasNext()){
+            AnalisisLaboratorio unAnalisis = (AnalisisLaboratorio) analisis.next();
+            seEncontro = (unAnalisis.estaRegular() && unAnalisis.estaAprobado() && unAnalisis.esDeYerbaCanchadaVerde());
+        }
+        return seEncontro;
+    }
+
 
     
     

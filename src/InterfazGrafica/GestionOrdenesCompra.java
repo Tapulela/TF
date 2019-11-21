@@ -5,6 +5,9 @@
  */
 package InterfazGrafica;
 
+import InterfazGrafica.Busqueda.BuscarProveedor;
+import InterfazGrafica.Busqueda.BuscarOrdenCompra;
+import InterfazGrafica.Busqueda.BuscarOrdenDeProduccion;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.OrdenDeCompra;
 import LogicaDeNegocio.OrdenDeProduccion;
@@ -55,7 +58,7 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
 
 
 
-    GestionOrdenesCompra(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
+    public GestionOrdenesCompra(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
         this.setUndecorated(true);
         initComponents();
         this.setSize(Toolkit.getDefaultToolkit().getScreenSize());

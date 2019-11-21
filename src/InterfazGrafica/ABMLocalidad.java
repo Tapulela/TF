@@ -51,7 +51,7 @@ public class ABMLocalidad extends javax.swing.JFrame implements TransferenciaIns
 
 
 
-    ABMLocalidad(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
+    public ABMLocalidad(Organizacion organizacion, JFrame ventanaAnterior, String trayectoriaAnterior) {
         this.setUndecorated(true);
         initComponents();
         this.setSize(Toolkit.getDefaultToolkit().getScreenSize());

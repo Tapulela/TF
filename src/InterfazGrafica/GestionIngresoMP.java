@@ -5,6 +5,12 @@
  */
 package InterfazGrafica;
 
+import InterfazGrafica.Busqueda.BuscarAnalisisLaboratorio;
+import InterfazGrafica.Busqueda.BuscarProveedor;
+import InterfazGrafica.Busqueda.BuscarOrdenCompra;
+import InterfazGrafica.Busqueda.BuscarIngresoMateriaPrima;
+import InterfazGrafica.Busqueda.BuscarEquipamiento;
+import LogicaDeNegocio.AnalisisLaboratorio;
 import LogicaDeNegocio.Bascula;
 import LogicaDeNegocio.Equipamiento;
 import LogicaDeNegocio.ExcepcionCargaParametros;
@@ -39,6 +45,7 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
     private OrdenDeCompra unaOrdenDeCompraSeleccionada;
     private Equipamiento unEquipamientoSeleccionado;
     private Proveedor unProveedorDeTransporteSeleccionado;
+    private AnalisisLaboratorio unAnalisisDeLaboratorio;
 
     private String trayectoriaActual;
     private String operacionActual;
@@ -195,6 +202,12 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         jBBuscarDestino = new javax.swing.JButton();
         jLOperacionSeleccionada = new javax.swing.JLabel();
         jLStaticEtiqueta2 = new javax.swing.JLabel();
+        jLStaticEtiqueta17 = new javax.swing.JLabel();
+        jBBuscarAnalisis = new javax.swing.JButton();
+        jLStaticEtiqueta18 = new javax.swing.JLabel();
+        jLStaticEtiqueta19 = new javax.swing.JLabel();
+        jCB3 = new javax.swing.JComboBox<>();
+        jLStaticCB3 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(153, 255, 153));
@@ -562,6 +575,35 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         jLStaticEtiqueta2.setEnabled(false);
         jLStaticEtiqueta2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
+        jLStaticEtiqueta17.setText("Analisis de laboratorio asociado");
+        jLStaticEtiqueta17.setEnabled(false);
+        jLStaticEtiqueta17.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jBBuscarAnalisis.setText("Buscar un analisis");
+        jBBuscarAnalisis.setEnabled(false);
+        jBBuscarAnalisis.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jBBuscarAnalisis.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jBBuscarAnalisisActionPerformed(evt);
+            }
+        });
+
+        jLStaticEtiqueta18.setText("Id de analisis de laboratorio asociado");
+        jLStaticEtiqueta18.setEnabled(false);
+        jLStaticEtiqueta18.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticEtiqueta19.setText("etiqueta");
+        jLStaticEtiqueta19.setEnabled(false);
+        jLStaticEtiqueta19.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jCB3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCB3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "YCV", "YE", "YM" }));
+        jCB3.setEnabled(false);
+
+        jLStaticCB3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLStaticCB3.setText("Tipo de lote");
+        jLStaticCB3.setEnabled(false);
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -605,8 +647,20 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLStaticEtiqueta15)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLStaticEtiqueta16)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jLStaticEtiqueta16))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta17)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jBBuscarAnalisis))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticEtiqueta18)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLStaticEtiqueta19))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLStaticCB3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jCB3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(12, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -649,7 +703,19 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLStaticEtiqueta15)
                     .addComponent(jLStaticEtiqueta16))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta17)
+                    .addComponent(jBBuscarAnalisis))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticEtiqueta18)
+                    .addComponent(jLStaticEtiqueta19))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticCB3)
+                    .addComponent(jCB3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -713,7 +779,7 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
                 case "Alta":
                     LocalTime unHorarioEntrada = jC2.getTime();
                     LocalTime unHorarioSalida = jC3.getTime();
-                    organizacion.registrarIngresoMateriaPrima(jC1.getCalendar(), unHorarioEntrada, unHorarioSalida, (String) jCB1.getSelectedItem(), jTFCampo1.getText(), (String) jCB2.getSelectedItem(), jTFCampo2.getText(), jTFCampo3.getText(), jTFCampo8.getText(), jTFCampo9.getText(), jTFCampo7.getText(), jTFCampo4.getText(), jTFCampo5.getText(), jTFCampo6.getText(), unEquipamientoSeleccionado, unaOrdenDeCompraSeleccionada, unProveedorDeTransporteSeleccionado);
+                    organizacion.registrarIngresoMateriaPrima(jC1.getCalendar(), unHorarioEntrada, unHorarioSalida, (String) jCB1.getSelectedItem(), jTFCampo1.getText(), (String) jCB2.getSelectedItem(), jTFCampo2.getText(), jTFCampo3.getText(), jTFCampo8.getText(), jTFCampo9.getText(), jTFCampo7.getText(), jTFCampo4.getText(), jTFCampo5.getText(), jTFCampo6.getText(), unEquipamientoSeleccionado, unaOrdenDeCompraSeleccionada, unProveedorDeTransporteSeleccionado, unAnalisisDeLaboratorio, (String) jCB3.getSelectedItem());
                     
                     break;
                 case "Baja":
@@ -772,6 +838,15 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         this.dispose();
     }//GEN-LAST:event_jBBuscarProveedorActionPerformed
 
+    private void jBBuscarAnalisisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBBuscarAnalisisActionPerformed
+        if (this.unaOrdenDeCompraSeleccionada == null){
+            JOptionPane.showMessageDialog(null, "Debe seleccionar una orden de compra para poder buscar un analisis de laboratorio asociado.");
+            return;
+        }
+        BuscarAnalisisLaboratorio unaVentana = new BuscarAnalisisLaboratorio(this.organizacion, this, this.trayectoriaActual);
+        this.dispose();
+    }//GEN-LAST:event_jBBuscarAnalisisActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -814,6 +889,7 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private InterfazGrafica.CabeceraDeVentana cabeceraDeVentana;
     private javax.swing.JButton jBBuscar;
+    private javax.swing.JButton jBBuscarAnalisis;
     private javax.swing.JButton jBBuscarDestino;
     private javax.swing.JButton jBBuscarOrdenCompra;
     private javax.swing.JButton jBBuscarProveedor;
@@ -824,10 +900,12 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
     private com.github.lgooddatepicker.components.TimePicker jC3;
     private javax.swing.JComboBox<String> jCB1;
     private javax.swing.JComboBox<String> jCB2;
+    private javax.swing.JComboBox<String> jCB3;
     private javax.swing.JComboBox<String> jCBOperacion;
     private javax.swing.JLabel jLOperacionSeleccionada;
     private javax.swing.JLabel jLStaticCB1;
     private javax.swing.JLabel jLStaticCB2;
+    private javax.swing.JLabel jLStaticCB3;
     private javax.swing.JLabel jLStaticCalendar1;
     private javax.swing.JLabel jLStaticCalendar2;
     private javax.swing.JLabel jLStaticCalendar3;
@@ -848,6 +926,9 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
     private javax.swing.JLabel jLStaticEtiqueta14;
     private javax.swing.JLabel jLStaticEtiqueta15;
     private javax.swing.JLabel jLStaticEtiqueta16;
+    private javax.swing.JLabel jLStaticEtiqueta17;
+    private javax.swing.JLabel jLStaticEtiqueta18;
+    private javax.swing.JLabel jLStaticEtiqueta19;
     private javax.swing.JLabel jLStaticEtiqueta2;
     private javax.swing.JLabel jLStaticEtiqueta3;
     private javax.swing.JLabel jLStaticEtiqueta4;
@@ -898,9 +979,11 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         
         jLStaticCB1.setEnabled(false);
         jLStaticCB2.setEnabled(false);
+        jLStaticCB3.setEnabled(false);
         
         jCB1.setEnabled(false);
         jCB2.setEnabled(false);
+        jCB3.setEnabled(false);
         
         jLStaticEtiqueta1.setEnabled(false);
         jLStaticEtiqueta2.setEnabled(false);
@@ -918,6 +1001,9 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         jLStaticEtiqueta14.setEnabled(false);
         jLStaticEtiqueta15.setEnabled(false);
         jLStaticEtiqueta16.setEnabled(false);
+        jLStaticEtiqueta17.setEnabled(false);
+        jLStaticEtiqueta18.setEnabled(false);
+        jLStaticEtiqueta19.setEnabled(false);
         
         jLStaticCalendar1.setEnabled(false);
         jLStaticCalendar2.setEnabled(false);
@@ -933,6 +1019,7 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         jBBuscarOrdenCompra.setEnabled(false);
         jBBuscarDestino.setEnabled(false);
         jBBuscarProveedor.setEnabled(false);
+        jBBuscarAnalisis.setEnabled(false);
         
         jBConcretarAccion.setEnabled(false);
         jBCancelar.setEnabled(false);
@@ -961,13 +1048,17 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
                 jLStaticEtiqueta5.setText("");
                 jLStaticEtiqueta14.setText("");
                 jLStaticEtiqueta16.setText("");
+                jLStaticEtiqueta19.setText("");
                 
                 jC2.setText("");
                 jC3.setText("");
                 
                 jCB1.setSelectedItem("Seleccionar");
                 jCB2.setSelectedItem("Seleccionar");
+                jCB3.setSelectedItem("Seleccionar");
+                
                 this.unaOrdenDeCompraSeleccionada = null;
+                this.unAnalisisDeLaboratorio = null;
     }
 
     @Override
@@ -982,6 +1073,7 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
             exhibirEquipamiento();
             exhibirProveedorDeTransporte();
             exhibirEtiqueta();
+            exhibirAnalisisDeLaboratorio();
         }
                 
         if (unObjeto instanceof OrdenDeCompra){
@@ -990,6 +1082,7 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
                 if (!unaOrdenDeCompraSeleccionada.poseeProveedorAsociado())
                     throw new ExcepcionCargaParametros("No se puede seleccionar una orden de compra sin proveedor asociado.");
                 exhibirOrdenDeCompraYProveedor();
+                habilitarSeleccionDeAnalisisDeLaboratorio();
             } catch (ExcepcionCargaParametros ex) {
                 JOptionPane.showMessageDialog(null, ex.getMessage());
                 return;
@@ -1009,14 +1102,17 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         if (unObjeto instanceof Proveedor){
             unProveedorDeTransporteSeleccionado = (Proveedor) unObjeto;
             exhibirProveedorDeTransporte();
-        }        
+        }
+        if (unObjeto instanceof AnalisisLaboratorio){
+            unAnalisisDeLaboratorio = (AnalisisLaboratorio) unObjeto;
+            exhibirAnalisisDeLaboratorio();
+        }   
         
         
         
-        organizarElementos();
+        //organizarElementos();
         jBConcretarAccion.setEnabled(true);
         jBCancelar.setEnabled(true);
-        //this.pack();
     }
 
     private void prepararAlta() {
@@ -1030,6 +1126,7 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         jBBuscarOrdenCompra.setEnabled(true);
         jBBuscarDestino.setEnabled(true);
         jBBuscarProveedor.setEnabled(true);
+        
         
         jLOperacionSeleccionada.setEnabled(true);
         
@@ -1056,10 +1153,12 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         //jLEstado.setEnabled(true); EL ESTADO NO SE ELIGE CUANDO SE DA DE ALTA.
         jLStaticCB1.setEnabled(true);
         jLStaticCB2.setEnabled(true);
+        jLStaticCB3.setEnabled(true);
         
         //jCBEstado.setEnabled(true); EL ESTADO NO SE ELIGE CUANDO SE DA DE ALTA.
         jCB1.setEnabled(true);
         jCB2.setEnabled(true);
+        jCB3.setEnabled(true);
         
         jLStaticEtiqueta1.setEnabled(true);
         jLStaticEtiqueta2.setEnabled(true);
@@ -1257,6 +1356,23 @@ public class GestionIngresoMP extends javax.swing.JFrame implements Transferenci
         jLStaticEtiqueta15.setEnabled(true);
         jLStaticEtiqueta16.setEnabled(true);
         jLStaticEtiqueta16.setText(unMovimientoSeleccionado.getLoteAsociado().getEtiqueta());
+    }
+
+    private void exhibirAnalisisDeLaboratorio() {
+        if (unAnalisisDeLaboratorio == null)
+            return;
+        jLStaticEtiqueta19.setText(""+unAnalisisDeLaboratorio.getId());
+    }
+
+    private void habilitarSeleccionDeAnalisisDeLaboratorio() {
+        jBBuscarAnalisis.setEnabled(true);
+        jLStaticEtiqueta17.setEnabled(true);
+        jLStaticEtiqueta18.setEnabled(true);
+        jLStaticEtiqueta19.setEnabled(true);
+    }
+
+    public OrdenDeCompra getUnaOrdenDeCompraSeleccionada() {
+        return unaOrdenDeCompraSeleccionada;
     }
     
 

@@ -5,6 +5,10 @@
  */
 package InterfazGrafica;
 
+import InterfazGrafica.Busqueda.BuscarLote;
+import InterfazGrafica.Busqueda.BuscarProveedor;
+import InterfazGrafica.Busqueda.BuscarMovimientoMateriaPrima;
+import InterfazGrafica.Busqueda.BuscarEquipamiento;
 import LogicaDeNegocio.Bascula;
 import LogicaDeNegocio.Equipamiento;
 import LogicaDeNegocio.ExcepcionCargaParametros;

@@ -49,7 +49,7 @@ public class Login extends javax.swing.JFrame {
         
         
         
-        //this.setLocationRelativeTo(null);
+        this.setLocationRelativeTo(null);
     }
 
     /**
@@ -186,7 +186,8 @@ public class Login extends javax.swing.JFrame {
             unaOrganizacion = new Organizacion(persistencia);
             persistencia.setOrganizacionAsociada(unaOrganizacion);
             persistencia.iniciarSesion(tBUsuario.getText(), jPFPass.getText(), unaOrganizacion);
-            MenuPrincipal unMenuPrincipal = new MenuPrincipal(unaOrganizacion);
+            //MenuPrincipal unMenuPrincipal = new MenuPrincipal(unaOrganizacion);
+            Inicio unInicio = new Inicio(unaOrganizacion);
             this.dispose();
         } catch (ClassNotFoundException ex) {
             JOptionPane.showMessageDialog(null, "Error con el driver: "+ex.getMessage());

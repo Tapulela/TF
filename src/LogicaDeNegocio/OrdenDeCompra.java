@@ -20,7 +20,6 @@ public class OrdenDeCompra extends Evento {
     public static final String ESTADO_REGULAR = "Regular";
     public static final String ESTADO_ANULADO = "Anulado";
     private int id;
-    private Calendar fechaOrigen;
     private float cantidadAComprar;
     private String unidadDeMedida;
     private float costoPorUnidad;
@@ -29,12 +28,11 @@ public class OrdenDeCompra extends Evento {
     private ArrayList lotesAsociados;
     private Proveedor proveedorAsociado;
     private OrdenDeProduccion ordenDeProduccionAsociada;
+    private ArrayList analisisRealizados;
 
     public OrdenDeCompra(int id, Usuario unUsuario, java.sql.Date fechaOrigen, float cantidadAComprar, String unidadDeMedida, float costoPorUnidad, String estado, Proveedor proveedorAsociado, OrdenDeProduccion unaOrdenDeProduccion, int idEvento) {
-        super(idEvento, estado, unUsuario);
+        super(idEvento, estado, unUsuario, fechaOrigen);
         this.id = id;
-        this.fechaOrigen = Calendar.getInstance();
-        this.fechaOrigen.setTime(fechaOrigen);
         this.cantidadAComprar = cantidadAComprar;
         this.unidadDeMedida = unidadDeMedida;
         this.costoPorUnidad = costoPorUnidad;
@@ -42,12 +40,12 @@ public class OrdenDeCompra extends Evento {
         this.proveedorAsociado = proveedorAsociado;
         this.ordenDeProduccionAsociada = unaOrdenDeProduccion;
         this.lotesAsociados = new ArrayList();
+        this.analisisRealizados = new ArrayList();
         
     }
     
     public OrdenDeCompra(Usuario unUsuario, float cantidadComprada, String unidadDeMedida, float costoPorUnidad, Proveedor proveedorAsociado, OrdenDeProduccion ordenDeProduccionAsociada) {
         super(Evento.ESTADO_REGULAR, unUsuario);
-        this.fechaOrigen = Calendar.getInstance();
         this.cantidadAComprar = cantidadComprada;
         this.unidadDeMedida = unidadDeMedida;
         this.costoPorUnidad = costoPorUnidad;
@@ -55,6 +53,7 @@ public class OrdenDeCompra extends Evento {
         this.estado = ESTADO_REGULAR;
         this.ordenDeProduccionAsociada = ordenDeProduccionAsociada;
         this.lotesAsociados = new ArrayList();
+        this.analisisRealizados = new ArrayList();
         
 
     }
@@ -70,13 +69,6 @@ public class OrdenDeCompra extends Evento {
         this.id = id;
     }
 
-    public java.sql.Date getFechaOrigen() {
-        return new Date(this.fechaOrigen.getTimeInMillis());
-    }
-
-    public void setFechaOrigen(Calendar fechaOrigen) {
-        this.fechaOrigen = fechaOrigen;
-    }
 
     public float getCantidadAComprar() {
         return cantidadAComprar;
@@ -168,24 +160,18 @@ public class OrdenDeCompra extends Evento {
         this.estado = ESTADO_ANULADO;
     }
 
-    public Calendar getFechaOrigenC() {
-        return this.fechaOrigen;
-    }
 
     Boolean poseeOrdenDeProduccionAsociada(OrdenDeProduccion unaOrdenDeProduccion) {
         return this.ordenDeProduccionAsociada==unaOrdenDeProduccion;
     }
 
-    Boolean origenEstaEntre(Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior) {
-        return (this.fechaOrigen.after(fechaOrigenInferior) && this.fechaOrigen.before(fechaOrigenSuperior));
-    }
     
     public Object[] devolverVector() {
         String unProveedor = "No posee";
         if (this.proveedorAsociado != null){
             unProveedor = this.proveedorAsociado.getRazonSocial();
         }
-        Object[] vec ={this.getId(), ( new SimpleDateFormat( "dd-MM-yyyy" ) ).format( this.fechaOrigen.getTime() ), this.getCantidadAComprar(), this.getUnidadDeMedida(), this.getCostoPorUnidad(),this.getEstadoEvento(), this.getOrdenDeProduccionAsociada().getId(), unProveedor};
+        Object[] vec ={this.getId(), ( new SimpleDateFormat( "dd-MM-yyyy" ) ).format( this.getFechaOrigenC().getTime() ), this.getCantidadAComprar(), this.getUnidadDeMedida(), this.getCostoPorUnidad(),this.getEstadoEvento(), this.getOrdenDeProduccionAsociada().getId(), unProveedor};
         return vec;
     }
     
@@ -216,5 +202,12 @@ public class OrdenDeCompra extends Evento {
         return retorno;
     }
     
+    public void agregarAnalisisDeLaboratorio(AnalisisLaboratorio unAnalisis){
+        this.analisisRealizados.add(unAnalisis);
+    }
+
+    public void removerAnalisisDeLaboratorio(AnalisisLaboratorio unAnalisis) {
+        this.analisisRealizados.remove(unAnalisis);
+    }
     
 }
