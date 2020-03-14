@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.11.0.final using JasperReports Library version 6.11.0-0c4056ccaa4d25a5a8c45672d2f764ea3498bebb  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isTitleNewPage="true" uuid="379de868-abe2-4d8c-b785-32c05d2cd9f7">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="criterios" class="java.lang.String"/>
+	<parameter name="Cabecera" class="java.lang.String"/>
+	<parameter name="ReporteDe" class="java.lang.String"/>
+	<parameter name="reportLogo" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="reporte" class="java.lang.String"/>
+	<field name="situacion" class="java.lang.String"/>
+	<field name="etiqueta" class="java.lang.String"/>
+	<field name="equipamientoS " class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="48" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="130" height="41" uuid="e7399d39-6bd5-483c-9644-d765c421a31e"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="24"/>
+				</textElement>
+				<text><![CDATA[Reporte de ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="200" y="0" width="355" height="40" uuid="573d09ae-192d-4342-a132-de6c7508faae"/>
+				<textElement verticalAlignment="Middle">
+					<font size="24"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{ReporteDe}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="-20" y="40" width="595" height="1" uuid="2c8109e9-778c-4c7a-971a-e783497c5e22"/>
+			</line>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="37" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="37" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="7" width="91" height="21" uuid="aacb4404-6ae3-4ddb-83a7-f4899173697c"/>
+				<textElement>
+					<font size="16"/>
+				</textElement>
+				<text><![CDATA[Lote]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="120" y="7" width="91" height="21" uuid="4aab69a7-ddec-4acf-8fed-1c62da3acb20"/>
+				<textElement>
+					<font size="16"/>
+				</textElement>
+				<text><![CDATA[Situación]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="230" y="8" width="110" height="21" uuid="abe3749c-bd1e-4734-9962-3d78cf231fe1"/>
+				<textElement>
+					<font size="16"/>
+				</textElement>
+				<text><![CDATA[Equipamiento]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="8" width="150" height="21" uuid="b603c112-46fc-4a11-acd5-97b735bd0a73"/>
+				<textElement>
+					<font size="16"/>
+				</textElement>
+				<text><![CDATA[Cantidad procesada]]></text>
+			</staticText>
+			<line>
+				<reportElement x="110" y="6" width="1" height="31" uuid="b4d5349d-f4c3-4cd8-9688-0b6c60127f73"/>
+			</line>
+			<line>
+				<reportElement x="220" y="6" width="1" height="31" uuid="b667d762-9e00-4727-ac7f-3c263d0a8d76"/>
+			</line>
+			<line>
+				<reportElement x="400" y="6" width="1" height="31" uuid="dfe87453-354b-44c7-9c68-e31fcaf5ee00"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="61" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="100" height="60" uuid="2309e065-4a1d-4386-90e9-fd5171401830"/>
+				<textFieldExpression><![CDATA[$F{etiqueta}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="2" y="60" width="558" height="1" uuid="4df1a6a2-6641-4a77-a0fe-9f37dac061b0"/>
+			</line>
+			<line>
+				<reportElement x="110" y="0" width="1" height="60" uuid="00a839fb-2dde-4395-9dd3-7ed884c7be3d"/>
+			</line>
+			<line>
+				<reportElement x="220" y="0" width="1" height="60" uuid="cc01ff2d-69a2-46d0-b4bf-af52e7cd03c2"/>
+			</line>
+			<textField>
+				<reportElement x="115" y="0" width="100" height="60" uuid="395d51d9-94b9-441f-86bd-2abb49b2c502"/>
+				<textFieldExpression><![CDATA[$F{situacion}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="400" y="0" width="1" height="60" uuid="b125dbfb-e1e8-4cc0-bfb3-d767a4cc1d5d"/>
+			</line>
+			<textField>
+				<reportElement x="230" y="0" width="160" height="60" uuid="68109537-31b6-4703-a0a3-04657de55fd5"/>
+				<textFieldExpression><![CDATA[$F{equipamientoS}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="409" y="0" width="160" height="60" uuid="0eaa031d-7631-4a24-a939-977254bb6d9a"/>
+				<textFieldExpression><![CDATA[$F{equipamientoS}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="40" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="66" splitType="Stretch">
+			<textField evaluationTime="Master">
+				<reportElement x="460" y="36" width="95" height="30" uuid="754ddb27-a454-4472-8c61-cf66c0b67128"/>
+				<textFieldExpression><![CDATA["Pagina "+ $V{MASTER_CURRENT_PAGE}+ " de "+ $V{MASTER_TOTAL_PAGES}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="273" y="4" width="281" height="30" uuid="ad13ea64-a65c-432b-8e4e-20fea49c8f16"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$P{Cabecera}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="4" width="273" height="21" uuid="381427a7-5ce1-4a4b-99ab-fc7e8f404194"/>
+				<text><![CDATA[YerbaSoft - Sistema de Gestión de Producción de Yerba]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="18" splitType="Stretch"/>
+	</summary>
+</jasperReport>

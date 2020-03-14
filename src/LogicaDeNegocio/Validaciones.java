@@ -5,6 +5,7 @@
  */
 package LogicaDeNegocio;
 
+import LogicaDeNegocio.GestionUsuariosYRoles.Usuario;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Objects;
@@ -88,7 +89,7 @@ public class Validaciones {
         return sonRegulares;
     }
     
-    public static boolean sonLotesAnalizados(ArrayList<Lote> lotes) {
+    public static boolean sonLotesAnalizadosYCV(ArrayList<Lote> lotes) {
         boolean sonAnalizados = true;
         Iterator recorredorLotes = lotes.iterator();
         while (recorredorLotes.hasNext() && sonAnalizados){
@@ -109,6 +110,58 @@ public class Validaciones {
             throw new ExcepcionCargaParametros("el limite superior en "+unCampo+" no puede ser menor a 0%.");
         if (limiteSuperior>100)
             throw new ExcepcionCargaParametros("el limite superior en "+unCampo+" no puede ser mayor a 100%.");
+    }
+
+    public static boolean loteSeEncuentraSiendoEstacionadoActualmente(Lote unLote) {
+        boolean seEncontroEstacionamientoEnCurso = false;
+        Iterator estacionamientos = unLote.getEstacionamientosAsociados().iterator();
+        while (estacionamientos.hasNext() && !seEncontroEstacionamientoEnCurso){
+            Estacionamiento unEstacionamiento = (Estacionamiento) estacionamientos.next();
+            seEncontroEstacionamientoEnCurso = unEstacionamiento.estaRegular() && unEstacionamiento.estaEnCurso();
+        }
+        return seEncontroEstacionamientoEnCurso;
+    }
+
+    public static boolean sonLotesDeYerbaCanchadaEstacionada(ArrayList lotes) {
+        boolean sonLotesYCE = true;
+        Iterator recorredorLotes = lotes.iterator();
+        while (recorredorLotes.hasNext() && sonLotesYCE){
+            Lote unLote = (Lote) recorredorLotes.next();
+            sonLotesYCE = unLote.esDeYerbaCancadaEstacionada();
+        }
+        return sonLotesYCE;
+    }
+
+    public static boolean sonLotesAnalizadosYCE(ArrayList lotes) {
+        boolean sonAnalizados = true;
+        Iterator recorredorLotes = lotes.iterator();
+        while (recorredorLotes.hasNext() && sonAnalizados){
+            Lote unLote = (Lote) recorredorLotes.next();
+            sonAnalizados = unLote.poseeAnalisisDeYCERegularYAprobado();
+        }
+        return sonAnalizados;
+    }
+
+    public static boolean sonLotesDeUnaMismaOrdenDeProduccion(ArrayList lotes, OrdenDeProduccion unaOrdenDeProduccion) {
+        boolean pertenecenALaMismaOrdenDeProduccion = true;
+        Iterator recorredorLotes = lotes.iterator();
+        while (recorredorLotes.hasNext() && pertenecenALaMismaOrdenDeProduccion){
+            Lote unLote = (Lote) recorredorLotes.next();
+            pertenecenALaMismaOrdenDeProduccion = unLote.poseeOrdenDeProduccionAsociada(unaOrdenDeProduccion);
+        }
+        return pertenecenALaMismaOrdenDeProduccion;
+    }
+
+    public static boolean existeUsuario(ArrayList usuarios, String unNombreDeUsuario) {
+        boolean seEncontro = false;
+        Iterator recorredorUsuarios = usuarios.iterator();
+        while (recorredorUsuarios.hasNext() && !seEncontro){
+            Usuario unUsuario = (Usuario) recorredorUsuarios.next();
+            seEncontro = unUsuario.poseeNombreDeUsuario(unNombreDeUsuario);
+        }
+        return seEncontro;
+        
+        
     }
 
     

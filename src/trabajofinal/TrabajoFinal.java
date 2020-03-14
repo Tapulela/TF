@@ -6,20 +6,7 @@
 package trabajofinal;
 
 import InterfazGrafica.Login;
-import LogicaDeNegocio.Lote;
-import LogicaDeNegocio.Proveedor;
-import LogicaDeNegocio.Equipamiento;
-import LogicaDeNegocio.Deposito;
-import LogicaDeNegocio.Organizacion;
-import LogicaDeNegocio.Validaciones;
-import Persistencia.Persistencia;
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 /**
  *
@@ -32,7 +19,6 @@ public class TrabajoFinal {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        
         
         
         

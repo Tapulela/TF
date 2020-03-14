@@ -12,21 +12,15 @@ import LogicaDeNegocio.Estacionamiento;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.Lote;
 import LogicaDeNegocio.Organizacion;
-import LogicaDeNegocio.Proveedor;
 import Persistencia.ExcepcionPersistencia;
-import java.awt.Component;
 import java.awt.Toolkit;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
-import java.util.function.UnaryOperator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
@@ -195,7 +189,7 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
         });
 
         jLStaticEtiqueta9.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jLStaticEtiqueta9.setText("Verifique que los lotes ingresados son los correctos, luego presione el botón .");
+        jLStaticEtiqueta9.setText("Verifique que los lotes ingresados son los correctos, luego presione el botón aceptar.");
         jLStaticEtiqueta9.setEnabled(false);
 
         jLStaticEtiqueta1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
@@ -805,9 +799,9 @@ public class GestionEstacionamientos extends javax.swing.JFrame implements Trans
             actualizarTablas();
         }
         
-         if (unObjeto instanceof Estacionamiento){
+        if (unObjeto instanceof Estacionamiento){
             this.unObjetoSeleccionado = (Estacionamiento) unObjeto;
-            this.lotesTabla2 = this.unObjetoSeleccionado.getLotesImplicados();
+            this.lotesTabla2 = this.unObjetoSeleccionado.obtenerLotesImplicados();
             habilitarTablas();
             actualizarTablas();
             //desHabilitarTablas();

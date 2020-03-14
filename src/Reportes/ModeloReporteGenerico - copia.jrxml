@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.10.0.final using JasperReports Library version 6.10.0-unknown  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="379de868-abe2-4d8c-b785-32c05d2cd9f7">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="criterios" class="java.lang.String"/>
+	<parameter name="Cabecera" class="java.lang.String"/>
+	<parameter name="ReporteDe" class="java.lang.String"/>
+	<parameter name="reportLogo" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="reporte" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="197" splitType="Stretch">
+			<staticText>
+				<reportElement x="70" y="0" width="130" height="41" uuid="e7399d39-6bd5-483c-9644-d765c421a31e"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="24"/>
+				</textElement>
+				<text><![CDATA[Reporte de ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="200" y="0" width="355" height="40" uuid="573d09ae-192d-4342-a132-de6c7508faae"/>
+				<textElement verticalAlignment="Middle">
+					<font size="24"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{ReporteDe}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="-20" y="189" width="595" height="1" uuid="2c8109e9-778c-4c7a-971a-e783497c5e22"/>
+			</line>
+			<staticText>
+				<reportElement x="70" y="40" width="280" height="21" uuid="f53d788a-b867-44da-9a77-a3f1a1fa94c5"/>
+				<text><![CDATA[YerbaSoft - Sistema de Gestión de Producción de Yerba]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="56" width="191" height="20" uuid="ef39362c-5a17-4252-95bc-6a6a3cdb8e11"/>
+				<text><![CDATA[Criterios de Filtrado utilizados]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="76" width="555" height="104" uuid="4d288826-dc50-483f-8087-69b5a3737d8b"/>
+				<textFieldExpression><![CDATA[$P{criterios}]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="0" y="0" width="60" height="56" uuid="74a2aa70-5e16-41c1-911b-47ce8b7f6c87"/>
+				<imageExpression><![CDATA[$P{reportLogo}]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="32" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="13" splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="103" splitType="Stretch">
+			<textField>
+				<reportElement x="15" y="1" width="538" height="90" uuid="2309e065-4a1d-4386-90e9-fd5171401830"/>
+				<textFieldExpression><![CDATA[$F{reporte}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="17" y="95" width="525" height="1" uuid="4df1a6a2-6641-4a77-a0fe-9f37dac061b0"/>
+			</line>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="40" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="66" splitType="Stretch">
+			<textField evaluationTime="Report">
+				<reportElement x="523" y="36" width="20" height="30" uuid="84b3ab4b-8702-423e-90fe-a3596173663f"/>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="490" y="36" width="20" height="30" uuid="754ddb27-a454-4472-8c61-cf66c0b67128"/>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="507" y="36" width="20" height="30" uuid="5055d4bc-827d-40b7-95f5-b8b180e73f87"/>
+				<text><![CDATA[de]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="273" y="4" width="281" height="30" uuid="ad13ea64-a65c-432b-8e4e-20fea49c8f16"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$P{Cabecera}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="4" width="273" height="21" uuid="381427a7-5ce1-4a4b-99ab-fc7e8f404194"/>
+				<text><![CDATA[YerbaSoft - Sistema de Gestión de Producción de Yerba]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="18" splitType="Stretch"/>
+	</summary>
+</jasperReport>

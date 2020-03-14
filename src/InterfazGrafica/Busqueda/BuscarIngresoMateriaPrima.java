@@ -17,7 +17,6 @@ import LogicaDeNegocio.OrdenDeCompra;
 import LogicaDeNegocio.OrdenDeProduccion;
 import LogicaDeNegocio.Organizacion;
 import LogicaDeNegocio.Proveedor;
-import java.awt.Component;
 import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +25,6 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
@@ -38,7 +36,7 @@ public class BuscarIngresoMateriaPrima extends javax.swing.JFrame implements Tra
 
     private JFrame ventanaAnterior;
     private Organizacion organizacion;
-    private Map<String, Boolean> criteriosSeleccionados;
+    
     
     private MovimientoInternoMateriaPrima unObjetoSeleccionado;
     
@@ -59,6 +57,7 @@ public class BuscarIngresoMateriaPrima extends javax.swing.JFrame implements Tra
     private final String criterio6 = "proveedorTransporte";
     private final String criterio7 = "proveedorOrdenCompra";
     private final String criterio8 = "fechaOrigen";
+    private Map<String, Boolean> criteriosSeleccionados;
     
     
     
@@ -500,11 +499,11 @@ public class BuscarIngresoMateriaPrima extends javax.swing.JFrame implements Tra
 
             },
             new String [] {
-                "ID", "Estado", "ID O,P.", "ID O.C.", "Equipamiento de ingreso", "Proveedor", "fecha", "Etiqueta"
+                "ID", "Estado", "Peso ingresado", "ID O,P.", "ID O.C.", "Equipamiento de ingreso", "Proveedor", "fecha", "Etiqueta"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false
+                false, false, true, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -524,16 +523,16 @@ public class BuscarIngresoMateriaPrima extends javax.swing.JFrame implements Tra
             jTable1.getColumnModel().getColumn(1).setMinWidth(80);
             jTable1.getColumnModel().getColumn(1).setPreferredWidth(80);
             jTable1.getColumnModel().getColumn(1).setMaxWidth(80);
-            jTable1.getColumnModel().getColumn(2).setMinWidth(60);
-            jTable1.getColumnModel().getColumn(2).setPreferredWidth(60);
-            jTable1.getColumnModel().getColumn(2).setMaxWidth(60);
             jTable1.getColumnModel().getColumn(3).setMinWidth(60);
             jTable1.getColumnModel().getColumn(3).setPreferredWidth(60);
             jTable1.getColumnModel().getColumn(3).setMaxWidth(60);
-            jTable1.getColumnModel().getColumn(5).setPreferredWidth(25);
-            jTable1.getColumnModel().getColumn(6).setMinWidth(105);
-            jTable1.getColumnModel().getColumn(6).setPreferredWidth(100);
-            jTable1.getColumnModel().getColumn(6).setMaxWidth(102);
+            jTable1.getColumnModel().getColumn(4).setMinWidth(60);
+            jTable1.getColumnModel().getColumn(4).setPreferredWidth(60);
+            jTable1.getColumnModel().getColumn(4).setMaxWidth(60);
+            jTable1.getColumnModel().getColumn(6).setPreferredWidth(25);
+            jTable1.getColumnModel().getColumn(7).setMinWidth(105);
+            jTable1.getColumnModel().getColumn(7).setPreferredWidth(100);
+            jTable1.getColumnModel().getColumn(7).setMaxWidth(102);
         }
 
         jLStaticObjetoSeleccionado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N

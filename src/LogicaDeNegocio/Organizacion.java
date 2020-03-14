@@ -5,28 +5,39 @@
  */
 package LogicaDeNegocio;
 
+import InterfazGrafica.Estadisticas.Estadistica;
+import InterfazGrafica.UtilidadesInterfazGrafica;
+import LogicaDeNegocio.Auditoria.Auditoria;
 import LogicaDeNegocio.GestionUsuariosYRoles.Usuario;
+import Persistencia.Configuracion;
 import Persistencia.ExcepcionPersistencia;
 import Persistencia.Persistencia;
+import Reportes.GeneradorDeReportes;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
+import net.sf.jasperreports.engine.JRException;
 
 /**
  *
  * @author usuario
  */
 public class Organizacion {
+
+    
+
+    
     private Persistencia persistencia;
     
     private Usuario usuarioActivo;
     
-    private Map<Integer, Empleado> empleados;
     private Map<Integer, Proveedor> proveedores;
     private Map<Integer, Equipamiento> equipamientos;
     private Map<Integer, MovimientoInternoMateriaPrima> movimientos; //INCLUYE INGRESOS
@@ -40,9 +51,16 @@ public class Organizacion {
     
     private Map<Integer, Transformacion> transformaciones;
     private Map<Integer, Estacionamiento> estacionamientos;
+    private Map<Integer, Molienda> moliendas;
     
     private Map<Integer, AnalisisLaboratorio> analisisLaboratorio;
     private Map<Integer, CriterioAnalisisLaboratorio> criteriosAnalisisLaboratorio;
+    private Map<Integer, Salida> salidas;
+    private Map<Integer, Egreso> egresos;
+    private Map<Integer, Merma> mermas;
+    private Map<Integer, Perdida> perdidas;
+    
+    private Map<Integer, Evento> eventos;
     
     private Map<Integer, Usuario> usuarios;
 
@@ -62,23 +80,57 @@ public class Organizacion {
         
         this.transformaciones = new HashMap <Integer, Transformacion>();
         this.estacionamientos = new HashMap <Integer, Estacionamiento>();
+        this.moliendas = new HashMap <Integer, Molienda>();
         
         this.analisisLaboratorio = new HashMap <Integer, AnalisisLaboratorio>();
         this.criteriosAnalisisLaboratorio = new HashMap <Integer, CriterioAnalisisLaboratorio>();
         
+        this.salidas = new HashMap <Integer, Salida>();
+        this.egresos = new HashMap <Integer, Egreso>();
+        this.mermas = new HashMap <Integer, Merma>();
+        this.perdidas = new HashMap <Integer, Perdida>();
+        
+        this.eventos = new HashMap <Integer, Evento>();
+        
         this.persistencia.recuperarOrganizacion(this);
+        
+        Estadistica.setOrganizacion(this);
+    }
+
+    public Map<Integer, Perdida> getPerdidas() {
+        return perdidas;
+    }
+
+    
+    
+    public Map<Integer, Merma> getMermas() {
+        return mermas;
     }
 
     public Map<Integer, AnalisisLaboratorio> getAnalisisLaboratorio() {
         return analisisLaboratorio;
     }
 
-    
-    
+    public Map<Integer, Salida> getSalidas() {
+        return salidas;
+    }
+
+    public Map<Integer, Egreso> getEgresos() {
+        return egresos;
+    }
+
+    public Map<Integer, Evento> getEventos() {
+        return eventos;
+    }
+
     public Map<Integer, MovimientoInternoMateriaPrima> getMovimientosDeIngreso() {
         return movimientosDeIngreso;
     }
 
+    public Map<Integer, Molienda> getMoliendas() {
+        return moliendas;
+    }
+    
     public void setMovimientosDeIngreso(Map<Integer, MovimientoInternoMateriaPrima> movimientosDeIngreso) {
         this.movimientosDeIngreso = movimientosDeIngreso;
     }
@@ -119,9 +171,6 @@ public class Organizacion {
         return ordenesProduccion;
     }
     
-    public Map<Integer, Empleado> getEmpleados() {
-        return empleados;
-    }
 
     public Map<Integer, Proveedor> getProveedores() {
         return proveedores;
@@ -137,6 +186,16 @@ public class Organizacion {
 
     public Map<Integer, MovimientoInternoMateriaPrima> getMovimientos() {
         return movimientos;
+    }
+    
+    public Map<Integer, MovimientoInternoMateriaPrima> getMovimientosInternos() {
+        Map<Integer, MovimientoInternoMateriaPrima> retorno = new HashMap();
+        for (Map.Entry<Integer,MovimientoInternoMateriaPrima> entry : this.movimientos.entrySet()){
+            MovimientoInternoMateriaPrima unMovimiento = entry.getValue();
+            if (unMovimiento.poseeEquipamientoOrigen())
+                retorno.put(entry.getKey(),entry.getValue());
+        }
+        return retorno;
     }
 
     public Map<Integer, Lote> getLotes() {
@@ -174,9 +233,9 @@ public class Organizacion {
         while (criteriosImplicados.hasNext()){
             CriterioAnalisisLaboratorio unCriterio = (CriterioAnalisisLaboratorio) criteriosImplicados.next();
             unaOrdenDeProduccion.agregarCriterioLaboratorio(unCriterio);
+            unCriterio.agregarOrdenDeProduccion(unaOrdenDeProduccion);
         }
         this.persistencia.modificarObjeto(unaOrdenDeProduccion);
-        
     }
     
     public void registrarOrdenDeProduccion(Calendar unaFechaOrigen, float cantidadAProducir, String unidadDeMedida, Calendar fechaEntregaProductoTerminado, String unaDescripcion, ArrayList criterios) throws ExcepcionCargaParametros, SQLException {
@@ -196,8 +255,8 @@ public class Organizacion {
             unCriterio.agregarOrdenDeProduccion(unaOrdenDeProduccion);
         }
         this.persistencia.persistirObjeto(unaOrdenDeProduccion);
+        this.getEventos().put(unaOrdenDeProduccion.getIdEvento(), unaOrdenDeProduccion);
         this.ordenesProduccion.put(unaOrdenDeProduccion.getId(), unaOrdenDeProduccion);
-        
     }
     
     
@@ -225,7 +284,7 @@ public class Organizacion {
         if (unTipoDeLote.equals("Seleccionar"))
             throw new ExcepcionCargaParametros("Debe indicar el tipo de lote que acepta este criterio.");
         
-        if (this.usuarios.get(usuarioActivo.getId())== null)
+        if (this.usuarioActivo != null && this.usuarios.get(usuarioActivo.getId())== null)
             throw new ExcepcionCargaParametros("Debe ingresar al sistema con un usuario valido.");
         
         if (fechaOrigen == null)
@@ -276,7 +335,7 @@ public class Organizacion {
         if (degustacion.equals("Seleccionar"))
             throw new ExcepcionCargaParametros("Debe indicar si hubo degustacion de la muestra.");
             
-        if (this.usuarios.get(usuarioActivo.getId())== null)
+        if (this.usuarioActivo != null && this.usuarios.get(usuarioActivo.getId())== null)
             throw new ExcepcionCargaParametros("Debe ingresar al sistema con un usuario valido.");
     
         if (unLote == null && unaOrdenDeCompra == null)
@@ -286,7 +345,9 @@ public class Organizacion {
             throw new ExcepcionCargaParametros("No puede ingresarse un lote y una orden de compra al mismo tiempo.");
         
         if (unaOrdenDeCompra != null && !unaOrdenDeCompra.seEncuentraRegular())
-            throw new ExcepcionCargaParametros("La ordne de compra seleccionada no se encuentra en estado regular.");
+            throw new ExcepcionCargaParametros("La orden de compra seleccionada no se encuentra en estado regular.");
+        if (unaOrdenDeCompra != null && !unaOrdenDeCompra.poseeProveedorAsociado())
+            throw new ExcepcionCargaParametros("La orden de compra seleccionada no posee un proveedor asociado.");
         if (unLote != null && !unLote.estaRegular())
             throw new ExcepcionCargaParametros("El lote seleccionado no se encuentra en estado regular.");
         
@@ -348,7 +409,7 @@ public class Organizacion {
             throw new ExcepcionCargaParametros("El porcentaje de humedad debe estar en un rango de 0% a 100%.");
         if (unPorcentajeHoja < 0 || unPorcentajeHoja >100)
             throw new ExcepcionCargaParametros("El porcentaje de Palo debe estar en un rango de 0% a 100%.");
-        if ((unPorcentajePalo + unPorcentajeSemilla + unPorcentajePolvo + unPorcentajeHoja) !=100)
+        if ((unPorcentajePalo + unPorcentajeSemilla + unPorcentajePolvo + unPorcentajeHoja) <99 && (unPorcentajePalo + unPorcentajeSemilla + unPorcentajePolvo + unPorcentajeHoja) >101)
             throw new ExcepcionCargaParametros("El porcentaje total de palo, semilla, polvo y hoja debe igualar a 100 % (Actualmente es de "+(unPorcentajePalo + unPorcentajeSemilla + unPorcentajePolvo + unPorcentajeHoja));
         
         AnalisisLaboratorio unAnalisis = null;
@@ -358,6 +419,7 @@ public class Organizacion {
         unLote.getOrdenDeProduccionAsociada().agregarEvento(unAnalisis);
         }else if (unaOrdenDeCompra != null){
             unAnalisis = new AnalisisLaboratorio(puntosNegros, torrada, color, aroma, tacto, degustacion, unPorcentajePalo, unPorcentajePolvo, unPorcentajeSemilla, unPorcentajeHoja, unPorcentajeHumedad, (Laboratorio) unLaboratorio, unCriterio, usuarioActivo, unComentario.toUpperCase(), unaOrdenDeCompra);
+            unaOrdenDeCompra.getProveedorAsociado().agregarAnalisis(unAnalisis);
             unaOrdenDeCompra.agregarAnalisisDeLaboratorio(unAnalisis);
             unaOrdenDeCompra.getOrdenDeProduccionAsociada().agregarEvento(unAnalisis);
         }
@@ -366,6 +428,7 @@ public class Organizacion {
         ((Laboratorio)unLaboratorio).agregarAnalisis(unAnalisis);
         unCriterio.agregarAnalisis(unAnalisis);
         this.getAnalisisLaboratorio().put(unAnalisis.getId(), unAnalisis);
+        this.getEventos().put(unAnalisis.getIdEvento(), unAnalisis);
     }
     
     /**
@@ -464,25 +527,53 @@ public class Organizacion {
             throw new ExcepcionCargaParametros("No se puede anular el analisis de un lote que registre uno o mas eventos (Movimientos, moliendas, analisis, etc) posteriores regulares.");
         unAnalisis.anular();
         persistencia.modificarObjeto(unAnalisis);
-    }   
+    }
+    
     public void anularEstacionamiento(Estacionamiento unEstacionamiento) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
-        
         if (unEstacionamiento.poseeUnoOMasEventosRegularesPosteriores())
             throw new ExcepcionCargaParametros("No se puede dar de baja un estacionamiento que tenga un lote que registre uno o mas eventos (Movimientos, moliendas, analisis, etc) posteriores regulares.");
         unEstacionamiento.anular();
         persistencia.modificarObjeto(unEstacionamiento);
-        Iterator lotesAEstacionar = unEstacionamiento.getLotesImplicados().iterator();
-        while (lotesAEstacionar.hasNext()){
-            Lote unLote = (Lote) lotesAEstacionar.next();
+        Iterator detallesAAnular = unEstacionamiento.getDetallesAsociados().iterator();
+        while (detallesAAnular.hasNext()){
+            Lote unLote = ((DetalleTransformacion) detallesAAnular.next()).getLoteImplicado();
             unLote.anularEstacionamiento();
-            unLote.agregarEstacionamiento(unEstacionamiento);
             persistencia.modificarObjeto(unLote);
         }
-    }       
+    }
+    
+    public void anularMolienda(Molienda unaMolienda) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+        if (unaMolienda == null)
+            throw new ExcepcionCargaParametros("Debe seleccionar una molienda para anular.");
+        if (unaMolienda.poseeUnoOMasEventosRegularesPosteriores())
+            throw new ExcepcionCargaParametros("No se puede anular una molienda que tenga un lote que registre uno o mas eventos (Movimientos, moliendas, analisis, etc) posteriores regulares.");
+        if (unaMolienda.poseeUnoOMasEgresos())
+            throw new ExcepcionCargaParametros("No se puede anular una molienda sobre la que se registre una o más salidas posteriores.");
+        unaMolienda.anular();
+        persistencia.modificarObjeto(unaMolienda);
+        Iterator detallesAAnular = unaMolienda.getDetallesAsociados().iterator();
+        while (detallesAAnular.hasNext()){
+            DetalleTransformacion unDetalle = (DetalleTransformacion) detallesAAnular.next();
+            if (unDetalle.getCantidadUtilizada() > Configuracion.BOLSAS_CONCLUSION_MOLIENDA){
+                Lote unLote = unDetalle.getLoteImplicado();
+                unLote.anularMolienda();
+                persistencia.modificarObjeto(unLote);
+            }
+        }
+    }
+    
+    public void anularEgreso(Egreso unEgreso) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+        if (unEgreso == null)
+            throw new ExcepcionCargaParametros("Debe seleccionar un egreso para anular.");
+        if (unEgreso.poseeUnoOMasEventosRegularesPosteriores())
+            throw new ExcepcionCargaParametros("No se puede dar de baja un egreso que registre uno o mas eventos (Movimientos, moliendas, analisis, etc) posteriores regulares.");
+        unEgreso.anular();
+        persistencia.modificarObjeto(unEgreso);
+    }
     
     public void registrarIngresoMateriaPrima(Calendar fechaOrigen, LocalTime horaEntrada, LocalTime horaSalida, String unidadTransporte, String cantidadUnidades, String unidadMedidaPeso, String pesoEntrada, String pesoSalida, String nHojaRuta, String nRemito, String nPrecinto, String nombreConductor, String patenteChasis, String patenteAcoplado, Equipamiento destino, OrdenDeCompra unaOrdenDeCompraAsociada,Proveedor unProveedorDeServicioDeTransporte, AnalisisLaboratorio unAnalisisLaboratorio, String unTipoDeLote) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
         
-        if (this.usuarios.get(usuarioActivo.getId())== null)
+        if (this.usuarioActivo != null && this.usuarios.get(usuarioActivo.getId())== null)
             throw new ExcepcionCargaParametros("Debe ingresar al sistema con un usuario valido.");
         
         if (unTipoDeLote.equals("Seleccionar"))
@@ -515,7 +606,9 @@ public class Organizacion {
         if (!unAnalisisLaboratorio.estaRegular())
             throw new ExcepcionCargaParametros("No se puede registrar un ingreso de materia prima sobre un analisis de laboratorio que no este regular.");
         if (!unaOrdenDeCompraAsociada.equals(unAnalisisLaboratorio.getOrdenDeCompraImplicada()))
-            throw new ExcepcionCargaParametros("No se puede registrar un ingreso de materia prima sobre un analisis de laboratorio que no sea de la orden de compra especificada.");
+            throw new ExcepcionCargaParametros("No se puede registrar un ingreso de materia prima sobre un analisis de laboratorio que no sea de la orden de compra especificada. (Orden de compra ingresada: "+unaOrdenDeCompraAsociada.getId()+", orden esperada: "+unAnalisisLaboratorio.getOrdenDeCompraImplicada().getId()+")");
+        if (unAnalisisLaboratorio.poseeLote() && unAnalisisLaboratorio.getLoteImplicado().estaRegular())
+            throw new ExcepcionCargaParametros("No se puede registrar un ingreso de materia prima sobre un analisis de laboratorio que ya posea un lote asociado en estado regular.");
         
         if (destino == null)
             throw new ExcepcionCargaParametros("No se ha seleccionado un equipamiento de destino.");
@@ -576,8 +669,8 @@ public class Organizacion {
         if (unPesoEntrada <=0 || unPesoSalida <= 0)
             throw new ExcepcionCargaParametros("El peso de entrada o de salida no pueden ser 0 (cero) o negativos.");
         
-        if (Organizacion.convertirUnidadPeso(unidadMedidaPeso, pesoNeto, unaOrdenDeCompraAsociada.getUnidadDeMedida()) > unaOrdenDeCompraAsociada.getCantidadRestanteARecibir())
-            throw new ExcepcionCargaParametros("No se puede registrar un ingreso que supere lo pactado en la orden de compra.");
+        if (Organizacion.convertirUnidadPeso(unidadMedidaPeso, pesoNeto, Lote.UNIDAD_MEDIDA_KILOGRAMO) > Organizacion.convertirUnidadPeso(unaOrdenDeCompraAsociada.getUnidadDeMedida(), unaOrdenDeCompraAsociada.getCantidadRestanteARecibir(), Lote.UNIDAD_MEDIDA_KILOGRAMO))
+            throw new ExcepcionCargaParametros("No se puede registrar un ingreso que supere lo pactado en la orden de compra "+unaOrdenDeCompraAsociada.getId()+". (Ingreso: "+UtilidadesInterfazGrafica.formatearFlotante(pesoNeto)+", Cantidad restante a recibir de la orden de compra: "+UtilidadesInterfazGrafica.formatearFlotante(Organizacion.convertirUnidadPeso(unaOrdenDeCompraAsociada.getUnidadDeMedida(), unaOrdenDeCompraAsociada.getCantidadRestanteARecibir(), unidadMedidaPeso))+" "+unaOrdenDeCompraAsociada.getUnidadDeMedida()+")");
         
         if (!destino.puedeAlbergar(pesoNeto, unidadMedidaPeso))
             throw new ExcepcionCargaParametros("El destino donde residirá el lote no posee espacio suficiente.");
@@ -585,11 +678,13 @@ public class Organizacion {
         if (!unAnalisisLaboratorio.poseeTipoDeLote(unTipoDeLote))
             throw new ExcepcionCargaParametros("El analisis de laboratorio ingresado es para lotes de tipo "+unAnalisisLaboratorio.getCriterioAsociado().getTipoLote()+" pero se esta registrando el tipo de lote "+unTipoDeLote);
         
-        Lote unLote = new Lote(pesoNeto, unTipoDeLote, unidadMedidaPeso, fechaOrigen, unaOrdenDeCompraAsociada, destino);
+        Lote unLote = new Lote(pesoNeto, unTipoDeLote, unidadMedidaPeso, fechaOrigen, unaOrdenDeCompraAsociada, destino, unidadTransporte, unaCantidadDeUnidades);
         persistencia.persistirObjeto(unLote);
         unLote.setEtiqueta(( new SimpleDateFormat( "yyyyMMdd" ) ).format( fechaOrigen.getTime() )+"-"+unLote.getId());
-        MovimientoInternoMateriaPrima unMovimiento = new MovimientoInternoMateriaPrima(this.getUsuarioActivo(), horaEntrada, horaSalida, unidadTransporte, unaCantidadDeUnidades, unidadMedidaPeso, unPesoEntrada, unPesoSalida, nHojaRuta, nRemito, nPrecinto, nombreConductor, patenteChasis, patenteAcoplado, unLote, null, destino, unProveedorDeServicioDeTransporte);
+        MovimientoInternoMateriaPrima unMovimiento = new MovimientoInternoMateriaPrima(fechaOrigen, this.getUsuarioActivo(), horaEntrada, horaSalida, unidadTransporte, unaCantidadDeUnidades, unidadMedidaPeso, unPesoEntrada, unPesoSalida, nHojaRuta, nRemito, nPrecinto, nombreConductor, patenteChasis, patenteAcoplado, unLote, null, destino, unProveedorDeServicioDeTransporte);
         destino.agregarLote(unLote);
+        destino.agregarMovimientoEntrada(unMovimiento);
+        
         persistencia.persistirObjeto(unMovimiento);
         unLote.agregarMovimiento(unMovimiento);
         unLote.asignarUltimoMovimiento(unMovimiento);
@@ -599,6 +694,7 @@ public class Organizacion {
         this.lotes.put(unLote.getId(), unLote);
         this.movimientos.put(unMovimiento.getId(), unMovimiento);
         this.movimientosDeIngreso.put(unMovimiento.getId(), unMovimiento);
+        this.getEventos().put(unMovimiento.getIdEvento(), unMovimiento);
         
         unLote.agregarAnalisis(unAnalisisLaboratorio);
         unAnalisisLaboratorio.setLoteImplicado(unLote);
@@ -622,33 +718,48 @@ public class Organizacion {
     }
     
     public void anularMovimientoDeMateriaPrima(MovimientoInternoMateriaPrima unMovimiento) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+        
+        if (this.usuarioActivo != null && this.usuarios.get(usuarioActivo.getId())== null)
+            throw new ExcepcionCargaParametros("Debe ingresar al sistema con un usuario valido.");
+        
         Lote unLoteImplicado = unMovimiento.getLoteAsociado();
         if (!unMovimiento.poseeEquipamientoOrigen())
             throw new ExcepcionCargaParametros("No se puede anular un movimiento de ingreso. Dirijase a gestión de Ingresos para hacerlo.");
         if (unLoteImplicado.poseeUnoOMasEventosRegularesPosterioresA(unMovimiento))
-            throw new ExcepcionCargaParametros("No se puede dar de baja un ingreso cuyo lote tenga eventos posteriores (Movimientos o transformaciones) en estados regulares.");
+            throw new ExcepcionCargaParametros("No se puede dar de baja un movimiento cuyo lote tenga eventos posteriores (Movimientos o transformaciones) en estados regulares.");
         unMovimiento.anular();
         unMovimiento.getEquipamientoDestino().removerLote(unLoteImplicado);
+        if (unMovimiento.poseeMermaRegular()){
+            Merma unaMerma = unMovimiento.obtenerMermaRegular();
+            if (unaMerma != null){
+                unaMerma.anular();
+                persistencia.modificarObjeto(unaMerma);
+            }
+        }
         MovimientoInternoMateriaPrima nuevoUltimoMovimiento = unLoteImplicado.calcularUltimoMovimientoRegular();
         unLoteImplicado.setEquipamientoDondeReside(nuevoUltimoMovimiento.getEquipamientoDestino());
         nuevoUltimoMovimiento.getEquipamientoDestino().agregarLote(unLoteImplicado);
+        nuevoUltimoMovimiento.setMovimientoInmediatamentePosterior(null);
         unLoteImplicado.setUltimoMovimientoRegular(nuevoUltimoMovimiento);
         persistencia.modificarObjeto(unMovimiento);
         persistencia.modificarObjeto(unLoteImplicado);
     }    
     
-    
-    
-public void registrarMovmimiento(Calendar fechaOrigen, LocalTime horaEntrada, LocalTime horaSalida, String unidadTransporte, String cantidadUnidades, String unidadMedidaPeso, String pesoEntrada, String pesoSalida, String nHojaRuta, String nRemito, String nPrecinto, String nombreConductor, String patenteChasis, String patenteAcoplado, Lote unLote, Equipamiento destino, Proveedor unProveedorDeServicioDeTransporte) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+public void registrarMovimimiento(Calendar fechaOrigen, LocalTime horaEntrada, LocalTime horaSalida, String unidadTransporte, String cantidadUnidades, String unidadMedidaPeso, String pesoEntrada, String pesoSalida, String nHojaRuta, String nRemito, String nPrecinto, String nombreConductor, String patenteChasis, String patenteAcoplado, Lote unLote, Equipamiento destino, Proveedor unProveedorDeServicioDeTransporte) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
         
-        if (this.usuarios.get(usuarioActivo.getId())== null)
+        if (this.usuarioActivo != null && this.usuarios.get(usuarioActivo.getId())== null)
             throw new ExcepcionCargaParametros("Debe ingresar al sistema con un usuario valido.");
         
         if (fechaOrigen == null)
             throw new ExcepcionCargaParametros("No se ha seleccionado una fecha de origen valida.");
         if (fechaOrigen.after(Calendar.getInstance()))
-            throw new ExcepcionCargaParametros("La fecha origen no puede exceder la fecha actual.");
+            throw new ExcepcionCargaParametros("La fecha de origen no puede exceder la fecha actual.");
         
+        if (unLote == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un lote.");
+        
+        if (Validaciones.loteSeEncuentraSiendoEstacionadoActualmente(unLote))
+            throw new ExcepcionCargaParametros("No se puede mover un lote que esté registre un estacionamiento en curso actualmente.");
         if (!Validaciones.esUnNumeroEnteroValido(cantidadUnidades))
             throw new ExcepcionCargaParametros("Verifique la cantidad de unidades ingresadas.");
         
@@ -727,8 +838,11 @@ public void registrarMovmimiento(Calendar fechaOrigen, LocalTime horaEntrada, Lo
         
         
         
-        MovimientoInternoMateriaPrima unMovimiento = new MovimientoInternoMateriaPrima(this.getUsuarioActivo(), horaEntrada, horaSalida, unidadTransporte, unaCantidadDeUnidades, unidadMedidaPeso, unPesoEntrada, unPesoSalida, nHojaRuta, nRemito, nPrecinto, nombreConductor, patenteChasis, patenteAcoplado, unLote, unLote.getEquipamientoDondeReside(), destino, unProveedorDeServicioDeTransporte);
+        MovimientoInternoMateriaPrima unMovimiento = new MovimientoInternoMateriaPrima(fechaOrigen, this.getUsuarioActivo(), horaEntrada, horaSalida, unidadTransporte, unaCantidadDeUnidades, unidadMedidaPeso, unPesoEntrada, unPesoSalida, nHojaRuta, nRemito, nPrecinto, nombreConductor, patenteChasis, patenteAcoplado, unLote, unLote.getEquipamientoDondeReside(), destino, unProveedorDeServicioDeTransporte);
         persistencia.persistirObjeto(unMovimiento);
+        unLote.getEquipamientoDondeReside().agregarMovimientoSalida(unMovimiento);
+        destino.agregarMovimientoEntrada(unMovimiento);
+
         unLote.getEquipamientoDondeReside().removerLote(unLote);
         destino.agregarLote(unLote);
         
@@ -741,20 +855,119 @@ public void registrarMovmimiento(Calendar fechaOrigen, LocalTime horaEntrada, Lo
         persistencia.modificarObjeto(unLote);//Ahora el lote tiene como clave foranea al equipamiento destino.
         
         this.movimientos.put(unMovimiento.getId(), unMovimiento);
+        this.getEventos().put(unMovimiento.getIdEvento(), unMovimiento);
+        
+        System.out.println("Cantidad de peso ingresado menos las perdidas: "+unLote.obtenerPesoIngresadoConPerdidasIncluidasKg());
+        Float cantidadPerdida = Organizacion.convertirUnidadPeso(unLote.getUnidadDeMedida(), unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(), Lote.UNIDAD_MEDIDA_KILOGRAMO) - Organizacion.convertirUnidadPeso(unidadMedidaPeso, pesoNeto, Lote.UNIDAD_MEDIDA_KILOGRAMO);
+        
+        cantidadPerdida = Math.max(cantidadPerdida, 0);
+        int diferenciaBolsas = unLote.obtenerUnidadesTransporteIngresadoConPerdidasIncluidas()-unaCantidadDeUnidades;
+        diferenciaBolsas = Math.max(diferenciaBolsas, 0); //SI ME INGRESAN MAS BOLSAS NO VOY A REGISTRAR UNA PERDIDA NEGATIVA.
+        //System.out.println("CANTIDAD PERDIDA: "+cantidadPerdida);
+        if (cantidadPerdida == 0 && diferenciaBolsas == 0)
+            return;
+        
+        if (unLote.poseeUnUltimoEstacionamientoSinMerma()){
+            Estacionamiento unEstacionamiento = unLote.obtenerUltimoEstacionamientoRegular();
+            //Calculo del maximo de merma posible:
+            Float maximoDeMermaPosibleKg = Configuracion.PORCENTAJE_MAXIMO_MERMA*unLote.obtenerPesoIngresadoConPerdidasIncluidasKg();
+            //Calculo la diferencia de peso
+            
+            //AQUI VIENE EL FABULOSO MODULO INTELIGENTE
+            Float pesoDeMermaKg = Math.min(cantidadPerdida, maximoDeMermaPosibleKg);
+            if (pesoDeMermaKg > 0){
+                Merma unaMerma = new Merma("Merma asociada al estacionamiento de id "+unEstacionamiento.getId()+" registrada a traves del movimiento de ID "+unMovimiento.getId(), "", usuarioActivo, unEstacionamiento, Lote.UNIDAD_MEDIDA_Tranporte, 0, Lote.UNIDAD_MEDIDA_KILOGRAMO, pesoDeMermaKg, unLote, unMovimiento);
+                unMovimiento.agregarMerma(unaMerma);
+                unEstacionamiento.agregarSalida(unaMerma);
+                unEstacionamiento.agregarMerma(unaMerma);
+                unLote.getOrdenDeProduccionAsociada().agregarEvento(unaMerma);
+                unLote.agregarMerma(unaMerma);
+                persistencia.persistirObjeto(unaMerma);
+                this.salidas.put(unaMerma.getId(), unaMerma);
+                this.mermas.put(unaMerma.getId(), unaMerma);
+                this.getEventos().put(unaMerma.getIdEvento(), unaMerma);
+                //EL MOVIMIENTO DEBERÍA CONOCER SU MERMA SI POSEYERA?
+            }
+            if (cantidadPerdida > maximoDeMermaPosibleKg){
+                System.err.println("Detectada una anomalía: Perdida excesiva de peso en el lote. Generando Perdida asociada...");
+                cantidadPerdida = cantidadPerdida - maximoDeMermaPosibleKg;
+                
+                Perdida unaPerdida = new Perdida("Perdida asociada al movimiento de id "+unMovimiento.getId(), "", usuarioActivo, unLote, unMovimiento, null, Lote.UNIDAD_MEDIDA_Tranporte, diferenciaBolsas, Lote.UNIDAD_MEDIDA_KILOGRAMO, cantidadPerdida);
+                persistencia.persistirObjeto(unaPerdida);
+                unLote.getOrdenDeProduccionAsociada().agregarEvento(unaPerdida);
+                unLote.agregarPerdida(unaPerdida);
+                this.salidas.put(unaPerdida.getId(), unaPerdida);
+                this.perdidas.put(unaPerdida.getId(), unaPerdida);
+                this.getEventos().put(unaPerdida.getIdEvento(), unaPerdida);
+            }
+        }else{
+            
+            //SOLO SE CALCULA LA DIFERENCIA DE PESO Y SI HAY DISCREPANCIA SE REGISTRA PERDIDA.
+            System.err.println("Detectada una anomalía: Perdida excesiva de peso en el lote. Generando Perdida asociada...");
+
+            Perdida unaPerdida = new Perdida("Perdida asociada al movimiento de id "+unMovimiento.getId(), "", usuarioActivo, unLote, unMovimiento, null, Lote.UNIDAD_MEDIDA_Tranporte, diferenciaBolsas, Lote.UNIDAD_MEDIDA_KILOGRAMO, cantidadPerdida);
+            persistencia.persistirObjeto(unaPerdida);
+            unLote.getOrdenDeProduccionAsociada().agregarEvento(unaPerdida);
+            unLote.agregarPerdida(unaPerdida);
+            this.salidas.put(unaPerdida.getId(), unaPerdida);
+            this.perdidas.put(unaPerdida.getId(), unaPerdida);
+            this.getEventos().put(unaPerdida.getIdEvento(), unaPerdida);
+        }
     }
 
-    public void registrarEstacionamiento (ArrayList<Lote> lotes, Equipamiento unEquipamiento, Calendar unaFechaOrigen, String duracion) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+    public void registrarEgreso (String unaDescripcion, String unComentario, String unaUnidadMedidaTransporte, String unaCantidadUtilizada, String unaUnidadMedidaPeso, String unPesoUtilizado, Molienda unaMolienda) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
         
-        if (lotes.isEmpty())
+        if (this.usuarioActivo != null && this.usuarios.get(usuarioActivo.getId())== null)
+            throw new ExcepcionCargaParametros("Debe ingresar al sistema con un usuario valido.");
+        
+        if (unaUnidadMedidaTransporte.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("No se selecciono una unidad de medida de transporte.");
+        
+        if (!Validaciones.esUnNumeroEnteroValido(unaCantidadUtilizada))
+            throw new ExcepcionCargaParametros("No se ingreso una cantidad de unidades a utilizar valida");
+        int cantidadUtilizada = Integer.parseInt(unaCantidadUtilizada);
+        if (cantidadUtilizada<0)
+            throw new ExcepcionCargaParametros("La cantidad de unidades de transporte no puede ser negativa.");
+        
+        if (unaUnidadMedidaPeso.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("No se selecciono una unidad de medida de peso.");
+        Float pesoUtilizado = Organizacion.convertirAFlotante(unPesoUtilizado, "peso egresado");
+        if (unaMolienda == null)
+            throw new ExcepcionCargaParametros("No se seleccionó una molienda");
+        if (!unaMolienda.estaRegular())
+            throw new ExcepcionCargaParametros("Debe seleccionar una molienda en estado regular.");
+        
+        if (pesoUtilizado<=0)
+            throw new ExcepcionCargaParametros("El peso utilizado no puede ser menor o igual a 0 (Cero).");
+        if (pesoUtilizado>unaMolienda.getPesoDisponibleAEgresarKg())
+            throw new ExcepcionCargaParametros("El peso del egreso a registrar excede el peso disponible de molienda. (Peso disponible: "+unaMolienda.getPesoDisponibleAEgresarKg()+" Kgs.)");
+        
+        Egreso unEgreso = new Egreso(unaDescripcion, unComentario, getUsuarioActivo(), unaMolienda, unaUnidadMedidaTransporte, cantidadUtilizada, unaUnidadMedidaPeso, pesoUtilizado);        
+        unaMolienda.agregarSalida(unEgreso);
+        
+        persistencia.persistirObjeto(unEgreso);
+        this.getEventos().put(unEgreso.getIdEvento(), unEgreso);
+        unaMolienda.getOrdenDeProduccionAsociada().agregarEvento(unEgreso);
+        this.salidas.put(unEgreso.getId(), unEgreso);
+        this.egresos.put(unEgreso.getId(), unEgreso);
+    }
+
+    public void registrarEstacionamiento (ArrayList lotesAsociados, Equipamiento unEquipamiento, Calendar unaFechaOrigen, String duracion) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+
+        if (this.usuarioActivo != null && this.usuarios.get(usuarioActivo.getId())== null)
+            throw new ExcepcionCargaParametros("Debe ingresar al sistema con un usuario valido.");
+
+        if (lotesAsociados.isEmpty())
             throw new ExcepcionCargaParametros("No se selecciono ningún lote.");
-        if (!unEquipamiento.poseeLotes(lotes))
+        if (!unEquipamiento.poseeLotes(lotesAsociados))
             throw new ExcepcionCargaParametros("No todos los lotes seleccionados estan presentes en ese equipamiento.");
-        if (!Validaciones.sonLotesDeYerbaCanchadaVerde(lotes))
+        if (!Validaciones.sonLotesDeYerbaCanchadaVerde(lotesAsociados))
             throw new ExcepcionCargaParametros("No todos los lotes seleccionados son de yerba canchada verde.");
-        if (!Validaciones.sonLotesRegulares(lotes))
+        if (!Validaciones.sonLotesRegulares(lotesAsociados))
             throw new ExcepcionCargaParametros("No todos los lotes seleccionados estan en estado regular.");
-        if (!Validaciones.sonLotesAnalizados(lotes))
+        if (!Validaciones.sonLotesAnalizadosYCV(lotesAsociados))
             throw new ExcepcionCargaParametros("No todos los lotes seleccionados poseen un analisis de laboratorio aprobado.");
+        
         
         if (unEquipamiento == null)
             throw new ExcepcionCargaParametros("No se selecciono una camara de estacionamiento.");
@@ -776,14 +989,15 @@ public void registrarMovmimiento(Calendar fechaOrigen, LocalTime horaEntrada, Lo
         Calendar fechaExtraccion = (Calendar) unaFechaOrigen.clone();
         fechaExtraccion.add(Calendar.DAY_OF_YEAR, unaDuracion);
         
-        
-        Estacionamiento unEstacionamiento = new Estacionamiento(fechaExtraccion, lotes, unEquipamiento, this.usuarioActivo);
-        
+        Estacionamiento unEstacionamiento = new Estacionamiento(fechaExtraccion, unEquipamiento, this.usuarioActivo, unaFechaOrigen);
+        Estacionamiento.prepararDetalle((ArrayList) lotesAsociados, unEstacionamiento);
         
         persistencia.persistirObjeto(unEstacionamiento);
+        this.getEventos().put(unEstacionamiento.getIdEvento(), unEstacionamiento);
         this.transformaciones.put(unEstacionamiento.getId(), unEstacionamiento);
         this.estacionamientos.put(unEstacionamiento.getId(), unEstacionamiento);
-        Iterator lotesAEstacionar = lotes.iterator();
+        
+        Iterator lotesAEstacionar = lotesAsociados.iterator();
         while (lotesAEstacionar.hasNext()){
             Lote unLote = (Lote) lotesAEstacionar.next();
             unLote.estacionar();
@@ -793,9 +1007,70 @@ public void registrarMovmimiento(Calendar fechaOrigen, LocalTime horaEntrada, Lo
         }
     }
     
+    public void registrarMolienda (ArrayList detallesAsociados, Equipamiento unEquipamiento, Calendar unaFechaOrigen, String unSector, String unTurno, OrdenDeProduccion unaOrdenProduccion) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+
+        if (this.usuarioActivo != null && this.usuarios.get(usuarioActivo.getId())== null)
+            throw new ExcepcionCargaParametros("Debe ingresar al sistema con un usuario valido.");
+
+        if (detallesAsociados == null)
+            throw new ExcepcionCargaParametros("No se ingreso ningun detalle.");
+        if (detallesAsociados.isEmpty())
+            throw new ExcepcionCargaParametros("No se selecciono ningún lote.");
+        
+        ArrayList lotesImplicados = DetalleTransformacion.obtenerLotesImplicados(detallesAsociados);
+        
+        if (!Validaciones.sonLotesDeYerbaCanchadaEstacionada(lotesImplicados))
+            throw new ExcepcionCargaParametros("No todos los lotes seleccionados son de yerba canchada estacionada.");
+        if (!Validaciones.sonLotesRegulares(lotesImplicados))
+            throw new ExcepcionCargaParametros("No todos los lotes seleccionados estan en estado regular.");
+        if (!Validaciones.sonLotesAnalizadosYCE(lotesImplicados))
+            throw new ExcepcionCargaParametros("No todos los lotes seleccionados poseen un analisis de laboratorio de YCE aprobado.");
+        if (!Validaciones.sonLotesDeUnaMismaOrdenDeProduccion(lotesImplicados, unaOrdenProduccion))
+            throw new ExcepcionCargaParametros("No todos los lotes seleccionados pertenecen a la misma orden de producción.");
+        if (unSector.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("Debe seleccionar un sector.");
+        if (unTurno.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("Debe seleccionar un turno.");
+        
+        if (unEquipamiento == null)
+            throw new ExcepcionCargaParametros("No se selecciono un molino.");
+        if (!(unEquipamiento instanceof Molino)) 
+            throw new ExcepcionCargaParametros("Debe seleccionar un molino para realizar una molienda.");
+
+        if (unaFechaOrigen == null)
+            throw new ExcepcionCargaParametros("No se especificó la fecha de origen.");
+        if (unaFechaOrigen.after(Calendar.getInstance()))
+            throw new ExcepcionCargaParametros("La fecha de origen no puede ser posterior a la fecha actual.");
+        
+        Molienda unaMolienda = new Molienda(unSector, unTurno, unEquipamiento, this.usuarioActivo, detallesAsociados);
+        
+        
+        persistencia.persistirObjeto(unaMolienda);
+        this.getEventos().put(unaMolienda.getIdEvento(), unaMolienda);
+        this.transformaciones.put(unaMolienda.getId(), unaMolienda);
+        this.moliendas.put(unaMolienda.getId(), unaMolienda);
+        
+        Iterator lotesAMoler = lotesImplicados.iterator();
+        while (lotesAMoler.hasNext()){
+            Lote unLote = (Lote) lotesAMoler.next();
+            unLote.agregarMolienda(unaMolienda);
+            unLote.getOrdenDeProduccionAsociada().agregarEvento(unaMolienda);
+            
+            /*Float pesoTotalKg = Organizacion.convertirUnidadPeso(unLote.getUnidadDeMedida(), unLote.getCantidadTotalPesoIngresado(), Lote.UNIDAD_MEDIDA_KILOGRAMO);
+            if (unLote.getCantidadDisponibleParaMolerKg()< pesoTotalKg*Configuracion.PORCENTAJE_CONCLUSION_MOLIENDA){
+                unLote.estacionar();
+                persistencia.modificarObjeto(unLote);
+            }*/
+            
+            if (unLote.getCantidadUnidadesDisponibleParaMoler()<=Configuracion.BOLSAS_CONCLUSION_MOLIENDA){
+                unLote.moler();
+                persistencia.modificarObjeto(unLote);
+            }
+        }
+    }
 
     
-    public static float convertirUnidadPeso (String unidadMedidaEntrada, float peso, String unidadMedidaSalida) throws ExcepcionCargaParametros{
+    public static float convertirUnidadPeso (String unidadMedidaEntrada, float peso, String unidadMedidaSalida){
         switch (unidadMedidaEntrada){
             case "Tonelada":
                 switch (unidadMedidaSalida){
@@ -804,7 +1079,7 @@ public void registrarMovmimiento(Calendar fechaOrigen, LocalTime horaEntrada, Lo
                     case "Kilogramo":
                         return peso*1000;
                     default:
-                        throw new ExcepcionCargaParametros ("Error en la conversion de peso: Se ingreso una unidad de medida no valida de Salida. (Utilice 'Tonelada' o 'Kilogramo'.");
+                        return peso;
                 }
             case "Kilogramo":
                 switch (unidadMedidaSalida){
@@ -813,10 +1088,10 @@ public void registrarMovmimiento(Calendar fechaOrigen, LocalTime horaEntrada, Lo
                     case "Kilogramo":
                         return peso;
                     default:
-                        throw new ExcepcionCargaParametros ("Error en la conversion de peso: Se ingreso una unidad de medida no valida de Salida. (Utilice 'Tonelada' o 'Kilogramo'.");
+                        return peso;
                 }                
             default:
-                throw new ExcepcionCargaParametros ("Error en la conversion de peso: Se ingreso una unidad de medida no valida de entrada. (Utilice 'Tonelada' o 'Kilogramo'.");
+                return peso;
         }
     }
     
@@ -924,6 +1199,46 @@ public void registrarMovmimiento(Calendar fechaOrigen, LocalTime horaEntrada, Lo
         return retorno;
     }
     
+        public ArrayList filtrarAuditoria(Map<String, Boolean> criterios, String unaTablaAsociada, Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior, String unaCantidadDeRegistros, String unaOperacion) throws ExcepcionCargaParametros, SQLException {
+        ArrayList retorno = new ArrayList();
+        
+        Boolean criterioTabla = criterios.get("tabla");
+        Boolean criterioFechaOrigen = criterios.get("fechaOrigen");
+        Boolean criterioOperacion = criterios.get("operacion");
+        
+        if (!Validaciones.esUnNumeroEnteroValido(unaCantidadDeRegistros))
+            throw new ExcepcionCargaParametros("Ingrese una cantidad de registros valida para recuperar.");
+        if (criterioTabla && unaTablaAsociada.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("No se ha seleccionado una tabla.");
+        if (criterioFechaOrigen && (fechaOrigenInferior == null || fechaOrigenSuperior == null))
+            throw new ExcepcionCargaParametros("Verifique las fechas de Origen Inferior y Superior ingresadas");
+        if (criterioOperacion && unaOperacion.contains("Seleccionar"))
+            throw new ExcepcionCargaParametros("Debe seleccionar una operación.");
+        
+        if (!criterioTabla)
+            unaTablaAsociada = "cualquiera";
+        if (!criterioOperacion)
+            unaOperacion = "cualquiera";
+        Iterator auditoriaARevisar = this.persistencia.obtenerAuditoria(unaTablaAsociada, unaCantidadDeRegistros, unaOperacion).iterator();
+        while (auditoriaARevisar.hasNext()){
+            boolean sePuedeAgregar = true;
+            Auditoria unaAuditoria = (Auditoria) auditoriaARevisar.next();
+            
+            if (criterioTabla && sePuedeAgregar)
+                sePuedeAgregar = unaAuditoria.esDeTabla(unaTablaAsociada);
+            
+            if (sePuedeAgregar && criterioFechaOrigen)
+                sePuedeAgregar = unaAuditoria.fechaOrigenEstaEntre(fechaOrigenInferior, fechaOrigenSuperior);
+            
+            if (sePuedeAgregar && criterioOperacion)
+                sePuedeAgregar = unaAuditoria.poseeOperacion(unaOperacion);
+            
+            if (sePuedeAgregar)
+                retorno.add(unaAuditoria);
+        }
+        return retorno;
+    }
+    
     public ArrayList filtrarCriterios(Map<String, Boolean> criterios, String unNombre, String unaDescripcion, String estadoSeleccionado,
         OrdenDeProduccion unaOrdenProduccionSeleccionada, AnalisisLaboratorio unAnalisisDeLaboratorioAsociado,  
         Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior) throws ExcepcionCargaParametros {
@@ -954,7 +1269,6 @@ public void registrarMovmimiento(Calendar fechaOrigen, LocalTime horaEntrada, Lo
             boolean sePuedeAgregar = true;
             int unId = (int) criteriosARevisar.next();
             CriterioAnalisisLaboratorio unCriterio = this.getCriteriosAnalisisLaboratorio().get(unId);
-            
             if (criterioNombre && sePuedeAgregar)
                 sePuedeAgregar = unCriterio.poseeNombre(unNombre);
             if (criterioDescripcion && sePuedeAgregar)
@@ -1041,7 +1355,7 @@ public void registrarMovmimiento(Calendar fechaOrigen, LocalTime horaEntrada, Lo
         }
         return retorno;
     }
-    
+
     public ArrayList filtrarEquipamientosSinBasculasNiLaboratorios(Map<String, Boolean> criterios, String unNombre, String unTipoEquipamiento, String unaDireccion, Calendar fechaAdquisicionLimiteInferior, Calendar fechaAdquisicionLimiteSuperior, Calendar fechaUltimoMantenimientoLimiteInferior, Calendar fechaUltimoMantenimientoLimiteSuperior, String unEstado, Bascula unaBasculaAsociada) throws ExcepcionCargaParametros{
         Boolean criterioNombre = criterios.get("Nombre");
         Boolean criterioTipo = criterios.get("Tipo");
@@ -1206,8 +1520,7 @@ public void registrarMovmimiento(Calendar fechaOrigen, LocalTime horaEntrada, Lo
         unEquipamiento.setFechaAdquisicion(unaFechaAdquisicion);
         unEquipamiento.setFechaUltimoMantenimiento(unaFechaUltimoMantenimiento);
         unEquipamiento.setCapacidadMaxima(unaCapacidadMaxima);
-        unEquipamiento.setCapacidadMaxima(unaCapacidadMaxima);
-        unEquipamiento.setUnidadDeMedida(unaUnidadDeMedida);        
+        unEquipamiento.setUnidadDeMedida(unaUnidadDeMedida);
         unEquipamiento.setEstado(unEstado);
         
         
@@ -1334,7 +1647,7 @@ public void registrarMovmimiento(Calendar fechaOrigen, LocalTime horaEntrada, Lo
     
     public void modificarAnalisisLaboratorio(AnalisisLaboratorio unAnalisis, Lote unLote, OrdenDeCompra unaOrdenDeCompra) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
             
-        if (this.usuarios.get(usuarioActivo.getId())== null)
+        if (this.usuarioActivo != null && this.usuarios.get(usuarioActivo.getId())== null)
             throw new ExcepcionCargaParametros("Debe ingresar al sistema con un usuario valido.");
     
         if (unAnalisis == null)
@@ -1546,6 +1859,217 @@ public void registrarMovmimiento(Calendar fechaOrigen, LocalTime horaEntrada, Lo
         this.persistencia.modificarObjeto(unaOrdenDeProduccion);
     }
     
+    public ArrayList filtrarEgresos(Map<String, Boolean> criterios, Equipamiento unMolinoSeleccionado, OrdenDeProduccion unaOrdenProduccionSeleccionada, Lote unLoteSeleccionado, String estadoSeleccionado, Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior, Molienda unaMoliendaImplicada) throws ExcepcionCargaParametros {
+        ArrayList retorno = new ArrayList();
+        
+        Boolean criterioMolinoAsociado = criterios.get("molino");
+        Boolean criterioOrdenDeProduccionAsociada = criterios.get("ordenProduccion");
+        Boolean criterioLoteAsociado = criterios.get("lote");
+        Boolean criterioEstado = criterios.get("estado");
+        Boolean criterioFechaOrigen = criterios.get("fechaOrigen");
+        Boolean criterioMolienda = criterios.get("molienda");
+        
+        if (criterioMolinoAsociado && unMolinoSeleccionado == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un molino.");
+        if (criterioMolinoAsociado && !(unMolinoSeleccionado instanceof Molino))
+            throw new ExcepcionCargaParametros("Debe seleccionarse un molino.");
+        if (criterioOrdenDeProduccionAsociada && unaOrdenProduccionSeleccionada == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de producción.");
+        if (criterioLoteAsociado && unLoteSeleccionado == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un lote.");
+        if (criterioEstado && estadoSeleccionado.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("No se ha seleccionado un estado.");
+        if (criterioFechaOrigen && (fechaOrigenInferior == null || fechaOrigenSuperior == null))
+            throw new ExcepcionCargaParametros("Verifique las fechas de Origen Inferior y Superior ingresadas");
+        if (criterioMolienda && unaMoliendaImplicada == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una molienda.");
+
+        Iterator egresosARevisar = this.getEgresos().keySet().iterator();
+        while (egresosARevisar.hasNext()){
+            boolean sePuedeAgregar = true;
+            int unId = (int) egresosARevisar.next();
+            Egreso unEgreso = this.getEgresos().get(unId);
+            
+            if (criterioMolinoAsociado && sePuedeAgregar)
+                sePuedeAgregar = unEgreso.esEnMolino(unMolinoSeleccionado);
+                
+            if (criterioOrdenDeProduccionAsociada && sePuedeAgregar)
+                sePuedeAgregar = unEgreso.poseeOrdenDeProduccionImplicada(unaOrdenProduccionSeleccionada);
+            if (criterioLoteAsociado && sePuedeAgregar)
+                sePuedeAgregar = unEgreso.poseeLoteImplicado(unLoteSeleccionado);
+            if (criterioEstado && sePuedeAgregar)
+                sePuedeAgregar = unEgreso.poseeEstado(estadoSeleccionado);
+            
+            if (sePuedeAgregar && criterioFechaOrigen)
+                sePuedeAgregar = unEgreso.fechaOrigenEstaEntre(fechaOrigenInferior, fechaOrigenSuperior);
+            
+            if (criterioMolienda && sePuedeAgregar)
+                sePuedeAgregar = unEgreso.poseeEventoImplicado(unaMoliendaImplicada);
+            
+            if (sePuedeAgregar)
+                retorno.add(unEgreso);
+        }
+        return retorno;
+    }
+    
+    public ArrayList filtrarSalidas(Map<String, Boolean> criterios, Equipamiento unEquipamientoSeleccionado, OrdenDeProduccion unaOrdenProduccionSeleccionada, Lote unLoteSeleccionado, String estadoSeleccionado, Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior, Evento unEvento, String unTipo) throws ExcepcionCargaParametros {
+        ArrayList retorno = new ArrayList();
+        
+        Boolean criterioEquipamientoAsociado = criterios.get("equipamiento");
+        Boolean criterioOrdenDeProduccionAsociada = criterios.get("ordenProduccion");
+        Boolean criterioLoteAsociado = criterios.get("lote");
+        Boolean criterioEstado = criterios.get("estado");
+        Boolean criterioFechaOrigen = criterios.get("fechaOrigen");
+        Boolean criterioEvento = criterios.get("evento");
+        Boolean criterioTipo = criterios.get("tipo");
+        
+        if (criterioEquipamientoAsociado && unEquipamientoSeleccionado == null)
+            throw new ExcepcionCargaParametros("Debe seleccionarse un equipamiento.");
+        if (criterioOrdenDeProduccionAsociada && unaOrdenProduccionSeleccionada == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de producción.");
+        if (criterioLoteAsociado && unLoteSeleccionado == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un lote.");
+        if (criterioEstado && estadoSeleccionado.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("No se ha seleccionado un estado.");
+        if (criterioFechaOrigen && (fechaOrigenInferior == null || fechaOrigenSuperior == null))
+            throw new ExcepcionCargaParametros("Verifique las fechas de Origen Inferior y Superior ingresadas");
+        if (criterioEvento && unEvento == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un evento.");
+        if (criterioTipo && unTipo.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("No se ha seleccionado un tipo de salida.");
+
+        Iterator salidasARevisar = this.getSalidas().keySet().iterator();
+        while (salidasARevisar.hasNext()){
+            boolean sePuedeAgregar = true;
+            int unId = (int) salidasARevisar.next();
+            Salida unaSalida = this.getSalidas().get(unId);
+            
+            if (criterioEquipamientoAsociado && sePuedeAgregar)
+                sePuedeAgregar = unaSalida.esEnEquipamiento(unEquipamientoSeleccionado);
+                
+            if (criterioOrdenDeProduccionAsociada && sePuedeAgregar)
+                sePuedeAgregar = unaSalida.poseeOrdenDeProduccionImplicada(unaOrdenProduccionSeleccionada);
+            
+            if (criterioLoteAsociado && sePuedeAgregar)
+                sePuedeAgregar = unaSalida.poseeLoteImplicado(unLoteSeleccionado);
+            
+            if (criterioEstado && sePuedeAgregar)
+                sePuedeAgregar = unaSalida.poseeEstado(estadoSeleccionado);
+            
+            if (sePuedeAgregar && criterioFechaOrigen)
+                sePuedeAgregar = unaSalida.fechaOrigenEstaEntre(fechaOrigenInferior, fechaOrigenSuperior);
+            
+            if (criterioEvento && sePuedeAgregar)
+                sePuedeAgregar = unaSalida.poseeEventoImplicado(unEvento);
+            
+            if (criterioTipo && sePuedeAgregar)
+                sePuedeAgregar = unaSalida.esDeTipo(unTipo);
+            
+            if (sePuedeAgregar)
+                retorno.add(unaSalida);
+        }
+        return retorno;
+    }
+    
+    public ArrayList filtrarMoliendas(Map<String, Boolean> criterios, Equipamiento unMolinoSeleccionado, OrdenDeProduccion unaOrdenProduccionSeleccionada, Lote unLoteSeleccionado, String estadoSeleccionado, Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior) throws ExcepcionCargaParametros {
+        ArrayList retorno = new ArrayList();
+        
+        Boolean criterioMolinoAsociado = criterios.get("molino");
+        Boolean criterioOrdenDeProduccionAsociada = criterios.get("ordenProduccion");
+        Boolean criterioLoteAsociado = criterios.get("lote");
+        Boolean criterioEstado = criterios.get("estado");
+        Boolean criterioFechaOrigen = criterios.get("fechaOrigen");
+        
+        if (criterioMolinoAsociado && unMolinoSeleccionado == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un molino.");
+        if (criterioMolinoAsociado && !(unMolinoSeleccionado instanceof Molino))
+            throw new ExcepcionCargaParametros("Debe seleccionarse un molino.");
+        if (criterioOrdenDeProduccionAsociada && unaOrdenProduccionSeleccionada == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de producción.");
+        if (criterioLoteAsociado && unLoteSeleccionado == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un lote.");
+        if (criterioEstado && estadoSeleccionado.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("No se ha seleccionado un estado.");
+        
+        if (criterioFechaOrigen && (fechaOrigenInferior == null || fechaOrigenSuperior == null))
+            throw new ExcepcionCargaParametros("Verifique las fechas de Origen Inferior y Superior ingresadas");
+
+        Iterator moliendasARevisar = this.getMoliendas().keySet().iterator();
+        while (moliendasARevisar.hasNext()){
+            boolean sePuedeAgregar = true;
+            int unId = (int) moliendasARevisar.next();
+            Molienda unaMolienda = this.getMoliendas().get(unId);
+            
+            if (criterioMolinoAsociado && sePuedeAgregar)
+                sePuedeAgregar = unaMolienda.esEnMolino(unMolinoSeleccionado);
+                
+            if (criterioOrdenDeProduccionAsociada && sePuedeAgregar)
+                sePuedeAgregar = unaMolienda.poseeOrdenDeProduccionImplicada(unaOrdenProduccionSeleccionada);
+            if (criterioLoteAsociado && sePuedeAgregar)
+                sePuedeAgregar = unaMolienda.poseeLoteImplicado(unLoteSeleccionado);
+            if (criterioEstado && sePuedeAgregar)
+                sePuedeAgregar = unaMolienda.poseeEstado(estadoSeleccionado);
+            
+            if (sePuedeAgregar && criterioFechaOrigen)
+                sePuedeAgregar = unaMolienda.fechaOrigenEstaEntre(fechaOrigenInferior, fechaOrigenSuperior);
+            
+            
+            if (sePuedeAgregar)
+                retorno.add(unaMolienda);
+        }
+        return retorno;
+    }
+    
+    public ArrayList filtrarMoliendasNoEgresadas(Map<String, Boolean> criterios, Equipamiento unMolinoSeleccionado, OrdenDeProduccion unaOrdenProduccionSeleccionada, Lote unLoteSeleccionado, String estadoSeleccionado, Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior) throws ExcepcionCargaParametros {
+        ArrayList retorno = new ArrayList();
+        
+        Boolean criterioMolinoAsociado = criterios.get("molino");
+        Boolean criterioOrdenDeProduccionAsociada = criterios.get("ordenProduccion");
+        Boolean criterioLoteAsociado = criterios.get("lote");
+        Boolean criterioEstado = criterios.get("estado");
+        Boolean criterioFechaOrigen = criterios.get("fechaOrigen");
+        
+        if (criterioMolinoAsociado && unMolinoSeleccionado == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un molino.");
+        if (criterioMolinoAsociado && !(unMolinoSeleccionado instanceof Molino))
+            throw new ExcepcionCargaParametros("Debe seleccionarse un molino.");
+        if (criterioOrdenDeProduccionAsociada && unaOrdenProduccionSeleccionada == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de producción.");
+        if (criterioLoteAsociado && unLoteSeleccionado == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un lote.");
+        if (criterioEstado && estadoSeleccionado.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("No se ha seleccionado un estado.");
+        
+        if (criterioFechaOrigen && (fechaOrigenInferior == null || fechaOrigenSuperior == null))
+            throw new ExcepcionCargaParametros("Verifique las fechas de Origen Inferior y Superior ingresadas");
+
+        Iterator moliendasARevisar = this.getMoliendas().keySet().iterator();
+        while (moliendasARevisar.hasNext()){
+            boolean sePuedeAgregar = true;
+            int unId = (int) moliendasARevisar.next();
+            Molienda unaMolienda = this.getMoliendas().get(unId);
+            
+            if (criterioMolinoAsociado && sePuedeAgregar)
+                sePuedeAgregar = unaMolienda.esEnMolino(unMolinoSeleccionado);
+                
+            if (criterioOrdenDeProduccionAsociada && sePuedeAgregar)
+                sePuedeAgregar = unaMolienda.poseeOrdenDeProduccionImplicada(unaOrdenProduccionSeleccionada);
+            if (criterioLoteAsociado && sePuedeAgregar)
+                sePuedeAgregar = unaMolienda.poseeLoteImplicado(unLoteSeleccionado);
+            if (criterioEstado && sePuedeAgregar)
+                sePuedeAgregar = unaMolienda.poseeEstado(estadoSeleccionado);
+            
+            if (sePuedeAgregar && criterioFechaOrigen)
+                sePuedeAgregar = unaMolienda.fechaOrigenEstaEntre(fechaOrigenInferior, fechaOrigenSuperior);
+            
+            if (sePuedeAgregar)
+                sePuedeAgregar = unaMolienda.getPesoDisponibleAEgresarKg()>0;
+            if (sePuedeAgregar)
+                retorno.add(unaMolienda);
+        }
+        return retorno;
+    }
+    
     public ArrayList filtrarEstacionamientos(Map<String, Boolean> criterios, Equipamiento unaCamaraSeleccionada, OrdenDeProduccion unaOrdenProduccionSeleccionada, Lote unLoteSeleccionado, String estadoSeleccionado, Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior, Calendar fechaExtraccionInferior, Calendar fechaExtraccionSuperior) throws ExcepcionCargaParametros {
         ArrayList retorno = new ArrayList();
         
@@ -1600,7 +2124,7 @@ public void registrarMovmimiento(Calendar fechaOrigen, LocalTime horaEntrada, Lo
         return retorno;
     }
     
-public ArrayList filtrarEventos(Map<String, Boolean> criterios, OrdenDeProduccion unaOrdenProduccionSeleccionada, String estadoSeleccionado, String unTipoDeEventoSeleccionado, Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior) throws ExcepcionCargaParametros {
+public ArrayList filtrarEventosDeOrdenDeProduccion(Map<String, Boolean> criterios, OrdenDeProduccion unaOrdenProduccionSeleccionada, String estadoSeleccionado, String unTipoDeEventoSeleccionado, Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior) throws ExcepcionCargaParametros {
         ArrayList retorno = new ArrayList();
         
         Boolean criterioEstado = criterios.get("estado");
@@ -1634,16 +2158,32 @@ public ArrayList filtrarEventos(Map<String, Boolean> criterios, OrdenDeProduccio
                     case "Ingresos":
                         sePuedeAgregar = (unEvento instanceof MovimientoInternoMateriaPrima && !((MovimientoInternoMateriaPrima)unEvento).poseeEquipamientoOrigen());
                         break;
-                    case "Estacionamientos":
-                        sePuedeAgregar = unEvento instanceof Estacionamiento;
                     case "Movimientos":
                         sePuedeAgregar = unEvento instanceof MovimientoInternoMateriaPrima;
                         break;
                     case "Analisis de laboratorios":
                         sePuedeAgregar = unEvento instanceof AnalisisLaboratorio;
                         break;
+                    case "Transformaciones":
+                        sePuedeAgregar = unEvento instanceof Transformacion;
+                        break;
+                    case "Estacionamientos":
+                        sePuedeAgregar = unEvento instanceof Estacionamiento;
+                        break;
                     case "Moliendas":
                         sePuedeAgregar = unEvento instanceof Molienda;
+                        break;
+                    case "Salidas":
+                        sePuedeAgregar = unEvento instanceof Salida;
+                        break;
+                    case "Egresos":
+                        sePuedeAgregar = unEvento instanceof Egreso;
+                        break;
+                    case "Mermas":
+                        sePuedeAgregar = unEvento instanceof Merma;
+                        break;
+                    case "Perdidas":
+                        sePuedeAgregar = unEvento instanceof Perdida;
                         break;
                 }
                 
@@ -1778,7 +2318,7 @@ public ArrayList filtrarMovimientos(Map<String, Boolean> criterios, String unEst
         return retorno;
     }    
 
-public ArrayList filtrarLotes(Map<String, Boolean> criterios, Equipamiento unEquipamientoAFiltrar, String unaEtiqueta, OrdenDeProduccion unaOrdenProduccionSeleccionada, OrdenDeCompra unaOrdenCompraSeleccionada, Proveedor unProveedorSeleccionado, Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior) throws ExcepcionCargaParametros {
+public ArrayList filtrarLotes(Map<String, Boolean> criterios, Equipamiento unEquipamientoAFiltrar, String unaEtiqueta, OrdenDeProduccion unaOrdenProduccionSeleccionada, OrdenDeCompra unaOrdenCompraSeleccionada, Proveedor unProveedorSeleccionado, Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior, String unTipoLote) throws ExcepcionCargaParametros {
         ArrayList retorno = new ArrayList();
         
         Boolean criterioEtiqueta = criterios.get("etiqueta");
@@ -1787,6 +2327,7 @@ public ArrayList filtrarLotes(Map<String, Boolean> criterios, Equipamiento unEqu
         Boolean criterioProveedorOrdenCompra = criterios.get("proveedorOrdenCompra");
         Boolean criterioFechaOrigen = criterios.get("fechaOrigen");
         Boolean criterioEquipamiento = criterios.get("equipamiento");
+        Boolean criterioTipoLote = criterios.get("tipoLote");
         
         if (criterioEtiqueta && (unaEtiqueta == null || unaEtiqueta.isEmpty()))
             throw new ExcepcionCargaParametros("No se ha ingresado una etiqueta para realizar el filtrado.");
@@ -1804,6 +2345,9 @@ public ArrayList filtrarLotes(Map<String, Boolean> criterios, Equipamiento unEqu
         if (criterioEquipamiento && !unEquipamientoAFiltrar.poseeUnoOMasLotes()){
             throw new ExcepcionCargaParametros("El equipamiento que seleccionó no posee lotes");
         }
+        if (criterioTipoLote && unTipoLote.equals("Seleccionar")){
+            throw new ExcepcionCargaParametros("Debe seleccionar un tipo de lote.");
+        }
         Iterator lotesARecorrer;
         
         if (criterioEquipamiento){
@@ -1820,6 +2364,9 @@ public ArrayList filtrarLotes(Map<String, Boolean> criterios, Equipamiento unEqu
                     sePuedeAgregar = unLote.poseeProveedorAsociado(unProveedorSeleccionado);
                 if (sePuedeAgregar && criterioFechaOrigen){
                     sePuedeAgregar = unLote.ultimoMovimientoEstaEntre(fechaOrigenInferior, fechaOrigenSuperior);
+                }
+                if (sePuedeAgregar && criterioTipoLote){
+                    sePuedeAgregar = unLote.esDeTipo(unTipoLote);
                 }
                 if (sePuedeAgregar)
                     retorno.add(unLote);
@@ -1840,6 +2387,87 @@ public ArrayList filtrarLotes(Map<String, Boolean> criterios, Equipamiento unEqu
                 if (sePuedeAgregar && criterioFechaOrigen){
                     sePuedeAgregar = unLote.ultimoMovimientoEstaEntre(fechaOrigenInferior, fechaOrigenSuperior);
                 }
+                if (sePuedeAgregar && criterioTipoLote){
+                    sePuedeAgregar = unLote.esDeTipo(unTipoLote);
+                }
+                if (sePuedeAgregar)
+                    retorno.add(unLote);
+            }
+            return retorno;
+        }
+            
+        
+    }
+
+public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equipamiento unEquipamientoAFiltrar, String unaEtiqueta, OrdenDeProduccion unaOrdenProduccionSeleccionada, OrdenDeCompra unaOrdenCompraSeleccionada, Proveedor unProveedorSeleccionado, Calendar fechaOrigenInferior, Calendar fechaOrigenSuperior, ArrayList lotesAOmitir, String unTipoLote) throws ExcepcionCargaParametros {
+        ArrayList retorno = new ArrayList();
+        
+        Boolean criterioEtiqueta = criterios.get("etiqueta");
+        Boolean criterioOrdenDeProduccionAsociada = criterios.get("ordenProduccion");
+        Boolean criterioOrdenDeCompra = criterios.get("ordenCompra");
+        Boolean criterioProveedorOrdenCompra = criterios.get("proveedorOrdenCompra");
+        Boolean criterioFechaOrigen = criterios.get("fechaOrigen");
+        Boolean criterioEquipamiento = criterios.get("equipamiento");
+        Boolean criterioTipoLote = criterios.get("tipoLote");
+        
+        if (criterioEtiqueta && (unaEtiqueta == null || unaEtiqueta.isEmpty()))
+            throw new ExcepcionCargaParametros("No se ha ingresado una etiqueta para realizar el filtrado.");
+        if (criterioOrdenDeProduccionAsociada && unaOrdenProduccionSeleccionada == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de producción.");
+        if (criterioOrdenDeCompra && unaOrdenCompraSeleccionada == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de compra.");
+        if (criterioProveedorOrdenCompra && unProveedorSeleccionado == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un proveedor asociado a un ingreso.");
+        if (criterioFechaOrigen && (fechaOrigenInferior == null || fechaOrigenSuperior == null))
+            throw new ExcepcionCargaParametros("Verifique las fechas de Origen Inferior y Superior ingresadas");
+        if (criterioEquipamiento && unEquipamientoAFiltrar == null)
+            throw new ExcepcionCargaParametros("No se ha seleccionado un equipamiento a filtrar.");
+        
+        if (criterioEquipamiento && !unEquipamientoAFiltrar.poseeUnoOMasLotes()){
+            throw new ExcepcionCargaParametros("El equipamiento que seleccionó no posee lotes");
+        }
+        if (criterioTipoLote && unTipoLote.equals("Seleccionar")){
+            throw new ExcepcionCargaParametros("Debe seleccionar un tipo de lote.");
+        }
+        Iterator lotesARecorrer;
+        
+        if (criterioEquipamiento){
+            lotesARecorrer = unEquipamientoAFiltrar.getLotesAsociadosNoAnulados().iterator();
+            while (lotesARecorrer.hasNext()){
+                boolean sePuedeAgregar = true;
+                Lote unLote = (Lote) lotesARecorrer.next();
+                sePuedeAgregar = !lotesAOmitir.contains(unLote);
+                if (sePuedeAgregar && criterioOrdenDeProduccionAsociada)
+                    sePuedeAgregar = unLote.poseeOrdenDeProduccionAsociada(unaOrdenProduccionSeleccionada);
+                if (sePuedeAgregar && criterioOrdenDeCompra)
+                    sePuedeAgregar = unLote.poseeOrdenDeCompraAsociada(unaOrdenCompraSeleccionada);
+                if (sePuedeAgregar && criterioProveedorOrdenCompra)
+                    sePuedeAgregar = unLote.poseeProveedorAsociado(unProveedorSeleccionado);
+                if (sePuedeAgregar && criterioFechaOrigen)
+                    sePuedeAgregar = unLote.ultimoMovimientoEstaEntre(fechaOrigenInferior, fechaOrigenSuperior);
+                if (sePuedeAgregar && criterioTipoLote)
+                    sePuedeAgregar = unLote.esDeTipo(unTipoLote);
+                
+                if (sePuedeAgregar)
+                    retorno.add(unLote);
+            }
+            return retorno;
+        }else{
+            lotesARecorrer = this.lotes.keySet().iterator();
+            while (lotesARecorrer.hasNext()){
+                Lote unLote = this.lotes.get((int) lotesARecorrer.next());
+                boolean sePuedeAgregar = true;
+                sePuedeAgregar = !lotesAOmitir.contains(unLote);
+                if (sePuedeAgregar && criterioOrdenDeProduccionAsociada)
+                    sePuedeAgregar = unLote.poseeOrdenDeProduccionAsociada(unaOrdenProduccionSeleccionada);
+                if (sePuedeAgregar && criterioOrdenDeCompra)
+                    sePuedeAgregar = unLote.poseeOrdenDeCompraAsociada(unaOrdenCompraSeleccionada);
+                if (sePuedeAgregar && criterioProveedorOrdenCompra)
+                    sePuedeAgregar = unLote.poseeProveedorAsociado(unProveedorSeleccionado);
+                if (sePuedeAgregar && criterioFechaOrigen)
+                    sePuedeAgregar = unLote.ultimoMovimientoEstaEntre(fechaOrigenInferior, fechaOrigenSuperior);
+                if (sePuedeAgregar && criterioTipoLote)
+                    sePuedeAgregar = unLote.esDeTipo(unTipoLote);
                 if (sePuedeAgregar)
                     retorno.add(unLote);
             }
@@ -1873,12 +2501,73 @@ public ArrayList filtrarLotes(Map<String, Boolean> criterios, Equipamiento unEqu
             if (sePuedeAgregar && criterioOrdenDeProduccionAsociada)
                 sePuedeAgregar = unaOrdenDeCompra.poseeOrdenDeProduccionAsociada(unaOrdenProduccionSeleccionada);
             if (sePuedeAgregar && criterioProveedor)
-                sePuedeAgregar = unaOrdenDeCompra.poseeProveedorAsociado();
-            if (sePuedeAgregar && criterioFechaOrigen){
+                sePuedeAgregar = unaOrdenDeCompra.poseeProveedor(unProveedorSeleccionado);
+            if (sePuedeAgregar && criterioFechaOrigen)
                 sePuedeAgregar = unaOrdenDeCompra.fechaOrigenEstaEntre(fechaOrigenInferior, fechaOrigenSuperior);
-            }
+            if (sePuedeAgregar && criterioEstado)
+                sePuedeAgregar = unaOrdenDeCompra.poseeEstado(unEstado);
             if (sePuedeAgregar)
                 retorno.add(unaOrdenDeCompra);
+        }
+        return retorno;
+    }
+    
+    public ArrayList filtrarGenerico(String [] criterios, Map<String, Boolean> criteriosSeleccionados, Map<String, Object> objetosAsociadosACriterios, Map<Integer, Object> objetosAFiltrar) throws ExcepcionCargaParametros {
+        ArrayList retorno = new ArrayList();
+        //Validaciones
+        for (int i=0; i<criterios.length; i++){
+            Boolean unCriterio = criteriosSeleccionados.get(criterios[i]);
+            Object unObjeto = objetosAsociadosACriterios.get(criterios[i]);
+            if (unCriterio && (unObjeto == null || (unObjeto instanceof String && (unObjeto.equals("") || unObjeto.equals("Seleccionar"))) || (unObjeto instanceof ArrayList && ((ArrayList)unObjeto).isEmpty())))
+                throw new ExcepcionCargaParametros("No se ha seleccionado un valor para el criterio: "+criterios[i]);
+            if (unCriterio && unObjeto instanceof ArrayList && ((ArrayList)unObjeto).size()>=2 && (((ArrayList)unObjeto).get(0) == null || ((ArrayList)unObjeto).get(1) == null))
+                throw new ExcepcionCargaParametros("No se ha seleccionado un valor para el criterio: "+criterios[i]);
+        }
+        //Evaluaciones
+        for (int i=0;i<criterios.length;i++){}
+        Iterator objetos = objetosAFiltrar.keySet().iterator();
+        while (objetos.hasNext()){
+            Boolean sePuedeAgregar = true;
+            int unId = (int) objetos.next();
+            Filtrable unObjetoFiltrable = (Filtrable) objetosAFiltrar.get(unId);
+            for (int i=0;i<criterios.length && sePuedeAgregar;i++){
+                boolean seDebeEvaluarCriterio = criteriosSeleccionados.get(criterios[i]);
+                if (seDebeEvaluarCriterio){
+                    String unCriterio = criterios[i];
+                    Object unObjeto = objetosAsociadosACriterios.get(criterios[i]);
+                    sePuedeAgregar = unObjetoFiltrable.cumpleCriterio(unCriterio, unObjeto);
+                }
+            }
+            if (sePuedeAgregar)
+                retorno.add(unObjetoFiltrable);
+        }
+        return retorno;
+    }
+    
+    public static ArrayList desmenuzarAnalisis (ArrayList unaListaAnalisis, String unDatoACensar){
+        ArrayList retorno = new ArrayList();
+        Iterator recorredorAnalisis = unaListaAnalisis.iterator();
+        while (recorredorAnalisis.hasNext()){
+            AnalisisLaboratorio unAnalisis = (AnalisisLaboratorio) recorredorAnalisis.next();
+            switch (unDatoACensar){
+                case AnalisisLaboratorio.ATRIBUTO_PORCENTAJE_HOJA:
+                    retorno.add(unAnalisis.getPorcentajeHoja());
+                    break;
+                case AnalisisLaboratorio.ATRIBUTO_PORCENTAJE_HUMEDAD:
+                    retorno.add(unAnalisis.getPorcentajeHumedad());
+                    break;
+                case AnalisisLaboratorio.ATRIBUTO_PORCENTAJE_PALO:
+                    retorno.add(unAnalisis.getPorcentajePalo());
+                    break;
+                case AnalisisLaboratorio.ATRIBUTO_PORCENTAJE_POLVO:
+                    retorno.add(unAnalisis.getPorcentajePolvo());
+                    break;
+                case AnalisisLaboratorio.ATRIBUTO_PORCENTAJE_SEMILLA:
+                    retorno.add(unAnalisis.getPorcentajeSemilla());
+                    break;
+                default:
+                    retorno.add(0f);
+            }
         }
         return retorno;
     }
@@ -1916,8 +2605,6 @@ public ArrayList filtrarLotes(Map<String, Boolean> criterios, Equipamiento unEqu
         return retorno;
     }
     public void registrarOrdenDeCompra(OrdenDeProduccion ordenProduccionSeleccionada, Proveedor proveedorSeleccionado, String unaUnidadMedida,String unaCantidadAComprar, String unCostoDeCompra) throws ExcepcionCargaParametros, SQLException {
-        unaCantidadAComprar = unaCantidadAComprar.replace(",", ".");
-        unCostoDeCompra = unCostoDeCompra.replace(",", ".");
         
         if (ordenProduccionSeleccionada == null)
             throw new ExcepcionCargaParametros("No se ha seleccionado una orden de producción");
@@ -1932,9 +2619,8 @@ public ArrayList filtrarLotes(Map<String, Boolean> criterios, Equipamiento unEqu
         if (!ordenProduccionSeleccionada.seEncuentraRegular())
             throw new ExcepcionCargaParametros("La orden de producción no se encuentra en estado regular.");
         
-        float cantidadAComprar = Float.parseFloat(unaCantidadAComprar);
-        float costoDeCompra = Float.parseFloat(unCostoDeCompra);
-        
+        float cantidadAComprar = Organizacion.convertirAFlotante(unaCantidadAComprar, "cantidad a comprar");
+        float costoDeCompra = Organizacion.convertirAFlotante(unCostoDeCompra, "costo de compra");
         
         if (cantidadAComprar <=0)
             throw new ExcepcionCargaParametros("La orden de compra no puede poseer una cantidad negativa.");
@@ -1949,6 +2635,7 @@ public ArrayList filtrarLotes(Map<String, Boolean> criterios, Equipamiento unEqu
         persistencia.persistirObjeto(unaOrdenDeCompra);
         this.ordenesCompra.put(unaOrdenDeCompra.getId(), unaOrdenDeCompra);
         ordenProduccionSeleccionada.agregarEvento(unaOrdenDeCompra);
+        this.getEventos().put(unaOrdenDeCompra.getIdEvento(), unaOrdenDeCompra);
         
     }
 
@@ -1959,8 +2646,8 @@ public ArrayList filtrarLotes(Map<String, Boolean> criterios, Equipamiento unEqu
             throw new ExcepcionCargaParametros("No se puede anular una orden de Compra que posee lotes en estado regular.");
         unaOrdenDeCompra.anular();
         persistencia.modificarObjeto(unaOrdenDeCompra);
-        
     }
+    
 
     public ArrayList getLocalidadesActivas() {
         ArrayList retorno = new ArrayList();
@@ -2065,7 +2752,7 @@ public ArrayList filtrarLotes(Map<String, Boolean> criterios, Equipamiento unEqu
         return retorno;
     }
 
-    private float convertirAFlotante(String unaCadena, String unCampo) throws ExcepcionCargaParametros {
+    public static float convertirAFlotante(String unaCadena, String unCampo) throws ExcepcionCargaParametros {
         if (!Validaciones.esUnNumeroFraccionarioValido(unaCadena))
             throw new ExcepcionCargaParametros("El valor ingresado para "+unCampo+" no posee un formato valido (Utilice solo numeros y una coma)");
         unaCadena = unaCadena.replace(".", "");
@@ -2078,6 +2765,14 @@ public ArrayList filtrarLotes(Map<String, Boolean> criterios, Equipamiento unEqu
     public static String expresarCalendario (Calendar unaFecha){
         return ( new SimpleDateFormat( "dd/MM/yyyy" ) ).format( unaFecha.getTime() );
     }
+    
+    public static String expresarFechaArchivo() {
+        return ( new SimpleDateFormat( "yyyy-MM-dd" ) ).format( Calendar.getInstance().getTime() );
+    }
+    
+    public static String expresarFechaArchivo(Calendar unCalendario) {
+        return ( new SimpleDateFormat( "yyyy-MM-dd" ) ).format( unCalendario.getTime() );
+    }
 
     public ArrayList getCriteriosActivos() {
         ArrayList retorno = new ArrayList();
@@ -2088,23 +2783,784 @@ public ArrayList filtrarLotes(Map<String, Boolean> criterios, Equipamiento unEqu
             if (unCriterio.seEncuentraActivo())
                 retorno.add(unCriterio);
         }
-        return retorno;
+        return retorno; 
     }
 
-    public void darDeBajaUnCriterio(CriterioAnalisisLaboratorio unAnalisis) throws SQLException, ExcepcionPersistencia {
-        unAnalisis.darDeBaja();
-        persistencia.modificarObjeto(unAnalisis);
+    public void darDeBajaUnCriterio(CriterioAnalisisLaboratorio unCriterio) throws SQLException, ExcepcionPersistencia {
+        unCriterio.darDeBaja();
+        persistencia.modificarObjeto(unCriterio);
     }
 
     public void modificarCriterioDeAnalisis(CriterioAnalisisLaboratorio unCriterio, String unEstado) throws SQLException, ExcepcionPersistencia, ExcepcionCargaParametros {
-        if (unEstado.equals("Seleecionar"))
+        if (unEstado.equals("Selecionar"))
             throw new ExcepcionCargaParametros("Debe seleccionar un estado para realizar una modificación");
         unCriterio.setEstado(unEstado);
         persistencia.modificarObjeto(unCriterio);
     }
 
+    public DetalleTransformacion generarDetalleMoliendaEnKg(String unaCantidadUnidadesUtilizadasEnKg, Lote unLoteImplicado) throws ExcepcionCargaParametros{
+        DetalleTransformacion retorno = null;
+        
+        //Validaciones de no nulidad
+        //<editor-fold defaultstate="collapsed">
+        if (unaCantidadUnidadesUtilizadasEnKg.equals(""))
+            throw new ExcepcionCargaParametros("Debe ingresar una unidad de unidades de transporte utilizadas.");
+        if (unLoteImplicado == null)
+            throw new ExcepcionCargaParametros("Debe ingresar un lote para registrar un detalle.");
+        //</editor-fold>
+        //Validaciones logicas
+        //<editor-fold defaultstate="collapsed">
+        if (!Validaciones.esUnNumeroEnteroValido(unaCantidadUnidadesUtilizadasEnKg))
+            throw new ExcepcionCargaParametros("La cantidad de unidades a utilizar no esta en un formato valido (Solo numeros).");
+        int unaCantidad = Integer.parseInt(unaCantidadUnidadesUtilizadasEnKg);
+        if (unaCantidad <= 0)
+            throw new ExcepcionCargaParametros("La cantidad de unidades ingresadas debe ser mayor que 0(Cero).");
+        if (unaCantidad > unLoteImplicado.getCantidadUnidadesDisponibleParaMoler())
+            throw new ExcepcionCargaParametros("El peso a utilizar excede el remanente disponible para moler. (Peso disponible: "+unLoteImplicado.getCantidadDisponibleParaMolerKg()+" Kg.)");
+        
+        Float unPeso = unaCantidad * unLoteImplicado.obtenerRazonKgBolsa();
+        
+        
+        if (unPeso <= 0)
+            throw new ExcepcionCargaParametros("El peso a utilizar debe ser mayor que 0 (Cero).");
+        if (unPeso > unLoteImplicado.getCantidadDisponibleParaMolerKg())
+            throw new ExcepcionCargaParametros("El peso a utilizar excede el remanente disponible para moler. (Peso disponible: "+unLoteImplicado.getCantidadDisponibleParaMolerKg()+" Kg.)");
+        
+        //</editor-fold>
+        retorno = new DetalleTransformacion(unLoteImplicado.getUnidadDeMedidaTransporte(), unaCantidad, Lote.UNIDAD_MEDIDA_KILOGRAMO, unPeso, unLoteImplicado);
+        return retorno;
+    }
+    
+    public void cargaInicial(){
+        if (!this.persistencia.seCargoInicialmenteLosCampos()){
+            try {
+                System.out.println("Detectada ausencia de tuplas iniciales, realizando carga...");
+                Calendar unaFechaOrigen; 
+                AnalisisLaboratorio unAnalisis;
+                Lote unLoteAMover;
+                String pesoSalida;
+                String pesoEntrada;
+                Float unPorcentajePaloInferior;
+                Float unPorcentajePaloSuperior;
+                String unPorcentajePalo;
 
+                Float unPorcentajeSemillaInferior;
+                Float unPorcentajeSemillaSuperior;
+                String unPorcentajeSemilla;
+                
+                Float unPorcentajePolvoInferior;
+                Float unPorcentajePolvoSuperior;
+                String unPorcentajePolvo;
+                
+                Float unPorcentajeHumedadInferior;
+                Float unPorcentajeHumedadSuperior;
+                String unPorcentajeHumedad;
+                
+                Float unPorcentajeHojaInferior;
+                Float unPorcentajeHojaSuperior;
+                String unPorcentajeHoja;
+            //Carga analisis
+            //<editor-fold defaultstate="collapsed">
+                //Analisis N° 1: Debe estar aprobado.
+                //<editor-fold defaultstate="collapsed">
+                
+                Laboratorio unLaboratorio = (Laboratorio) this.equipamientos.get(1);
+                CriterioAnalisisLaboratorio unCriterio = (CriterioAnalisisLaboratorio) this.criteriosAnalisisLaboratorio.get(4);
+                OrdenDeCompra unaOrdenDeCompra = this.ordenesCompra.get(1);
+                unaFechaOrigen = Calendar.getInstance();
+                unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -6);
+                
+                unPorcentajePaloInferior = unCriterio.getPorcentajePaloLimiteInferior();
+                unPorcentajePaloSuperior = unCriterio.getPorcentajePaloLimiteSuperior();
+                unPorcentajePalo = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajePaloInferior+(Float)(unPorcentajePaloSuperior-unPorcentajePaloInferior)/2);
+                
+                unPorcentajeSemillaInferior = unCriterio.getPorcentajeSemillaLimiteInferior();
+                unPorcentajeSemillaSuperior = unCriterio.getPorcentajeSemillaLimiteSuperior();
+                unPorcentajeSemilla = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeSemillaInferior+(Float)(unPorcentajeSemillaSuperior-unPorcentajeSemillaInferior)/2);
+                
+                unPorcentajePolvoInferior = unCriterio.getPorcentajePolvoLimiteInferior();
+                unPorcentajePolvoSuperior = unCriterio.getPorcentajePolvoLimiteSuperior();
+                unPorcentajePolvo = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajePolvoInferior+(Float)(unPorcentajePolvoSuperior-unPorcentajePolvoInferior)/2);
+                
+                unPorcentajeHumedadInferior = unCriterio.getPorcentajeHumedadLimiteInferior();
+                unPorcentajeHumedadSuperior = unCriterio.getPorcentajeHumedadLimiteSuperior();
+                unPorcentajeHumedad = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeHumedadInferior+(Float)(unPorcentajeHumedadSuperior-unPorcentajeHumedadInferior)/2);
+                
+                unPorcentajeHojaInferior = unCriterio.getPorcentajeHojaLimiteInferior();
+                unPorcentajeHojaSuperior = unCriterio.getPorcentajeHojaLimiteSuperior();
+                unPorcentajeHoja = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeHojaInferior+(Float)(unPorcentajeHojaSuperior-unPorcentajeHojaInferior)/2);
+                
+                registrarAnalisisDeLaboratorio(unCriterio.getPuntosNegros(), unCriterio.getTorrada(), unCriterio.getColor(), unCriterio.getAroma(), unCriterio.getTacto(), unCriterio.getDegustacion(), unaFechaOrigen, null, unLaboratorio, unPorcentajePalo, unPorcentajeSemilla, unPorcentajePolvo, unPorcentajeHumedad, unPorcentajeHoja, unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);
+                unAnalisis = analisisLaboratorio.get(1);
+                
+                /*System.out.println("Analisis n° "+unAnalisis.getId()+", conclusion: "+unAnalisis.getConclusion());
+                if (unAnalisis.estaRechazado())
+                    System.out.println(unAnalisis.getCriterioAsociado().generarDetalleDeResultadoDeAnalisis(unAnalisis));
+                */
+                
+                //</editor-fold>
+                //Analisis N° 2: Debe estar aprobado.
+                //<editor-fold defaultstate="collapsed">
+                unLaboratorio = (Laboratorio) this.equipamientos.get(1);
+                unCriterio = (CriterioAnalisisLaboratorio) this.criteriosAnalisisLaboratorio.get(4);
+                unaOrdenDeCompra = this.ordenesCompra.get(2);
+                unaFechaOrigen = Calendar.getInstance();
+                unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -6);
+                
+                unPorcentajePaloInferior = unCriterio.getPorcentajePaloLimiteInferior();
+                unPorcentajePaloSuperior = unCriterio.getPorcentajePaloLimiteSuperior();
+                unPorcentajePalo = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajePaloInferior+(Float)(unPorcentajePaloSuperior-unPorcentajePaloInferior)/2);
+                
+                unPorcentajeSemillaInferior = unCriterio.getPorcentajeSemillaLimiteInferior();
+                unPorcentajeSemillaSuperior = unCriterio.getPorcentajeSemillaLimiteSuperior();
+                unPorcentajeSemilla = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeSemillaInferior+(Float)(unPorcentajeSemillaSuperior-unPorcentajeSemillaInferior)/2);
+                
+                unPorcentajePolvoInferior = unCriterio.getPorcentajePolvoLimiteInferior();
+                unPorcentajePolvoSuperior = unCriterio.getPorcentajePolvoLimiteSuperior();
+                unPorcentajePolvo = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajePolvoInferior+(Float)(unPorcentajePolvoSuperior-unPorcentajePolvoInferior)/2);
+                
+                unPorcentajeHumedadInferior = unCriterio.getPorcentajeHumedadLimiteInferior();
+                unPorcentajeHumedadSuperior = unCriterio.getPorcentajeHumedadLimiteSuperior();
+                unPorcentajeHumedad = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeHumedadInferior+(Float)(unPorcentajeHumedadSuperior-unPorcentajeHumedadInferior)/2);
+                
+                unPorcentajeHojaInferior = unCriterio.getPorcentajeHojaLimiteInferior();
+                unPorcentajeHojaSuperior = unCriterio.getPorcentajeHojaLimiteSuperior();
+                unPorcentajeHoja = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeHojaInferior+(Float)(unPorcentajeHojaSuperior-unPorcentajeHojaInferior)/2);
+                
+                registrarAnalisisDeLaboratorio(unCriterio.getPuntosNegros(), unCriterio.getTorrada(), unCriterio.getColor(), unCriterio.getAroma(), unCriterio.getTacto(), unCriterio.getDegustacion(), unaFechaOrigen, null, unLaboratorio, unPorcentajePalo, unPorcentajeSemilla, unPorcentajePolvo, unPorcentajeHumedad, unPorcentajeHoja, unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);
+                
+                //registrarAnalisisDeLaboratorio("SI", "SI", "VERDE OSCURO", "TIPICO", "CRUJIENTE", "SI", unaFechaOrigen, null, unLaboratorio, "5,0", "5,0", "5,0", "15,0", "85,0", unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);
+                unAnalisis = analisisLaboratorio.get(2);
+                //</editor-fold>                
+                //Analisis N° 3: Debe estar aprobado.
+                //<editor-fold defaultstate="collapsed">
+                unLaboratorio = (Laboratorio) this.equipamientos.get(1);
+                unCriterio = (CriterioAnalisisLaboratorio) this.criteriosAnalisisLaboratorio.get(4);
+                unaOrdenDeCompra = this.ordenesCompra.get(2);
+                unaFechaOrigen = Calendar.getInstance();
+                unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -6);
+                
+                unPorcentajePaloInferior = unCriterio.getPorcentajePaloLimiteInferior();
+                unPorcentajePaloSuperior = unCriterio.getPorcentajePaloLimiteSuperior();
+                unPorcentajePalo = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajePaloInferior+(Float)(unPorcentajePaloSuperior-unPorcentajePaloInferior)/2);
+                
+                unPorcentajeSemillaInferior = unCriterio.getPorcentajeSemillaLimiteInferior();
+                unPorcentajeSemillaSuperior = unCriterio.getPorcentajeSemillaLimiteSuperior();
+                unPorcentajeSemilla = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeSemillaInferior+(Float)(unPorcentajeSemillaSuperior-unPorcentajeSemillaInferior)/2);
+                
+                unPorcentajePolvoInferior = unCriterio.getPorcentajePolvoLimiteInferior();
+                unPorcentajePolvoSuperior = unCriterio.getPorcentajePolvoLimiteSuperior();
+                unPorcentajePolvo = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajePolvoInferior+(Float)(unPorcentajePolvoSuperior-unPorcentajePolvoInferior)/2);
+                
+                unPorcentajeHumedadInferior = unCriterio.getPorcentajeHumedadLimiteInferior();
+                unPorcentajeHumedadSuperior = unCriterio.getPorcentajeHumedadLimiteSuperior();
+                unPorcentajeHumedad = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeHumedadInferior+(Float)(unPorcentajeHumedadSuperior-unPorcentajeHumedadInferior)/2);
+                
+                unPorcentajeHojaInferior = unCriterio.getPorcentajeHojaLimiteInferior();
+                unPorcentajeHojaSuperior = unCriterio.getPorcentajeHojaLimiteSuperior();
+                unPorcentajeHoja = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeHojaInferior+(Float)(unPorcentajeHojaSuperior-unPorcentajeHojaInferior)/2);
+                
+                registrarAnalisisDeLaboratorio(unCriterio.getPuntosNegros(), unCriterio.getTorrada(), unCriterio.getColor(), unCriterio.getAroma(), unCriterio.getTacto(), unCriterio.getDegustacion(), unaFechaOrigen, null, unLaboratorio, unPorcentajePalo, unPorcentajeSemilla, unPorcentajePolvo, unPorcentajeHumedad, unPorcentajeHoja, unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);
+                //registrarAnalisisDeLaboratorio("SI", "SI", "VERDE OSCURO", "TIPICO", "CRUJIENTE", "SI", unaFechaOrigen, null, unLaboratorio, "5,0", "5,0", "5,0", "15,0", "85,0", unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);
+                unAnalisis = analisisLaboratorio.get(3);
+                //</editor-fold>
+                //Analisis N° 4: Debe estar rechazado.
+                //<editor-fold defaultstate="collapsed">
+                unLaboratorio = (Laboratorio) this.equipamientos.get(1);
+                unCriterio = (CriterioAnalisisLaboratorio) this.criteriosAnalisisLaboratorio.get(4);
+                unaOrdenDeCompra = this.ordenesCompra.get(3);
+                unaFechaOrigen = Calendar.getInstance();
+                unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -6);
+                registrarAnalisisDeLaboratorio("SI", "SI", "VERDE OSCURO", "TIPICO", "CRUJIENTE", "SI", unaFechaOrigen, null, unLaboratorio, "10,0", "5,7", "4,3", "6,7", "80,0", unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);
+                unAnalisis = analisisLaboratorio.get(4);
+                //</editor-fold>
+                //Analisis N° 5: Debe estar aprobado.
+                //<editor-fold defaultstate="collapsed">
+                unLaboratorio = (Laboratorio) this.equipamientos.get(1);
+                unCriterio = (CriterioAnalisisLaboratorio) this.criteriosAnalisisLaboratorio.get(4);
+                unaOrdenDeCompra = this.ordenesCompra.get(3);
+                unaFechaOrigen = Calendar.getInstance();
+                unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -6);
+                
+                unPorcentajePaloInferior = unCriterio.getPorcentajePaloLimiteInferior();
+                unPorcentajePaloSuperior = unCriterio.getPorcentajePaloLimiteSuperior();
+                unPorcentajePalo = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajePaloInferior+(Float)(unPorcentajePaloSuperior-unPorcentajePaloInferior)/2);
+                
+                unPorcentajeSemillaInferior = unCriterio.getPorcentajeSemillaLimiteInferior();
+                unPorcentajeSemillaSuperior = unCriterio.getPorcentajeSemillaLimiteSuperior();
+                unPorcentajeSemilla = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeSemillaInferior+(Float)(unPorcentajeSemillaSuperior-unPorcentajeSemillaInferior)/2);
+                
+                unPorcentajePolvoInferior = unCriterio.getPorcentajePolvoLimiteInferior();
+                unPorcentajePolvoSuperior = unCriterio.getPorcentajePolvoLimiteSuperior();
+                unPorcentajePolvo = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajePolvoInferior+(Float)(unPorcentajePolvoSuperior-unPorcentajePolvoInferior)/2);
+                
+                unPorcentajeHumedadInferior = unCriterio.getPorcentajeHumedadLimiteInferior();
+                unPorcentajeHumedadSuperior = unCriterio.getPorcentajeHumedadLimiteSuperior();
+                unPorcentajeHumedad = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeHumedadInferior+(Float)(unPorcentajeHumedadSuperior-unPorcentajeHumedadInferior)/2);
+                
+                unPorcentajeHojaInferior = unCriterio.getPorcentajeHojaLimiteInferior();
+                unPorcentajeHojaSuperior = unCriterio.getPorcentajeHojaLimiteSuperior();
+                unPorcentajeHoja = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeHojaInferior+(Float)(unPorcentajeHojaSuperior-unPorcentajeHojaInferior)/2);
+                
+                registrarAnalisisDeLaboratorio(unCriterio.getPuntosNegros(), unCriterio.getTorrada(), unCriterio.getColor(), unCriterio.getAroma(), unCriterio.getTacto(), unCriterio.getDegustacion(), unaFechaOrigen, null, unLaboratorio, unPorcentajePalo, unPorcentajeSemilla, unPorcentajePolvo, unPorcentajeHumedad, unPorcentajeHoja, unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);
+                //registrarAnalisisDeLaboratorio("SI", "SI", "VERDE OSCURO", "TIPICO", "CRUJIENTE", "SI", unaFechaOrigen, null, unLaboratorio, "5,0", "5,0", "5,0", "15,0", "85,0", unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);
+                unAnalisis = analisisLaboratorio.get(5);
+                //</editor-fold>
+                //Analisis N° 6: Debe estar aprobado.
+                //<editor-fold defaultstate="collapsed">
+                unLaboratorio = (Laboratorio) this.equipamientos.get(1);
+                unCriterio = (CriterioAnalisisLaboratorio) this.criteriosAnalisisLaboratorio.get(4);
+                unaOrdenDeCompra = this.ordenesCompra.get(4);
+                unaFechaOrigen = Calendar.getInstance();
+                unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -6);
+                
+                unPorcentajePaloInferior = unCriterio.getPorcentajePaloLimiteInferior();
+                unPorcentajePaloSuperior = unCriterio.getPorcentajePaloLimiteSuperior();
+                unPorcentajePalo = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajePaloInferior+(Float)(unPorcentajePaloSuperior-unPorcentajePaloInferior)/2);
+                
+                unPorcentajeSemillaInferior = unCriterio.getPorcentajeSemillaLimiteInferior();
+                unPorcentajeSemillaSuperior = unCriterio.getPorcentajeSemillaLimiteSuperior();
+                unPorcentajeSemilla = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeSemillaInferior+(Float)(unPorcentajeSemillaSuperior-unPorcentajeSemillaInferior)/2);
+                
+                unPorcentajePolvoInferior = unCriterio.getPorcentajePolvoLimiteInferior();
+                unPorcentajePolvoSuperior = unCriterio.getPorcentajePolvoLimiteSuperior();
+                unPorcentajePolvo = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajePolvoInferior+(Float)(unPorcentajePolvoSuperior-unPorcentajePolvoInferior)/2);
+                
+                unPorcentajeHumedadInferior = unCriterio.getPorcentajeHumedadLimiteInferior();
+                unPorcentajeHumedadSuperior = unCriterio.getPorcentajeHumedadLimiteSuperior();
+                unPorcentajeHumedad = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeHumedadInferior+(Float)(unPorcentajeHumedadSuperior-unPorcentajeHumedadInferior)/2);
+                
+                unPorcentajeHojaInferior = unCriterio.getPorcentajeHojaLimiteInferior();
+                unPorcentajeHojaSuperior = unCriterio.getPorcentajeHojaLimiteSuperior();
+                unPorcentajeHoja = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeHojaInferior+(Float)(unPorcentajeHojaSuperior-unPorcentajeHojaInferior)/2);
+                
+                registrarAnalisisDeLaboratorio(unCriterio.getPuntosNegros(), unCriterio.getTorrada(), unCriterio.getColor(), unCriterio.getAroma(), unCriterio.getTacto(), unCriterio.getDegustacion(), unaFechaOrigen, null, unLaboratorio, unPorcentajePalo, unPorcentajeSemilla, unPorcentajePolvo, unPorcentajeHumedad, unPorcentajeHoja, unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);
+                //registrarAnalisisDeLaboratorio("SI", "SI", "VERDE OSCURO", "TIPICO", "CRUJIENTE", "SI", unaFechaOrigen, null, unLaboratorio, "5,0", "5,0", "5,0", "15,0", "85,0", unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);
+                unAnalisis = analisisLaboratorio.get(6);
+                //</editor-fold>
+                //Analisis N° 7: Debe estar aprobado.
+                //<editor-fold defaultstate="collapsed">
+                unLaboratorio = (Laboratorio) this.equipamientos.get(1);
+                unCriterio = (CriterioAnalisisLaboratorio) this.criteriosAnalisisLaboratorio.get(4);
+                unaOrdenDeCompra = this.ordenesCompra.get(5);
+                unaFechaOrigen = Calendar.getInstance();
+                unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -6);
+                
+                unPorcentajePaloInferior = unCriterio.getPorcentajePaloLimiteInferior();
+                unPorcentajePaloSuperior = unCriterio.getPorcentajePaloLimiteSuperior();
+                unPorcentajePalo = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajePaloInferior+(Float)(unPorcentajePaloSuperior-unPorcentajePaloInferior)/2);
+                
+                unPorcentajeSemillaInferior = unCriterio.getPorcentajeSemillaLimiteInferior();
+                unPorcentajeSemillaSuperior = unCriterio.getPorcentajeSemillaLimiteSuperior();
+                unPorcentajeSemilla = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeSemillaInferior+(Float)(unPorcentajeSemillaSuperior-unPorcentajeSemillaInferior)/2);
+                
+                unPorcentajePolvoInferior = unCriterio.getPorcentajePolvoLimiteInferior();
+                unPorcentajePolvoSuperior = unCriterio.getPorcentajePolvoLimiteSuperior();
+                unPorcentajePolvo = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajePolvoInferior+(Float)(unPorcentajePolvoSuperior-unPorcentajePolvoInferior)/2);
+                
+                unPorcentajeHumedadInferior = unCriterio.getPorcentajeHumedadLimiteInferior();
+                unPorcentajeHumedadSuperior = unCriterio.getPorcentajeHumedadLimiteSuperior();
+                unPorcentajeHumedad = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeHumedadInferior+(Float)(unPorcentajeHumedadSuperior-unPorcentajeHumedadInferior)/2);
+                
+                unPorcentajeHojaInferior = unCriterio.getPorcentajeHojaLimiteInferior();
+                unPorcentajeHojaSuperior = unCriterio.getPorcentajeHojaLimiteSuperior();
+                unPorcentajeHoja = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeHojaInferior+(Float)(unPorcentajeHojaSuperior-unPorcentajeHojaInferior)/2);
+                
+                registrarAnalisisDeLaboratorio(unCriterio.getPuntosNegros(), unCriterio.getTorrada(), unCriterio.getColor(), unCriterio.getAroma(), unCriterio.getTacto(), unCriterio.getDegustacion(), unaFechaOrigen, null, unLaboratorio, unPorcentajePalo, unPorcentajeSemilla, unPorcentajePolvo, unPorcentajeHumedad, unPorcentajeHoja, unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);
+                //registrarAnalisisDeLaboratorio("SI", "SI", "VERDE OSCURO", "TIPICO", "CRUJIENTE", "SI", unaFechaOrigen, null, unLaboratorio, "5,0", "5,0", "5,0", "15,0", "85,0", unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);
+                unAnalisis = analisisLaboratorio.get(7);
+                System.out.println("carga aleatoria");
+                //</editor-fold>
+                
+                //Carga aleatoria
+                //<editor-fold defaultstate="collapsed">
+                Random generadorAleatorio = new Random();
+                int cantidadAGenerarAnalisis = 1000;
+                for (int i = 0; i<cantidadAGenerarAnalisis; i++){
+                    unLaboratorio = (Laboratorio) this.equipamientos.get(1);
+                    
+                    int unNumeroCriterio = Math.max(Math.abs(generadorAleatorio.nextInt() % (this.criteriosAnalisisLaboratorio.keySet().size())),1);
+                    unCriterio = (CriterioAnalisisLaboratorio) this.criteriosAnalisisLaboratorio.get(unNumeroCriterio);
+                    
+                    int unNumeroOrdenCompra = Math.max((Math.abs(generadorAleatorio.nextInt() % (this.ordenesCompra.keySet().size()))), 1);
+                    unaOrdenDeCompra = (OrdenDeCompra) this.ordenesCompra.get(unNumeroOrdenCompra);
+                    
+                    if (Math.random()>0.5){
+                        int unAnio = (Math.abs(generadorAleatorio.nextInt() % 10));
+                        int unMes = (Math.abs(generadorAleatorio.nextInt() % 12));
+                        int unDia = (Math.abs(generadorAleatorio.nextInt() % 28));
+
+                        unaFechaOrigen = Calendar.getInstance();
+                        unaFechaOrigen.add(Calendar.YEAR, -unAnio);
+                        unaFechaOrigen.add(Calendar.MONTH, -unMes);
+                        unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -unDia);
+
+                        String[] atrCual = new String[AnalisisLaboratorio.ATRIBUTOS.length];
+                        String[] atrCuan = new String[4];
+                        for (int j = 0; j<AnalisisLaboratorio.ATRIBUTOS.length; j++){
+                            int unNumeroSubAtributo = (Math.abs(generadorAleatorio.nextInt() % (AnalisisLaboratorio.SUB_ATRIBUTOS[j].length)));
+                            String unSubAtributo = AnalisisLaboratorio.SUB_ATRIBUTOS[j][unNumeroSubAtributo];
+                            atrCual[j] = unSubAtributo;
+                        }
+                        Float porcentajeTotal = 100f;
+                        unPorcentajeHumedad = UtilidadesInterfazGrafica.formatearFlotante(generadorAleatorio.nextFloat()*100);
+                        for (int j = 0; j<4; j++){
+                            if (j<3)
+                                atrCuan[j] = UtilidadesInterfazGrafica.formatearFlotante((generadorAleatorio.nextFloat()*10000) % porcentajeTotal);
+                            else
+                                atrCuan[j] = UtilidadesInterfazGrafica.formatearFlotante(porcentajeTotal);
+                            porcentajeTotal = porcentajeTotal - Organizacion.convertirAFlotante(atrCuan[j], "insertor de tuplasss");
+                        }
+                        registrarAnalisisDeLaboratorio(atrCual[0], atrCual[1], atrCual[2], atrCual[3], atrCual[4], "SI", unaFechaOrigen, null, unLaboratorio, ""+atrCuan[0], ""+atrCuan[1], ""+atrCuan[2], ""+unPorcentajeHumedad, ""+atrCuan[3], unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);
+//                    unAnalisis = analisisLaboratorio.get(7);    
+                    }else{
+                        int unAnio = (Math.abs(generadorAleatorio.nextInt() % 10));
+                        int unMes = (Math.abs(generadorAleatorio.nextInt() % 12));
+                        int unDia = (Math.abs(generadorAleatorio.nextInt() % 28));
+
+                        unaFechaOrigen = Calendar.getInstance();
+                        unaFechaOrigen.add(Calendar.YEAR, -unAnio);
+                        unaFechaOrigen.add(Calendar.MONTH, -unMes);
+                        unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -unDia);
+
+                        String[] atrCual = new String[AnalisisLaboratorio.ATRIBUTOS.length];
+                        String[] atrCuan = new String[4];
+                        for (int j = 0; j<AnalisisLaboratorio.ATRIBUTOS.length; j++){
+                            String unSubAtributo = unCriterio.generarUnAtributoCualitativo(j);
+                            atrCual[j] = unSubAtributo;
+                        }
+                        Float porcentajeTotal = 100f;
+                        unPorcentajePalo = unCriterio.generarPorcentajePalo();
+                        porcentajeTotal = porcentajeTotal - Organizacion.convertirAFlotante(unPorcentajePalo, "Insertor tuplas porcentaje palo");
+                        //System.out.println("porcentaje palo "+unPorcentajePalo);
+                        
+                        unPorcentajePolvo = unCriterio.generarPorcentajePolvo();
+                        porcentajeTotal = porcentajeTotal - Organizacion.convertirAFlotante(unPorcentajePolvo, "Insertor tuplas porcentaje polvo");
+                        //System.out.println("porcentaje Polvo "+unPorcentajePolvo);
+                        
+                        unPorcentajeSemilla = unCriterio.generarPorcentajeSemilla();
+                        porcentajeTotal = porcentajeTotal - Organizacion.convertirAFlotante(unPorcentajeSemilla, "Insertor tuplas porcentaje semilla");
+                        //System.out.println("porcentaje Semilla "+unPorcentajeSemilla);
+                        
+                        unPorcentajeHoja = UtilidadesInterfazGrafica.formatearFlotante(porcentajeTotal);
+                        //System.out.println("porcentaje Hoja "+unPorcentajeHoja);
+                        
+                        unPorcentajeHumedad = unCriterio.generarPorcentajeHumedad();
+                        //System.out.println("porcentaje humedad "+unPorcentajeHumedad);
+                        registrarAnalisisDeLaboratorio(atrCual[0], atrCual[1], atrCual[2], atrCual[3], atrCual[4], "SI", unaFechaOrigen, null, unLaboratorio, ""+unPorcentajePalo, ""+unPorcentajeSemilla, ""+unPorcentajePolvo, ""+unPorcentajeHumedad, ""+unPorcentajeHoja, unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);                        
+                    }
+                }
+                
+                //</editor-fold>
+                
+            //</editor-fold>
+            //Carga de Ingresos
+            
+            System.out.println("Carga de ingresos");
+            //<editor-fold defaultstate="collapsed">
+                //Ingreso N°1
+                //<editor-fold defaultstate="collapsed">
+                Equipamiento unEquipamientoDestino = equipamientos.get(3);     //El Depósito N°1.
+                unaOrdenDeCompra = ordenesCompra.get(1);
+                unAnalisis = analisisLaboratorio.get(1);
+                Proveedor unProveedorServicioTransporte = proveedores.get(3);
+                LocalTime unHorarioEntrada = LocalTime.of(7,00,12);
+                LocalTime unHorarioSalida = LocalTime.of(11, 30, 15);
+                unaFechaOrigen = Calendar.getInstance();
+                unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -2);
+                unaFechaOrigen.add(Calendar.YEAR, -5);
+                pesoEntrada = "40.000";
+                pesoSalida = "20.000";
+                registrarIngresoMateriaPrima(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, pesoEntrada, pesoSalida, "3545", "3321", "5135", "Pedro Gabriel Gómez", "OMD-418", "IUT-166", unEquipamientoDestino, unaOrdenDeCompra, unProveedorServicioTransporte, unAnalisis, Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE);
+                //</editor-fold>
+                //Ingreso N°2
+                //<editor-fold defaultstate="collapsed">
+                unEquipamientoDestino = equipamientos.get(4);     //La C.E.A. N°1
+                unaOrdenDeCompra = ordenesCompra.get(2);
+                unAnalisis = analisisLaboratorio.get(2);
+                unProveedorServicioTransporte = proveedores.get(4);
+                unHorarioEntrada = LocalTime.of(7,00,12);
+                unHorarioSalida = LocalTime.of(11, 30, 15);
+                unaFechaOrigen = Calendar.getInstance();
+                unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -2);
+                unaFechaOrigen.add(Calendar.YEAR, -5);
+                pesoEntrada = "33.500";
+                pesoSalida = "23.500";
+                registrarIngresoMateriaPrima(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, pesoEntrada, pesoSalida, "3545", "3321", "5135", "Pedro Gabriel Gómez", "OMD-418", "IUT-166", unEquipamientoDestino, unaOrdenDeCompra, unProveedorServicioTransporte, unAnalisis, Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE);
+                //</editor-fold>
+                //Ingreso N°3
+                //<editor-fold defaultstate="collapsed">
+                unEquipamientoDestino = equipamientos.get(4);     //La C.E.A. N°1
+                unaOrdenDeCompra = ordenesCompra.get(2);
+                unAnalisis = analisisLaboratorio.get(3);
+                unProveedorServicioTransporte = proveedores.get(4);
+                unHorarioEntrada = LocalTime.of(7,00,12);
+                unHorarioSalida = LocalTime.of(11, 30, 15);
+                unaFechaOrigen = Calendar.getInstance();
+                unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -1);
+                unaFechaOrigen.add(Calendar.YEAR, -5);
+                pesoEntrada = "39.500";
+                pesoSalida = "34.500";
+                registrarIngresoMateriaPrima(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, pesoEntrada, pesoSalida, "3545", "3321", "5135", "Pedro Gabriel Gómez", "OMD-418", "IUT-166", unEquipamientoDestino, unaOrdenDeCompra, unProveedorServicioTransporte, unAnalisis, Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE);
+                //</editor-fold>                
+                //Ingreso N°4
+                //<editor-fold defaultstate="collapsed">
+                unEquipamientoDestino = equipamientos.get(3);     //DEPOSITO N°1
+                unaOrdenDeCompra = ordenesCompra.get(3);
+                unAnalisis = analisisLaboratorio.get(5);
+                unProveedorServicioTransporte = proveedores.get(3);
+                unHorarioEntrada = LocalTime.of(7,00,12);
+                unHorarioSalida = LocalTime.of(11, 30, 15);
+                unaFechaOrigen = Calendar.getInstance();
+                unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -1);
+                unaFechaOrigen.add(Calendar.YEAR, -4);
+                pesoEntrada = "35.000";
+                pesoSalida = "25.000";
+                registrarIngresoMateriaPrima(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, pesoEntrada, pesoSalida, "3545", "3321", "5135", "Pedro Gabriel Gómez", "OMD-418", "INE-487", unEquipamientoDestino, unaOrdenDeCompra, unProveedorServicioTransporte, unAnalisis, Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE);
+                //</editor-fold>
+                //Ingreso N°5
+                //<editor-fold defaultstate="collapsed">
+                unEquipamientoDestino = equipamientos.get(3);     //DEPOSITO N°1
+                unaOrdenDeCompra = ordenesCompra.get(4);
+                unAnalisis = analisisLaboratorio.get(6);
+                unProveedorServicioTransporte = proveedores.get(4);
+                unHorarioEntrada = LocalTime.of(7,00,12);
+                unHorarioSalida = LocalTime.of(11, 30, 15);
+                unaFechaOrigen = Calendar.getInstance();
+                unaFechaOrigen.add(Calendar.DAY_OF_MONTH, 0);
+                unaFechaOrigen.add(Calendar.YEAR, -4);
+                pesoEntrada = "35.627";
+                pesoSalida = "25.627";
+                registrarIngresoMateriaPrima(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, pesoEntrada, pesoSalida, "3545", "3321", "5135", "Pedro Gabriel Gómez", "YKE-289", "HIR-873", unEquipamientoDestino, unaOrdenDeCompra, unProveedorServicioTransporte, unAnalisis, Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE);
+                //</editor-fold>
+            //</editor-fold>
+            
+                System.out.println("Carga de ingresos completada");
+            //Carga Movimientos:
+            //<editor-fold defaultstate="collapsed">
+                //MOVIMIENTO N°1
+                //<editor-fold defaultstate="collapsed">
+                unEquipamientoDestino = equipamientos.get(4);     //La C.E.A. N°1
+                unProveedorServicioTransporte = proveedores.get(3);
+                unHorarioEntrada = LocalTime.of(7,00,12);
+                unHorarioSalida = LocalTime.of(11, 30, 15);
+                unaFechaOrigen = Calendar.getInstance();
+                unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -4);
+                unLoteAMover = lotes.get(1);
+                registrarMovimimiento(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, "38.453", "15.124", "4235", "6015", "6785", "Juan Carlos Burnick", "UUF-516", "MEC-443", unLoteAMover, unEquipamientoDestino, unProveedorServicioTransporte);
+                //</editor-fold>
+                
+                //MOVIMIENTO N°2
+                //<editor-fold defaultstate="collapsed">
+                unEquipamientoDestino = equipamientos.get(4);     //La C.E.A. N°1
+                unProveedorServicioTransporte = proveedores.get(3);
+                unHorarioEntrada = LocalTime.of(7,00,12);
+                unHorarioSalida = LocalTime.of(11, 30, 15);
+                unaFechaOrigen = Calendar.getInstance();
+                unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -4);
+                unLoteAMover = lotes.get(4);
+                registrarMovimimiento(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, "38.124", "15.132", "4236", "6115", "6795", "Juan Carlos Burnick", "UUF-516", "MEC-443", unLoteAMover, unEquipamientoDestino, unProveedorServicioTransporte);
+                //</editor-fold>
+            
+            //</editor-fold>
+            //Estacionamientos
+            //<editor-fold defaultstate="collapsed">
+                //ESTACIONAMIENTO N°1
+                //<editor-fold defaultstate="collapsed">
+                CamaraEstacionamiento unaCamara = (CamaraEstacionamiento) equipamientos.get(4);
+                ArrayList lotesAEstacionar = new ArrayList();
+                Lote unLoteAEstacionar = this.lotes.get(1);
+                lotesAEstacionar.add(unLoteAEstacionar);
+                unaFechaOrigen = Calendar.getInstance();
+                unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -3);
+                registrarEstacionamiento(lotesAEstacionar, unaCamara, unaFechaOrigen, "0");
+                
+                //</editor-fold>
+            //</editor-fold>
+            
+            //ANALISIS DEL LOTE N°1 DE YCE
+            //<editor-fold defaultstate="collapsed">
+            unLaboratorio = (Laboratorio) this.equipamientos.get(1);
+            unCriterio = (CriterioAnalisisLaboratorio) this.criteriosAnalisisLaboratorio.get(5);
+            unaOrdenDeCompra = this.ordenesCompra.get(1);
+            unaFechaOrigen = Calendar.getInstance();
+            unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -2);
+            Lote unLote = (Lote) lotes.get(1);
+            registrarAnalisisDeLaboratorio("SI", "SI", "VERDE OSCURO", "TIPICO", "CRUJIENTE", "SI", unaFechaOrigen, unLote, unLaboratorio, "5,0", "5,0", "5,0", "15,0", "85,0", unCriterio, "SIN COMENTARIO", null);
+            unAnalisis = analisisLaboratorio.get(6);
+            //</editor-fold>
+            
+            //MOVIMIENTO A MOLINO DEL LOTE N°1
+            //<editor-fold defaultstate="collapsed">
+            unEquipamientoDestino = equipamientos.get(5);     //El MOLINO
+            unProveedorServicioTransporte = proveedores.get(3);
+            unHorarioEntrada = LocalTime.of(7,00,12);
+            unHorarioSalida = LocalTime.of(11, 30, 15);
+            unaFechaOrigen = Calendar.getInstance();
+            unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -2);
+            unLoteAMover = lotes.get(1);
+            registrarMovimimiento(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, "35.000", "15.600", "4235", "6015", "6785", "Abel Gomez", "FIU-196", "MAQ-453", unLoteAMover, unEquipamientoDestino, unProveedorServicioTransporte);
+            //</editor-fold>
+            
+            } catch (ExcepcionCargaParametros ex) {
+                System.err.println("Error en la carga de parametros en la pre-carga de tuplas: "+ex.getMessage());
+            } catch (SQLException ex) {
+                System.err.println("Error en la base de datos en la pre-carga de tuplas: "+ex.getMessage());
+            } catch (ExcepcionPersistencia ex) {
+                System.err.println("Error en la persistencia en la pre-carga de tuplas: "+ex.getMessage());
+            }
+        }
+    }
+    
+    public void generarReporteINYMv3(Calendar unaFecha) throws JRException, ExcepcionCargaParametros{
+        if (unaFecha == null)
+            throw new ExcepcionCargaParametros("Debe seleccionar una fecha para generar el reporte de INYM");
+        String unResumen = this.resumirExistenciaV3();
+        GeneradorDeReportes.generarReporteINYMv3(unaFecha, equipamientos, unResumen, usuarioActivo);
+    }
+    
+    public void generarReporteINYMv4(Calendar unaFecha) throws JRException, ExcepcionCargaParametros{
+        if (unaFecha == null)
+            throw new ExcepcionCargaParametros("Debe seleccionar una fecha para generar el reporte de INYM");
+        String unResumen = this.resumirExistenciaV4(unaFecha);
+        GeneradorDeReportes.generarReporteINYMv3(unaFecha, equipamientos, unResumen, usuarioActivo);
+    }
+    
+    public ArrayList filtrarDetalleAuditoria(String unId) throws ExcepcionCargaParametros, SQLException {
+        if (!Validaciones.esUnNumeroEnteroValido(unId))
+            throw new ExcepcionCargaParametros("No se ingresó un numero correcto para realizar una consulta de detalle de auditoría.");
+        int id = Integer.parseInt(unId);
+        return this.persistencia.obtenerDetalleAuditoria(id);
+    }
+
+    private String resumirExistencia() {
+        String retorno = "";
+        retorno = retorno + "Total de YCV: "+UtilidadesInterfazGrafica.formatearFlotante(this.calcularTotalYCVKg())+" Kilogramos\n";
+        retorno = retorno + "Total de YCE: "+UtilidadesInterfazGrafica.formatearFlotante(this.calcularTotalYCEKg())+" Kilogramos\n";
+        retorno = retorno + "Total de YCM: "+UtilidadesInterfazGrafica.formatearFlotante(this.calcularTotalYCMKg())+" Kilogramos\n";
+        return retorno;
+    }
+
+    
+    /*CUANDO VUELVAS
+        TENES QUE
+    
+    REDISEÑAR RESUMIR EXISTENCIA V3
+    HACER CALCULAR TOTAL YCVKG V3
+    HACER CALCULAR TOTAL YCEKG V3
+    HACER CALCULAR TOTAL YCMKG V3
+    
+    */
+    private String resumirExistenciaV3() {
+        String retorno = "";
+        retorno = retorno + "Total de YCV: "+UtilidadesInterfazGrafica.formatearFlotante(this.calcularTotalYCVKgV3())+" Kilogramos\n";
+        retorno = retorno + "Total de YCE: "+UtilidadesInterfazGrafica.formatearFlotante(this.calcularTotalYCEKgV3())+" Kilogramos\n";
+        retorno = retorno + "Total de YCM: "+UtilidadesInterfazGrafica.formatearFlotante(this.calcularTotalYCMKgV3())+" Kilogramos\n";
+        return retorno;
+    }
+    
+    private String resumirExistenciaV4(Calendar unaFecha) {
+        String retorno = "";
+        retorno = retorno + "Total de YCV: "+UtilidadesInterfazGrafica.formatearFlotante(this.calcularTotalYCVKgV4(unaFecha))+" Kilogramos\n";
+        retorno = retorno + "Total de YCE: "+UtilidadesInterfazGrafica.formatearFlotante(this.calcularTotalYCEKgV4(unaFecha))+" Kilogramos\n";
+        retorno = retorno + "Total de YCM: "+UtilidadesInterfazGrafica.formatearFlotante(this.calcularTotalYCMKgV4(unaFecha))+" Kilogramos\n";
+        return retorno;
+    }
+    
+    private Float calcularTotalYCVKg() {
+        Float totalYCV = 0f;
+        Iterator recorredorDeLotes = this.lotes.keySet().iterator();
+        while (recorredorDeLotes.hasNext()){
+            int unId = (int) recorredorDeLotes.next();
+            Lote unLote = this.lotes.get(unId);
+            if (unLote.esDeYerbaCancadaVerde() && unLote.estaRegular())
+                totalYCV = totalYCV + unLote.obtenerPesoIngresadoConPerdidasIncluidasKg();
+        }
+        return totalYCV;
+    }
+    
+    private Float calcularTotalYCVKgV3() {
+        Float totalYCV = 0f;
+        Iterator recorredorDeLotes = this.lotes.keySet().iterator();
+        while (recorredorDeLotes.hasNext()){
+            int unId = (int) recorredorDeLotes.next();
+            Lote unLote = this.lotes.get(unId);
+            if (unLote.esDeYerbaCancadaVerde() && unLote.estaRegular() && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM))
+                totalYCV = totalYCV + unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(Equipamiento.FECHA_REPORTE_INYM);
+        }
+        return totalYCV;
+    }
+    
+    private Float calcularTotalYCVKgV4(Calendar unaFecha) {
+        Float totalYCV = 0f;
+        Iterator recorredorDeLotes = this.lotes.keySet().iterator();
+        while (recorredorDeLotes.hasNext()){
+            int unId = (int) recorredorDeLotes.next();
+            Lote unLote = this.lotes.get(unId);
+            if (unLote.esDeYerbaCancadaVerde(unaFecha) && unLote.estaRegular() && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM))
+                totalYCV = totalYCV + unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(Equipamiento.FECHA_REPORTE_INYM);
+        }
+        return totalYCV;
+    }
+    
+    private Float calcularTotalYCEKg() {
+        Float totalYCE = 0f;
+        Iterator recorredorDeLotes = this.lotes.keySet().iterator();
+        while (recorredorDeLotes.hasNext()){
+            int unId = (int) recorredorDeLotes.next();
+            Lote unLote = this.lotes.get(unId);
+            if (unLote.esDeYerbaCancadaEstacionada()&& unLote.estaRegular())
+                totalYCE = totalYCE + unLote.obtenerPesoIngresadoConPerdidasIncluidasKg();
+        }
+        return totalYCE;
+    }
+    
+    private Float calcularTotalYCEKgV3() {
+        Float totalYCE = 0f;
+        Iterator recorredorDeLotes = this.lotes.keySet().iterator();
+        while (recorredorDeLotes.hasNext()){
+            int unId = (int) recorredorDeLotes.next();
+            Lote unLote = this.lotes.get(unId);
+            if (unLote.esDeYerbaCancadaEstacionada()&& unLote.estaRegular() && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM))
+                totalYCE = totalYCE + unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(Equipamiento.FECHA_REPORTE_INYM);
+        }
+        return totalYCE;
+    }
+    
+
+    private Float calcularTotalYCEKgV4(Calendar unaFecha) {
+        Float totalYCE = 0f;
+        Iterator recorredorDeLotes = this.lotes.keySet().iterator();
+        while (recorredorDeLotes.hasNext()){
+            int unId = (int) recorredorDeLotes.next();
+            Lote unLote = this.lotes.get(unId);
+            if (unLote.esDeYerbaCancadaEstacionada(unaFecha)&& unLote.estaRegular() && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM))
+                totalYCE = totalYCE + unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(Equipamiento.FECHA_REPORTE_INYM);
+        }
+        return totalYCE;
+    }
+    
+    private Float calcularTotalYCMKg() {
+        Float totalYCV = 0f;
+        Iterator recorredorDeLotes = this.lotes.keySet().iterator();
+        while (recorredorDeLotes.hasNext()){
+            int unId = (int) recorredorDeLotes.next();
+            Lote unLote = this.lotes.get(unId);
+            if (unLote.esDeTipo("YM")&& unLote.estaRegular())
+                totalYCV = totalYCV + unLote.obtenerPesoIngresadoConPerdidasIncluidasKg();
+        }
+        return totalYCV;
+    }
+    
+    private Float calcularTotalYCMKgV3() {
+        Float totalYCV = 0f;
+        Iterator recorredorDeLotes = this.lotes.keySet().iterator();
+        while (recorredorDeLotes.hasNext()){
+            int unId = (int) recorredorDeLotes.next();
+            Lote unLote = this.lotes.get(unId);
+            if (unLote.esDeTipo("YM") && unLote.estaRegular() && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM))
+                totalYCV = totalYCV + unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(Equipamiento.FECHA_REPORTE_INYM);
+        }
+        return totalYCV;
+    }
+    
+    private Float calcularTotalYCMKgV4(Calendar unaFecha) {
+        Float totalYCV = 0f;
+        Iterator recorredorDeLotes = this.lotes.keySet().iterator();
+        while (recorredorDeLotes.hasNext()){
+            int unId = (int) recorredorDeLotes.next();
+            Lote unLote = this.lotes.get(unId);
+            if (unLote.esDeTipo("YM") && unLote.estaRegular() && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM))
+                totalYCV = totalYCV + unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(Equipamiento.FECHA_REPORTE_INYM);
+        }
+        return totalYCV;
+    }
+    
+    public void darDeAltaUnUsuario (String unNombreUsuario, String unNombre, String unApellido,String unDNI, String unRol) throws ExcepcionCargaParametros, SQLException{
+        if (unNombreUsuario.equals(""))
+            throw new ExcepcionCargaParametros("El nombre de usuario ingresado no es valido.");
+        if (unNombre.equals(""))
+            throw new ExcepcionCargaParametros("El nombre ingresado no es valido.");
+        if (unApellido.equals(""))
+            throw new ExcepcionCargaParametros("El apellido ingresado no es valido.");
+        if (unDNI.equals(""))
+            throw new ExcepcionCargaParametros("El DNI ingresado no es valido.");
+        if (!Validaciones.unDniEsValido(unDNI))
+            throw new ExcepcionCargaParametros("El DNI ingresado no es valido.");
+        if (unRol.equals("") || unRol.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("El nombre de usuario ingresado no es valido");
+        
+        ArrayList usuariosAValidar = Organizacion.convertMapUsuariosToArrayList(this.usuarios);
+        if (Validaciones.existeUsuario(usuariosAValidar,unNombreUsuario))
+            throw new ExcepcionCargaParametros("Ya existe un usuario con ese nombre de usuario");
+        
+        Usuario unUsuario = new Usuario(unNombre, unNombreUsuario, unApellido, unDNI, unRol);
+        persistencia.persistirObjeto(unUsuario);
+        this.usuarios.put(unUsuario.getId(), unUsuario);
+    }
+    
+    
+    
+    public void darDeBajaUnUsuario (Usuario unUsuario) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+        if (unUsuario == null)
+            throw new ExcepcionCargaParametros("Debe seleccionar un usuario.");
+        if (this.usuarioActivo.equals(unUsuario))
+            throw new ExcepcionCargaParametros("No puede darse de baja el usuario de la sesión actualmente activa.");
+        unUsuario.darDeBaja();
+        persistencia.modificarObjeto(unUsuario);
+    }
+    
+    public void modificarUnUsuario (Usuario unUsuario, String unEstado, String unRol) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+        if (unUsuario == null)
+            throw new ExcepcionCargaParametros("Debe seleccionar un usuario.");
+        if (this.usuarioActivo.equals(unUsuario))
+            throw new ExcepcionCargaParametros("No se puede modificar usuario de la sesión actualmente activa.");
+        if (unEstado.equals("") || unEstado.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("El estado ingresado no es valido.");
+        if (unRol.equals("") || unRol.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("El rol ingresado no es valido.");
+        unUsuario.setRol(unRol);
+        unUsuario.setEstado(unEstado);
+        persistencia.modificarObjeto(unUsuario);
+    }
+    
+    public ArrayList obtenerOrdenesDeProduccionOrdenadas(){
+        ArrayList retorno = new ArrayList();
+        
+        Iterator claves = this.ordenesProduccion.keySet().iterator();
+        while (claves.hasNext()){
+            int unaClave = (int) claves.next();
+            OrdenDeProduccion unaOrden = this.ordenesProduccion.get(unaClave);
+            if (unaOrden.seEncuentraRegular() && unaOrden.calcularProgresoGeneral()<95f){
+                retorno.add(unaOrden);
+            }
+        }
+        Collections.sort(retorno);
+        return retorno;
+    }
+    
+    private static ArrayList convertMapUsuariosToArrayList(Map<Integer, Usuario> mapa) {
+        ArrayList retorno = new ArrayList();
+        Iterator recorredor = mapa.keySet().iterator();
+        while (recorredor.hasNext()){
+            int unId = (int) recorredor.next();
+            Usuario unUsuario = mapa.get(unId);
+            retorno.add(unUsuario);
+        }
+        return retorno;
+    }
+    
+    public static long calcularCantidadDiasDiferencia (Calendar fechaLimiteInferior, Calendar fechaLimiteSuperior){
+        long retorno = 0;
+        long milisegundosLimiteSuperior = fechaLimiteSuperior.getTimeInMillis();
+        long milisegundosLimiteInferior = fechaLimiteInferior.getTimeInMillis();
+        long diferencia = milisegundosLimiteSuperior - milisegundosLimiteInferior;
+        //Pasar a días
+        diferencia = diferencia / (24 * 60 * 60 * 1000);
+        retorno = diferencia;
+        return retorno;
+    }
+    
 
 }
-
 

@@ -14,14 +14,12 @@ import Persistencia.ExcepcionPersistencia;
 import java.awt.Component;
 import java.awt.Toolkit;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 /**
  *
@@ -446,7 +444,6 @@ public class ABMProveedor extends javax.swing.JFrame implements TransferenciaIns
 
         jBConcretarAccion.setEnabled(true);
         jBCancelar.setEnabled(true);
-        this.pack();
     }
 
     private void prepararAlta() {

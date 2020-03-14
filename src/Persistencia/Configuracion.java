@@ -22,6 +22,10 @@ import java.util.Map;
  * @author usuario
  */
 public class Configuracion {
+    
+    public static final Float PORCENTAJE_CONCLUSION_MOLIENDA = 0.005f;
+    public static final int BOLSAS_CONCLUSION_MOLIENDA = 0;
+    public static final Float PORCENTAJE_MAXIMO_MERMA = 0.03f;
     public static boolean verificarExistenciaDeArchivo(){
         boolean retorno;
         String ruta = "./Configuracion.ini";

@@ -254,14 +254,14 @@ public class BuscarProveedor extends javax.swing.JFrame {
 
             },
             new String [] {
-                "ID", "Razon Social", "CUIL", "Estado", "Localidad"
+                "ID", "Razon Social", "CUIL", "Estado", "Localidad", "Calidad"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class
+                java.lang.Integer.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+                false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {

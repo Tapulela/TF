@@ -10,8 +10,6 @@ import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 
 /**
@@ -22,6 +20,7 @@ public class Evento implements Comparable{
     public static String ESTADO_REGULAR = "Regular";
     public static String ESTADO_ANULADO = "Anulado";
     
+    private int id;
     private int idEvento;
     
     private Usuario usuarioAsociado;
@@ -29,7 +28,8 @@ public class Evento implements Comparable{
 
     private String estadoEvento;
 
-    public Evento(int idEvento, String estado, Usuario unUsuario, java.sql.Date fechaOrigen) { //Para recuperar en la bd
+    public Evento(int idEvento, String estado, Usuario unUsuario, java.sql.Date fechaOrigen, int id) { //Para recuperar en la bd
+        this.id = id;
         this.idEvento = idEvento;
         this.fechaOrigen = Calendar.getInstance();
         this.fechaOrigen.setTime(fechaOrigen);
@@ -133,7 +133,9 @@ public class Evento implements Comparable{
         return this.idEvento-compararId;
     }
 
-    boolean esPosteriorA(Evento unEventoAComparar) {
+    public boolean esPosteriorA(Evento unEventoAComparar) {
+        if (unEventoAComparar == null)
+            return true;
         return (this.idEvento > unEventoAComparar.getIdEvento());
     }
     
@@ -165,6 +167,26 @@ public class Evento implements Comparable{
             unId = unAnalisis.getId();
             unTipoDeEvento = "Analisis de Laboratorio";
         }
+        if (this instanceof Molienda){
+            Molienda unaMolienda = (Molienda) this;
+            unId = unaMolienda.getId();
+            unTipoDeEvento = "Molienda";
+        }
+        if (this instanceof Egreso){
+            Egreso unEgreso = (Egreso) this;
+            unId = unEgreso.getId();
+            unTipoDeEvento = "Egreso";
+        }
+        if (this instanceof Perdida){
+            Perdida unaPerdida = (Perdida) this;
+            unId = unaPerdida.getId();
+            unTipoDeEvento = "Perdida";
+        }
+        if (this instanceof Merma){
+            Merma unaMerma = (Merma) this;
+            unId = unaMerma.getId();
+            unTipoDeEvento = "Merma";
+        }
         //Object[] vec ={unId, unTipoDeEvento, unaFechaDeOrigen, this.estadoEvento};
         Object[] vec ={this.idEvento, unTipoDeEvento, unaFechaDeOrigen, this.estadoEvento};
         return vec;
@@ -180,11 +202,38 @@ public class Evento implements Comparable{
         fechaOrigenInferior.set(Calendar.SECOND, 0);
         fechaOrigenInferior.set(Calendar.MILLISECOND, 0);
         
-
-        
         fechaOrigenSuperior.set(Calendar.HOUR_OF_DAY, 23);
         fechaOrigenSuperior.set(Calendar.MINUTE, 59);
         fechaOrigenSuperior.set(Calendar.SECOND, 59);        
         return ((this.getFechaOrigenC().compareTo(fechaOrigenInferior)>=0 )&& this.getFechaOrigenC().compareTo(fechaOrigenSuperior)<=0);
     }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+    
+    public boolean esAnteriorOIgualA(Calendar fechaOrigenSuperior) {
+        fechaOrigenSuperior.set(Calendar.HOUR_OF_DAY, 23);
+        fechaOrigenSuperior.set(Calendar.MINUTE, 59);
+        fechaOrigenSuperior.set(Calendar.SECOND, 59);
+        return (this.getFechaOrigenC().compareTo(fechaOrigenSuperior)<=0);
+    }
+    
+    public boolean esPosteriorA(Calendar fechaOrigenSuperior) {
+        fechaOrigenSuperior.set(Calendar.HOUR_OF_DAY, 23);
+        fechaOrigenSuperior.set(Calendar.MINUTE, 59);
+        fechaOrigenSuperior.set(Calendar.SECOND, 59);
+        return (this.getFechaOrigenC().compareTo(fechaOrigenSuperior)>0);
+    }
+
+    public void setFechaOrigen(Calendar fechaOrigen) {
+        this.fechaOrigen = fechaOrigen;
+    }
+    
+    
+    
 }

@@ -109,7 +109,7 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="jLabel3" alignment="0" min="-2" max="-2" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
-                          <Component id="jCBCriterio2" min="-2" max="-2" attributes="0"/>
+                          <Component id="jCBCriterio1" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Component id="botonCriterio1" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -119,7 +119,7 @@
                           <Component id="jLCriterio1" min="-2" pref="370" max="-2" attributes="0"/>
                       </Group>
                       <Group type="102" alignment="0" attributes="0">
-                          <Component id="jCBCriterio4" min="-2" max="-2" attributes="0"/>
+                          <Component id="jCBCriterio2" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Component id="botonCriterio4" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -129,7 +129,7 @@
                           <Component id="jLCriterio4" min="-2" pref="292" max="-2" attributes="0"/>
                       </Group>
                       <Group type="102" alignment="0" attributes="0">
-                          <Component id="jCBCriterio5" min="-2" max="-2" attributes="0"/>
+                          <Component id="jCBCriterio4" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Component id="jLEstatico1Criterio5" min="-2" max="-2" attributes="0"/>
                           <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
@@ -157,7 +157,7 @@
                   <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="jCBCriterio2" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jCBCriterio1" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="botonCriterio1" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
@@ -167,7 +167,7 @@
                   </Group>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="jCBCriterio4" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jCBCriterio2" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="botonCriterio4" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
@@ -182,7 +182,7 @@
                   </Group>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="1" attributes="0">
-                      <Component id="jCBCriterio5" min="-2" max="-2" attributes="0"/>
+                      <Component id="jCBCriterio4" min="-2" max="-2" attributes="0"/>
                       <Group type="103" alignment="1" groupAlignment="0" attributes="0">
                           <Component id="dato2Criterio5" alignment="1" min="-2" max="-2" attributes="0"/>
                           <Component id="jLEstatico2Criterio5" alignment="1" min="-2" max="-2" attributes="0"/>
@@ -206,7 +206,7 @@
             <Property name="text" type="java.lang.String" value="Criterios de b&#xfa;squeda"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JCheckBox" name="jCBCriterio2">
+        <Component class="javax.swing.JCheckBox" name="jCBCriterio1">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Dialog" size="24" style="0"/>
@@ -214,7 +214,7 @@
             <Property name="text" type="java.lang.String" value="Orden de Produccion asociada"/>
           </Properties>
           <Events>
-            <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="jCBCriterio2ItemStateChanged"/>
+            <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="jCBCriterio1ItemStateChanged"/>
           </Events>
         </Component>
         <Component class="javax.swing.JCheckBox" name="jCBCriterio3">
@@ -257,7 +257,7 @@
             <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
           </AuxValues>
         </Component>
-        <Component class="javax.swing.JCheckBox" name="jCBCriterio5">
+        <Component class="javax.swing.JCheckBox" name="jCBCriterio4">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Dialog" size="24" style="0"/>
@@ -265,10 +265,10 @@
             <Property name="text" type="java.lang.String" value="Fecha de Origen"/>
           </Properties>
           <Events>
-            <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="jCBCriterio5ItemStateChanged"/>
+            <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="jCBCriterio4ItemStateChanged"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JCheckBox" name="jCBCriterio4">
+        <Component class="javax.swing.JCheckBox" name="jCBCriterio2">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Dialog" size="24" style="0"/>
@@ -279,7 +279,7 @@
             </Property>
           </Properties>
           <Events>
-            <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="jCBCriterio4ItemStateChanged"/>
+            <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="jCBCriterio2ItemStateChanged"/>
           </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="jLEstatico1Criterio5">

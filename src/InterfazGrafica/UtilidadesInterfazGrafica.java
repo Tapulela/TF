@@ -6,10 +6,11 @@
 package InterfazGrafica;
 
 import java.awt.Component;
-import javax.swing.JEditorPane;
+import java.text.DecimalFormat;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JViewport;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
@@ -18,6 +19,8 @@ import javax.swing.table.TableModel;
  * @author usuario
  */
 public class UtilidadesInterfazGrafica {
+    
+    
     public static void establecerAlineacionDeTabla(JTable table, int alignment)
     {
         DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
@@ -38,6 +41,15 @@ public class UtilidadesInterfazGrafica {
         table.setSelectionForeground(new java.awt.Color(255, 255, 255));
     }
     
+    public static void establecerAlineacionDerechaDeTabla(JTable table, int unaColumna)
+    {
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        TableModel tableModel = table.getModel();
+        table.getColumnModel().getColumn(unaColumna).setCellRenderer(rightRenderer);
+    }
+    
     /**
      *  Deshabilita JTextArea, JtextField, calendarios, javax.swing.JRadioButton y JFormattedTextField
      * @param componentes
@@ -45,7 +57,7 @@ public class UtilidadesInterfazGrafica {
     public static void deshabilitarCamposEditablesContenedor(Component[] componentes){
         for (int i=0; i<componentes.length ;i++ ){
             Component unComponente = componentes[i];
-            if (unComponente instanceof javax.swing.JTextArea || unComponente instanceof javax.swing.JTextField || unComponente instanceof com.toedter.calendar.JDateChooser || unComponente instanceof javax.swing.JFormattedTextField || unComponente instanceof javax.swing.JComboBox || unComponente instanceof javax.swing.JRadioButton)
+            if (unComponente instanceof javax.swing.JTextArea || unComponente instanceof javax.swing.JTextField || unComponente instanceof com.toedter.calendar.JDateChooser || unComponente instanceof javax.swing.JFormattedTextField || unComponente instanceof javax.swing.JComboBox || unComponente instanceof javax.swing.JRadioButton || unComponente instanceof javax.swing.JButton || unComponente instanceof javax.swing.JCheckBox)
                 unComponente.setEnabled(false);
             if (unComponente instanceof JPanel)
                 deshabilitarCamposEditablesContenedor(((JPanel) unComponente).getComponents());
@@ -94,7 +106,30 @@ public class UtilidadesInterfazGrafica {
             }
             
         }
-    }    
+    }   
+    
+    public static void habilitarCamposEditablesContenedorSingular(Component[] componentes){
+        for (int i=0; i<componentes.length ;i++ ){
+            Component unComponente = componentes[i];
+            if (unComponente instanceof javax.swing.JTextArea || unComponente instanceof javax.swing.JTextField || unComponente instanceof com.toedter.calendar.JDateChooser || unComponente instanceof javax.swing.JFormattedTextField || unComponente instanceof javax.swing.JComboBox || unComponente instanceof javax.swing.JRadioButton || unComponente instanceof javax.swing.JComboBox || unComponente instanceof javax.swing.JCheckBox)
+                unComponente.setEnabled(true);
+            if (unComponente instanceof javax.swing.JComboBox){
+                javax.swing.JComboBox unComboBox = (javax.swing.JComboBox) unComponente;
+                unComboBox.setEnabled(true);
+            }
+        }
+    }
+    public static void deshabilitarCamposEditablesContenedorSingular(Component[] componentes){
+        for (int i=0; i<componentes.length ;i++ ){
+            Component unComponente = componentes[i];
+            if (unComponente instanceof javax.swing.JTextArea || unComponente instanceof javax.swing.JTextField || unComponente instanceof com.toedter.calendar.JDateChooser || unComponente instanceof javax.swing.JFormattedTextField || unComponente instanceof javax.swing.JComboBox || unComponente instanceof javax.swing.JRadioButton || unComponente instanceof javax.swing.JComboBox || unComponente instanceof javax.swing.JCheckBox)
+                unComponente.setEnabled(false);
+            if (unComponente instanceof javax.swing.JComboBox){
+                javax.swing.JComboBox unComboBox = (javax.swing.JComboBox) unComponente;
+                unComboBox.setEnabled(true);
+            }
+        }
+    }
     
     /**
      *  Habilita JTextArea, JtextField, calendarios, y JFormattedTextField
@@ -132,6 +167,21 @@ public class UtilidadesInterfazGrafica {
         }
     }
     
+    public static void habilitarEtiquetasContenedorSingular(Component[] componentes){
+        for (int i=0; i<componentes.length ;i++ ){
+            Component unComponente = componentes[i];
+            if (unComponente instanceof javax.swing.JLabel)
+                unComponente.setEnabled(true);
+        }
+    }
+    public static void deshabilitarEtiquetasContenedorSingular(Component[] componentes){
+        for (int i=0; i<componentes.length ;i++ ){
+            Component unComponente = componentes[i];
+            if (unComponente instanceof javax.swing.JLabel)
+                unComponente.setEnabled(false);
+        }
+    }
+    
     public static void deshabilitarEtiquetasContenedor(Component[] componentes){
         for (int i=0; i<componentes.length ;i++ ){
             Component unComponente = componentes[i];
@@ -145,5 +195,13 @@ public class UtilidadesInterfazGrafica {
                 deshabilitarEtiquetasContenedor(viewport.getComponents());
             }
         }
+    }
+    
+    public static String formatearFlotante(Float unFlotante){
+        String retorno = "0";
+        String pattern = "###,###.###";
+        DecimalFormat decimalFormat = new DecimalFormat(pattern);
+        retorno = decimalFormat.format(unFlotante);
+        return retorno;
     }
 }

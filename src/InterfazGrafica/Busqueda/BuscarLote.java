@@ -6,10 +6,13 @@
 package InterfazGrafica.Busqueda;
 
 
+import InterfazGrafica.GestionMoliendas;
 import InterfazGrafica.GestionMovimientos;
 import InterfazGrafica.ParametrosDeInterfaz;
 import InterfazGrafica.TransferenciaInstancias;
 import static InterfazGrafica.UtilidadesInterfazGrafica.establecerAlineacionDeTabla;
+import static InterfazGrafica.UtilidadesInterfazGrafica.establecerAlineacionDerechaDeTabla;
+import LogicaDeNegocio.DetalleTransformacion;
 import LogicaDeNegocio.Equipamiento;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.Lote;
@@ -55,6 +58,7 @@ public class BuscarLote extends javax.swing.JFrame implements TransferenciaInsta
     private final String criterio4 = "proveedorOrdenCompra";
     private final String criterio5 = "fechaOrigen";
     private final String criterio6 = "equipamiento";
+    private final String criterio7 = "tipoLote";
     
     
     
@@ -94,6 +98,7 @@ public class BuscarLote extends javax.swing.JFrame implements TransferenciaInsta
         criteriosSeleccionados.put(criterio4, false);
         criteriosSeleccionados.put(criterio5, false);
         criteriosSeleccionados.put(criterio6, false);
+        criteriosSeleccionados.put(criterio7, false);
         if (ventanaAnterior instanceof GestionMovimientos){
             
             //No voy a poder elegir equipamiento, porque fue elegido previamente.
@@ -102,9 +107,36 @@ public class BuscarLote extends javax.swing.JFrame implements TransferenciaInsta
             botonCriterio6.setEnabled(false);
             actualizarEquipamiento();
         }
+        if (ventanaAnterior instanceof GestionMoliendas){
+            GestionMoliendas gestionMoliendas = (GestionMoliendas) ventanaAnterior;
+            
+            //No voy a poder elegir equipamiento, porque fue elegido previamente.
+            this.unEquipamientoSeleccionado = gestionMoliendas.getUnMolino();
+            jCBCriterio6.doClick();
+            jCBCriterio6.setEnabled(false);
+            botonCriterio6.setEnabled(false);
+            actualizarEquipamiento();
+            
+            //La orden de produccion ya esta impuesta.
+            OrdenDeProduccion unaOrdenProduccion = gestionMoliendas.getUnaOrdenProduccionSeleccionada();
+            this.unaOrdenDeProduccionSeleccionada = unaOrdenProduccion;
+            jCBCriterio2.doClick();
+            jCBCriterio2.setEnabled(false);
+            botonCriterio2.setEnabled(false);
+            jLCriterio2.setText(""+unaOrdenProduccion.getId());
+            
+            //El tipo de lote debe ser exclusivamente de estacionamiento
+            jCBCriterio7.doClick();
+            jCBCriterio7.setEnabled(false);
+            jCB3.setSelectedItem(Lote.TIPO_LOTE_YERBA_CANCHADA_ESTACIONADA);
+            jCB3.setEnabled(false);
+        }
         
         establecerAlineacionDeTabla(jTable1, SwingConstants.CENTER);
+        
         ParametrosDeInterfaz.configurarVentana(this);
+        establecerAlineacionDerechaDeTabla(jTable1, 9);
+        
         
     }
     
@@ -146,6 +178,8 @@ public class BuscarLote extends javax.swing.JFrame implements TransferenciaInsta
         botonCriterio6 = new javax.swing.JButton();
         jLCriterio6 = new javax.swing.JLabel();
         jLEstaticoCriterio6 = new javax.swing.JLabel();
+        jCBCriterio7 = new javax.swing.JCheckBox();
+        jCB3 = new javax.swing.JComboBox<>();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jLStaticObjetoSeleccionado = new javax.swing.JLabel();
@@ -307,6 +341,18 @@ public class BuscarLote extends javax.swing.JFrame implements TransferenciaInsta
         jLEstaticoCriterio6.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         jLEstaticoCriterio6.setText("Equipamiento asociado");
 
+        jCBCriterio7.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        jCBCriterio7.setText("Tipo de Lote");
+        jCBCriterio7.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio7ItemStateChanged(evt);
+            }
+        });
+
+        jCB3.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        jCB3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "YCV", "YCE", "YM" }));
+        jCB3.setEnabled(false);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -317,33 +363,6 @@ public class BuscarLote extends javax.swing.JFrame implements TransferenciaInsta
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jButton1))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLEstaticoCriterio3)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLCriterio3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLEstaticoCriterio2)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLCriterio2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addComponent(jCBCriterio3)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(botonCriterio3))
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addComponent(jCBCriterio4)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(botonCriterio4))
-                                    .addComponent(jLEstaticoCriterio4))
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLEstaticoCriterio6)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLCriterio6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -375,7 +394,38 @@ public class BuscarLote extends javax.swing.JFrame implements TransferenciaInsta
                                         .addComponent(jCBCriterio6)
                                         .addGap(18, 18, 18)
                                         .addComponent(botonCriterio6)))))
-                        .addGap(0, 45, Short.MAX_VALUE)))
+                        .addGap(0, 45, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLEstaticoCriterio3)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLCriterio3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLEstaticoCriterio2)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLCriterio2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLEstaticoCriterio6)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLCriterio6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jCBCriterio7)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jCB3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jCBCriterio3)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(botonCriterio3))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jCBCriterio4)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(botonCriterio4))
+                                    .addComponent(jLEstaticoCriterio4))
+                                .addGap(0, 0, Short.MAX_VALUE)))))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -427,7 +477,11 @@ public class BuscarLote extends javax.swing.JFrame implements TransferenciaInsta
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLEstaticoCriterio6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLCriterio6, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(jCB3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jCBCriterio7))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 41, Short.MAX_VALUE)
                 .addComponent(jButton1)
                 .addContainerGap())
         );
@@ -439,17 +493,18 @@ public class BuscarLote extends javax.swing.JFrame implements TransferenciaInsta
 
             },
             new String [] {
-                "ID", "Estado", "ID O,P.", "ID O.C.", "Proveedor", "fecha de llegada", "Etiqueta"
+                "ID", "Estado", "ID O,P.", "ID O.C.", "Proveedor", "fecha de llegada", "Etiqueta", "Tipo", "Bolsas disponibles", "Peso disponible"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit [columnIndex];
             }
         });
+        jTable1.getTableHeader().setReorderingAllowed(false);
         jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jTable1MouseClicked(evt);
@@ -460,9 +515,9 @@ public class BuscarLote extends javax.swing.JFrame implements TransferenciaInsta
             jTable1.getColumnModel().getColumn(0).setMinWidth(40);
             jTable1.getColumnModel().getColumn(0).setPreferredWidth(43);
             jTable1.getColumnModel().getColumn(0).setMaxWidth(45);
-            jTable1.getColumnModel().getColumn(1).setMinWidth(72);
-            jTable1.getColumnModel().getColumn(1).setPreferredWidth(70);
-            jTable1.getColumnModel().getColumn(1).setMaxWidth(75);
+            jTable1.getColumnModel().getColumn(1).setMinWidth(82);
+            jTable1.getColumnModel().getColumn(1).setPreferredWidth(80);
+            jTable1.getColumnModel().getColumn(1).setMaxWidth(85);
             jTable1.getColumnModel().getColumn(2).setMinWidth(60);
             jTable1.getColumnModel().getColumn(2).setPreferredWidth(60);
             jTable1.getColumnModel().getColumn(2).setMaxWidth(60);
@@ -470,9 +525,12 @@ public class BuscarLote extends javax.swing.JFrame implements TransferenciaInsta
             jTable1.getColumnModel().getColumn(3).setPreferredWidth(60);
             jTable1.getColumnModel().getColumn(3).setMaxWidth(60);
             jTable1.getColumnModel().getColumn(4).setPreferredWidth(25);
-            jTable1.getColumnModel().getColumn(5).setMinWidth(105);
-            jTable1.getColumnModel().getColumn(5).setPreferredWidth(100);
-            jTable1.getColumnModel().getColumn(5).setMaxWidth(102);
+            jTable1.getColumnModel().getColumn(5).setMinWidth(155);
+            jTable1.getColumnModel().getColumn(5).setPreferredWidth(150);
+            jTable1.getColumnModel().getColumn(5).setMaxWidth(152);
+            jTable1.getColumnModel().getColumn(6).setMinWidth(300);
+            jTable1.getColumnModel().getColumn(6).setPreferredWidth(300);
+            jTable1.getColumnModel().getColumn(6).setMaxWidth(300);
         }
 
         jLStaticObjetoSeleccionado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
@@ -509,15 +567,15 @@ public class BuscarLote extends javax.swing.JFrame implements TransferenciaInsta
                 .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 649, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLStaticObjetoSeleccionado)
                     .addComponent(jLObjetoSeleccionado, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jBConcretarAccion)
                     .addComponent(jBCancelar))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -558,15 +616,30 @@ public class BuscarLote extends javax.swing.JFrame implements TransferenciaInsta
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         try {
-            ArrayList listaFiltrada = null;
-            listaFiltrada = this.organizacion.filtrarLotes(this.criteriosSeleccionados, unEquipamientoSeleccionado, datoCriterio1.getText(),unaOrdenDeProduccionSeleccionada, unaOrdenDeCompraSeleccionada, unProveedorSeleccionado, dato1Criterio5.getCalendar(), dato2Criterio5.getCalendar());
-            
-            ((DefaultTableModel)this.jTable1.getModel()).setRowCount(0);
-            Iterator ingresos = listaFiltrada.iterator();
-            while (ingresos.hasNext()){
-                Lote unLote = (Lote) ingresos.next();    
-                ((DefaultTableModel)this.jTable1.getModel()).addRow(unLote.devolverVector());
+            if (!(ventanaAnterior instanceof GestionMoliendas)){
+                ArrayList listaFiltrada = null;
+                listaFiltrada = this.organizacion.filtrarLotes(this.criteriosSeleccionados, unEquipamientoSeleccionado, datoCriterio1.getText(),unaOrdenDeProduccionSeleccionada, unaOrdenDeCompraSeleccionada, unProveedorSeleccionado, dato1Criterio5.getCalendar(), dato2Criterio5.getCalendar(), (String) jCB3.getSelectedItem());
+
+                ((DefaultTableModel)this.jTable1.getModel()).setRowCount(0);
+                Iterator ingresos = listaFiltrada.iterator();
+                while (ingresos.hasNext()){
+                    Lote unLote = (Lote) ingresos.next();    
+                    ((DefaultTableModel)this.jTable1.getModel()).addRow(unLote.devolverVector());
+                }
+            }else{
+                ArrayList listaFiltrada = null;
+                GestionMoliendas unaVentanaAnterior = (GestionMoliendas) ventanaAnterior;
+                ArrayList lotesAOmitir = DetalleTransformacion.obtenerLotesImplicados(unaVentanaAnterior.getDetallesAsociados());
+                listaFiltrada = this.organizacion.filtrarLotesOmitiendoLotes(this.criteriosSeleccionados, unEquipamientoSeleccionado, datoCriterio1.getText(),unaOrdenDeProduccionSeleccionada, unaOrdenDeCompraSeleccionada, unProveedorSeleccionado, dato1Criterio5.getCalendar(), dato2Criterio5.getCalendar(), lotesAOmitir, (String) jCB3.getSelectedItem());
+
+                ((DefaultTableModel)this.jTable1.getModel()).setRowCount(0);
+                Iterator ingresos = listaFiltrada.iterator();
+                while (ingresos.hasNext()){
+                    Lote unLote = (Lote) ingresos.next();    
+                    ((DefaultTableModel)this.jTable1.getModel()).addRow(unLote.devolverVector());
+                }
             }
+            
         } catch (ExcepcionCargaParametros ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage());
         }
@@ -632,12 +705,18 @@ public class BuscarLote extends javax.swing.JFrame implements TransferenciaInsta
         jLEstaticoCriterio6.setEnabled(jCBCriterio6.isSelected());
         jLCriterio6.setEnabled(jCBCriterio6.isSelected());
 
-        criteriosSeleccionados.put(criterio6, jCBCriterio2.isSelected());
+        criteriosSeleccionados.put(criterio6, jCBCriterio6.isSelected());
     }//GEN-LAST:event_jCBCriterio6ItemStateChanged
 
     private void botonCriterio6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonCriterio6ActionPerformed
-        BuscarEquipamiento ventana = new BuscarEquipamiento(organizacion, ventanaAnterior, trayectoriaActual);
+        BuscarEquipamiento ventana = new BuscarEquipamiento(organizacion, this, trayectoriaActual);
+        dispose();
     }//GEN-LAST:event_botonCriterio6ActionPerformed
+
+    private void jCBCriterio7ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio7ItemStateChanged
+        jCB3.setEnabled(jCBCriterio7.isSelected());
+        criteriosSeleccionados.put(criterio7, jCBCriterio7.isSelected());
+    }//GEN-LAST:event_jCBCriterio7ItemStateChanged
 
     /**
      * @param args the command line arguments
@@ -687,12 +766,14 @@ public class BuscarLote extends javax.swing.JFrame implements TransferenciaInsta
     private javax.swing.JButton jBCancelar;
     private javax.swing.JButton jBConcretarAccion;
     private javax.swing.JButton jButton1;
+    private javax.swing.JComboBox<String> jCB3;
     private javax.swing.JCheckBox jCBCriterio1;
     private javax.swing.JCheckBox jCBCriterio2;
     private javax.swing.JCheckBox jCBCriterio3;
     private javax.swing.JCheckBox jCBCriterio4;
     private javax.swing.JCheckBox jCBCriterio5;
     private javax.swing.JCheckBox jCBCriterio6;
+    private javax.swing.JCheckBox jCBCriterio7;
     private javax.swing.JLabel jLCriterio2;
     private javax.swing.JLabel jLCriterio3;
     private javax.swing.JLabel jLCriterio4;

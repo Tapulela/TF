@@ -403,7 +403,7 @@ public class rastrearOrdenDeProduccion extends javax.swing.JFrame implements Tra
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         try {
             ArrayList listaFiltrada = null;
-            listaFiltrada = this.organizacion.filtrarEventos(this.criteriosSeleccionados, this.unaOrdenDeProduccionSeleccionada, (String)datoCriterio1.getSelectedItem(), (String)datoCriterio2.getSelectedItem(), dato1Criterio2.getCalendar(), dato2Criterio2.getCalendar());
+            listaFiltrada = this.organizacion.filtrarEventosDeOrdenDeProduccion(this.criteriosSeleccionados, this.unaOrdenDeProduccionSeleccionada, (String)datoCriterio1.getSelectedItem(), (String)datoCriterio2.getSelectedItem(), dato1Criterio2.getCalendar(), dato2Criterio2.getCalendar());
             
             ((DefaultTableModel)this.jTable1.getModel()).setRowCount(0);
             Iterator eventos = listaFiltrada.iterator();

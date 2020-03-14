@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.11.0.final using JasperReports Library version 6.11.0-0c4056ccaa4d25a5a8c45672d2f764ea3498bebb  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="0" uuid="379de868-abe2-4d8c-b785-32c05d2cd9f7">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="subCabecera" class="java.lang.String" isForPrompting="false"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="reporteINYM" class="java.lang.String"/>
+	<field name="YCV" class="java.lang.Float"/>
+	<field name="YCE" class="java.lang.Float"/>
+	<field name="YM" class="java.lang.Float"/>
+	<variable name="subTotalYCV" class="java.lang.Float" resetType="None" incrementType="Column" calculation="Sum">
+		<variableExpression><![CDATA[$F{YCV}]]></variableExpression>
+		<initialValueExpression><![CDATA[0f]]></initialValueExpression>
+	</variable>
+	<variable name="subTotalYCE" class="java.lang.Float" resetType="None" incrementType="Column" calculation="Sum">
+		<variableExpression><![CDATA[$F{YCE}]]></variableExpression>
+		<initialValueExpression><![CDATA[0f]]></initialValueExpression>
+	</variable>
+	<variable name="subTotalYM" class="java.lang.Float" resetType="None" incrementType="Column" calculation="Sum">
+		<variableExpression><![CDATA[$F{YM}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="555" height="20" uuid="4d288826-dc50-483f-8087-69b5a3737d8b"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{subCabecera}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="1" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="58" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<line>
+				<reportElement x="-20" y="50" width="595" height="1" uuid="2c8109e9-778c-4c7a-971a-e783497c5e22"/>
+			</line>
+			<textField>
+				<reportElement x="0" y="0" width="261" height="41" uuid="a54ddddf-29de-475e-89cc-039877188db4"/>
+				<textFieldExpression><![CDATA["Subtotal YCV: " + (new DecimalFormat("###,###.###")).format($V{subTotalYCV}) +" Kilogramos \n"+
+"Subtotal YCE: " + (new DecimalFormat("###,###.###")).format($V{subTotalYCE} )+" Kilogramos \n"+
+"Subtotal YM: " + (new DecimalFormat("###,###.###")).format($V{subTotalYM})+" Kilogramos"]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="98" splitType="Stretch">
+			<textField>
+				<reportElement x="15" y="1" width="538" height="90" uuid="2309e065-4a1d-4386-90e9-fd5171401830"/>
+				<textFieldExpression><![CDATA[$F{reporteINYM}+" \n"+$F{YCV}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="17" y="95" width="525" height="1" uuid="4df1a6a2-6641-4a77-a0fe-9f37dac061b0"/>
+			</line>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="3" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="15" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<line>
+				<reportElement x="-20" y="6" width="595" height="3" uuid="0d31b65b-7077-42ff-b76e-323bca29c2b2"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+		</band>
+	</pageFooter>
+	<lastPageFooter>
+		<band/>
+	</lastPageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

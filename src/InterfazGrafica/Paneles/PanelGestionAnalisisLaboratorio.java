@@ -6,17 +6,35 @@
 package InterfazGrafica.Paneles;
 
 import InterfazGrafica.ABMCriteriosAnalisisLaboratorio;
+import InterfazGrafica.Busqueda.BuscarCriterioAnalisisLaboratorio;
+import InterfazGrafica.Busqueda.BuscarEquipamiento;
+import InterfazGrafica.Busqueda.BuscarLote;
+import InterfazGrafica.Busqueda.BuscarOrdenCompra;
+import InterfazGrafica.Busqueda.BuscarOrdenDeProduccion;
 import InterfazGrafica.GestionAnalisisLaboratorio;
-import InterfazGrafica.GestionMovimientos;
 import InterfazGrafica.Inicio;
+import InterfazGrafica.ParametrosDeInterfaz;
+import InterfazGrafica.TransferenciaInstancias;
+import InterfazGrafica.UtilidadesInterfazGrafica;
+import static InterfazGrafica.UtilidadesInterfazGrafica.establecerAlineacionDeTabla;
+import LogicaDeNegocio.AnalisisLaboratorio;
+import LogicaDeNegocio.CriterioAnalisisLaboratorio;
+import LogicaDeNegocio.Equipamiento;
+import LogicaDeNegocio.Lote;
+import LogicaDeNegocio.OrdenDeCompra;
+import LogicaDeNegocio.OrdenDeProduccion;
 import LogicaDeNegocio.Organizacion;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JRadioButton;
+import javax.swing.SwingConstants;
 
 /**
  *
  * @author usuario
  */
-public class PanelGestionAnalisisLaboratorio extends javax.swing.JPanel {
+public class PanelGestionAnalisisLaboratorio extends Panel implements TransferenciaInstancias{
 
     /**
      * Creates new form PanelGestionEstacionamientos
@@ -24,13 +42,28 @@ public class PanelGestionAnalisisLaboratorio extends javax.swing.JPanel {
     public PanelGestionAnalisisLaboratorio() {
         initComponents();
     }
-    private JFrame ventanaContenedora;
-
-    public PanelGestionAnalisisLaboratorio(JFrame ventanaContenedora) {
-        this.ventanaContenedora = ventanaContenedora;
+    
+    
+    private Lote unLoteSeleccionado;
+    private CriterioAnalisisLaboratorio unCriterioSeleccionado;
+    private OrdenDeProduccion unaOrdenDeProduccion;
+    private Equipamiento unLaboratorio;
+    private OrdenDeCompra unaOrdenDeCompra;
+    private AnalisisLaboratorio unObjetoSeleccionado;
+    
+    public static final String[] criterios = new String[] {"Lote implicado", "Comentario", "Tipo de lote", "Criterio de Analisis implicado", "Estado", "Fecha de origen", "Orden de produccion", "Laboratorio", "Orden de compra", "Posee lote asociado", "Conclusión"};
+    
+    
+    
+    
+    public PanelGestionAnalisisLaboratorio(JFrame ventanaContenedora, String trayectoriaActual, Organizacion unaOrganizacion, String tituloReporte) {
+        super(ventanaContenedora, trayectoriaActual, unaOrganizacion, criterios, tituloReporte);
         initComponents();
         this.setVisible(true);
         
+        establecerAlineacionDeTabla(jTable1, SwingConstants.CENTER);
+        UtilidadesInterfazGrafica.configurarTabla(jTable1);
+        ParametrosDeInterfaz.confeccionarComponentes(this.getComponents());
     }
     
 
@@ -43,11 +76,66 @@ public class PanelGestionAnalisisLaboratorio extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
         jButton20 = new javax.swing.JButton();
         jButton21 = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
+        jPanel3 = new javax.swing.JPanel();
+        botonCriterio8 = new javax.swing.JButton();
+        jLEstaticoCriterio7 = new javax.swing.JLabel();
+        datoCriterio2 = new javax.swing.JTextField();
+        botonCriterio7 = new javax.swing.JButton();
+        botonCriterio9 = new javax.swing.JButton();
+        jCBCriterio4 = new javax.swing.JCheckBox();
+        jCBCriterio1 = new javax.swing.JCheckBox();
+        jCBCriterio2 = new javax.swing.JCheckBox();
+        jCBCriterio8 = new javax.swing.JCheckBox();
+        jCBCriterio9 = new javax.swing.JCheckBox();
+        jLEstaticoCriterio4 = new javax.swing.JLabel();
+        jCBCriterio7 = new javax.swing.JCheckBox();
+        jLCriterio8 = new javax.swing.JLabel();
+        jLEstaticoCriterio9 = new javax.swing.JLabel();
+        botonCriterio4 = new javax.swing.JButton();
+        jLEstaticoCriterio8 = new javax.swing.JLabel();
+        jLCriterio4 = new javax.swing.JLabel();
+        jLEstaticoCriterio1 = new javax.swing.JLabel();
+        botonCriterio1 = new javax.swing.JButton();
+        jLCriterio7 = new javax.swing.JLabel();
+        jLCriterio9 = new javax.swing.JLabel();
+        jLCriterio1 = new javax.swing.JLabel();
+        jPanel4 = new javax.swing.JPanel();
+        jLEstatico1Criterio6 = new javax.swing.JLabel();
+        dato1Criterio6 = new com.toedter.calendar.JDateChooser();
+        jLEstatico2Criterio6 = new javax.swing.JLabel();
+        dato2Criterio6 = new com.toedter.calendar.JDateChooser();
+        datoCriterio5 = new javax.swing.JComboBox<>();
+        jCBCriterio6 = new javax.swing.JCheckBox();
+        jCBCriterio3 = new javax.swing.JCheckBox();
+        jCBCriterio5 = new javax.swing.JCheckBox();
+        datoCriterio3 = new javax.swing.JComboBox<>();
+        jPanel5 = new javax.swing.JPanel();
+        jCBCriterio10 = new javax.swing.JCheckBox();
+        dato1Criterio10 = new javax.swing.JRadioButton();
+        dato2Criterio10 = new javax.swing.JRadioButton();
+        jCBCriterio11 = new javax.swing.JCheckBox();
+        datoCriterio11 = new javax.swing.JComboBox<>();
+        jButton2 = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jBVerDetalle = new javax.swing.JButton();
+        jLabel6 = new javax.swing.JLabel();
+        jLObjetoSeleccionado = new javax.swing.JLabel();
+
+        setBackground(new java.awt.Color(204, 204, 204));
 
         jButton20.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jButton20.setText("Gestionar Analisis de laboratorio");
+        jButton20.setIcon(new javax.swing.ImageIcon(getClass().getResource("/InterfazGrafica/Assets/icono-Opcion.png"))); // NOI18N
+        jButton20.setText("Gestionar análisis de laboratorio");
+        jButton20.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jButton20.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton20ActionPerformed(evt);
@@ -55,12 +143,536 @@ public class PanelGestionAnalisisLaboratorio extends javax.swing.JPanel {
         });
 
         jButton21.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jButton21.setText("Gestionar Criterio de Analisis de Laboratorio");
+        jButton21.setIcon(new javax.swing.ImageIcon(getClass().getResource("/InterfazGrafica/Assets/icono-Opcion.png"))); // NOI18N
+        jButton21.setText("Gestionar criterios de análisis de laboratorio");
+        jButton21.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jButton21.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton21ActionPerformed(evt);
             }
         });
+
+        jLabel3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLabel3.setText("Consulta de análisis de laboratorio");
+
+        jButton1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jButton1.setText("Realizar consulta");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        botonCriterio8.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        botonCriterio8.setText("Buscar un laboratorio");
+        botonCriterio8.setEnabled(false);
+        botonCriterio8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonCriterio8ActionPerformed(evt);
+            }
+        });
+
+        jLEstaticoCriterio7.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLEstaticoCriterio7.setText("Orden de produccion seleccionada:");
+
+        datoCriterio2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        datoCriterio2.setText("Ingrese un comentario");
+        datoCriterio2.setEnabled(false);
+
+        botonCriterio7.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        botonCriterio7.setText("Buscar una Orden de produccion");
+        botonCriterio7.setEnabled(false);
+        botonCriterio7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonCriterio7ActionPerformed(evt);
+            }
+        });
+
+        botonCriterio9.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        botonCriterio9.setText("Buscar una orden de compra");
+        botonCriterio9.setEnabled(false);
+        botonCriterio9.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonCriterio9ActionPerformed(evt);
+            }
+        });
+
+        jCBCriterio4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCBCriterio4.setText("Criterio implicado");
+        jCBCriterio4.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio4ItemStateChanged(evt);
+            }
+        });
+
+        jCBCriterio1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCBCriterio1.setText("Lote implicado");
+        jCBCriterio1.setPressedIcon(new javax.swing.ImageIcon(getClass().getResource("/InterfazGrafica/Assets/CheckTic.png"))); // NOI18N
+        jCBCriterio1.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio1ItemStateChanged(evt);
+            }
+        });
+
+        jCBCriterio2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCBCriterio2.setText("Comentario");
+        jCBCriterio2.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio2ItemStateChanged(evt);
+            }
+        });
+
+        jCBCriterio8.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCBCriterio8.setText("Laboratorio implicado");
+        jCBCriterio8.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio8ItemStateChanged(evt);
+            }
+        });
+
+        jCBCriterio9.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCBCriterio9.setText("Orden de compra implicada");
+        jCBCriterio9.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio9ItemStateChanged(evt);
+            }
+        });
+
+        jLEstaticoCriterio4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLEstaticoCriterio4.setText("Criterio de análisis seleccionado:");
+
+        jCBCriterio7.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCBCriterio7.setText("Orden de produccion implicada");
+        jCBCriterio7.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio7ItemStateChanged(evt);
+            }
+        });
+
+        jLCriterio8.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLEstaticoCriterio9.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLEstaticoCriterio9.setText("Orden de compra seleccionada");
+
+        botonCriterio4.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        botonCriterio4.setText("Buscar un criterio de analisis");
+        botonCriterio4.setEnabled(false);
+        botonCriterio4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonCriterio4ActionPerformed(evt);
+            }
+        });
+
+        jLEstaticoCriterio8.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLEstaticoCriterio8.setText("Laboratorio seleccionado");
+
+        jLCriterio4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLEstaticoCriterio1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLEstaticoCriterio1.setText("Lote seleccionado:");
+
+        botonCriterio1.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        botonCriterio1.setText("Buscar un lote");
+        botonCriterio1.setEnabled(false);
+        botonCriterio1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonCriterio1ActionPerformed(evt);
+            }
+        });
+
+        jLCriterio7.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLCriterio9.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLCriterio1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLCriterio4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLEstaticoCriterio1)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLCriterio1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(jCBCriterio9)
+                                .addGap(18, 18, 18)
+                                .addComponent(botonCriterio9))
+                            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addGroup(jPanel3Layout.createSequentialGroup()
+                                    .addComponent(jLEstaticoCriterio7)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(jLCriterio7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGroup(jPanel3Layout.createSequentialGroup()
+                                    .addComponent(jCBCriterio8)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(botonCriterio8))
+                                .addGroup(jPanel3Layout.createSequentialGroup()
+                                    .addComponent(jCBCriterio7)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(botonCriterio7))
+                                .addGroup(jPanel3Layout.createSequentialGroup()
+                                    .addComponent(jLEstaticoCriterio8)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(jLCriterio8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGroup(jPanel3Layout.createSequentialGroup()
+                                    .addComponent(jLEstaticoCriterio9)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(jLCriterio9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(jCBCriterio1)
+                                .addGap(18, 18, 18)
+                                .addComponent(botonCriterio1))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(jCBCriterio4)
+                                .addGap(18, 18, 18)
+                                .addComponent(botonCriterio4))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(jCBCriterio2)
+                                .addGap(18, 18, 18)
+                                .addComponent(datoCriterio2, javax.swing.GroupLayout.PREFERRED_SIZE, 479, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLEstaticoCriterio4))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCBCriterio1)
+                    .addComponent(botonCriterio1))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(jLCriterio1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLEstaticoCriterio1))
+                .addGap(19, 19, 19)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCBCriterio2)
+                    .addComponent(datoCriterio2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(jCBCriterio4)
+                    .addComponent(botonCriterio4))
+                .addGap(18, 18, 18)
+                .addComponent(jLEstaticoCriterio4)
+                .addGap(18, 18, 18)
+                .addComponent(jLCriterio4, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                            .addComponent(botonCriterio7)
+                            .addComponent(jCBCriterio7))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                            .addComponent(jLCriterio7, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLEstaticoCriterio7))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jCBCriterio8)
+                            .addComponent(botonCriterio8))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLEstaticoCriterio8)
+                            .addComponent(jLCriterio8, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                            .addComponent(botonCriterio9)
+                            .addComponent(jCBCriterio9))
+                        .addGap(18, 18, 18)
+                        .addComponent(jLEstaticoCriterio9))
+                    .addComponent(jLCriterio9, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
+
+        jLEstatico1Criterio6.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLEstatico1Criterio6.setText("Desde");
+        jLEstatico1Criterio6.setEnabled(false);
+
+        dato1Criterio6.setEnabled(false);
+        dato1Criterio6.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLEstatico2Criterio6.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLEstatico2Criterio6.setText("Hasta");
+        jLEstatico2Criterio6.setEnabled(false);
+
+        dato2Criterio6.setEnabled(false);
+        dato2Criterio6.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        datoCriterio5.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        datoCriterio5.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Regular", "Anulado" }));
+        datoCriterio5.setEnabled(false);
+
+        jCBCriterio6.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCBCriterio6.setText("Fecha de origen");
+        jCBCriterio6.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio6ItemStateChanged(evt);
+            }
+        });
+
+        jCBCriterio3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCBCriterio3.setText("Tipo de lote");
+        jCBCriterio3.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio3ItemStateChanged(evt);
+            }
+        });
+
+        jCBCriterio5.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCBCriterio5.setText("Estado");
+        jCBCriterio5.setPressedIcon(new javax.swing.ImageIcon(getClass().getResource("/InterfazGrafica/Assets/CheckTic.png"))); // NOI18N
+        jCBCriterio5.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio5ItemStateChanged(evt);
+            }
+        });
+
+        datoCriterio3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        datoCriterio3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "YCV", "YCE", "YM" }));
+        datoCriterio3.setEnabled(false);
+
+        jCBCriterio10.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCBCriterio10.setText("Posee lote asociado");
+        jCBCriterio10.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio10ItemStateChanged(evt);
+            }
+        });
+
+        buttonGroup1.add(dato1Criterio10);
+        dato1Criterio10.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        dato1Criterio10.setText("Si");
+        dato1Criterio10.setEnabled(false);
+        dato1Criterio10.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                dato1Criterio10ItemStateChanged(evt);
+            }
+        });
+
+        buttonGroup1.add(dato2Criterio10);
+        dato2Criterio10.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        dato2Criterio10.setText("No");
+        dato2Criterio10.setEnabled(false);
+        dato2Criterio10.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                dato2Criterio10ItemStateChanged(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jCBCriterio10)
+                .addGap(18, 18, 18)
+                .addComponent(dato1Criterio10)
+                .addGap(18, 18, 18)
+                .addComponent(dato2Criterio10)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(dato1Criterio10)
+                        .addComponent(dato2Criterio10))
+                    .addComponent(jCBCriterio10))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jCBCriterio11.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCBCriterio11.setText("Conclusión");
+        jCBCriterio11.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio11ItemStateChanged(evt);
+            }
+        });
+
+        datoCriterio11.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        datoCriterio11.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "APROBADO", "RECHAZADO" }));
+        datoCriterio11.setEnabled(false);
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addComponent(jCBCriterio11)
+                                .addGap(18, 18, 18)
+                                .addComponent(datoCriterio11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addComponent(jCBCriterio3)
+                                .addGap(18, 18, 18)
+                                .addComponent(datoCriterio3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addComponent(jCBCriterio5)
+                                .addGap(18, 18, 18)
+                                .addComponent(datoCriterio5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addComponent(jCBCriterio6)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLEstatico1Criterio6)
+                                .addGap(6, 6, 6)
+                                .addComponent(dato1Criterio6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jLEstatico2Criterio6)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(dato2Criterio6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addGap(18, 18, 18))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCBCriterio3)
+                    .addComponent(datoCriterio3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jCBCriterio5)
+                    .addComponent(datoCriterio5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(jCBCriterio6)
+                    .addComponent(jLEstatico1Criterio6)
+                    .addComponent(dato1Criterio6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLEstatico2Criterio6)
+                    .addComponent(dato2Criterio6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCBCriterio11)
+                    .addComponent(datoCriterio11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18))
+        );
+
+        jButton2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jButton2.setText("Generar reporte");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(20, 20, 20)
+                        .addComponent(jLabel3))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGap(18, 18, 18)
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(190, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jButton1)
+                .addGap(18, 18, 18)
+                .addComponent(jButton2)
+                .addGap(18, 18, 18))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(20, 20, 20)
+                .addComponent(jLabel3)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(jButton2))
+                .addGap(18, 18, 18))
+        );
+
+        jTable1.setAutoCreateRowSorter(true);
+        jTable1.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "ID", "Resultado", "Estado", "Lote implicado", "O.C.", "Criterio utilizado"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTable1MouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(jTable1);
+        if (jTable1.getColumnModel().getColumnCount() > 0) {
+            jTable1.getColumnModel().getColumn(0).setMinWidth(200);
+            jTable1.getColumnModel().getColumn(0).setPreferredWidth(200);
+            jTable1.getColumnModel().getColumn(0).setMaxWidth(200);
+        }
+
+        jLabel4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel4.setText("Consultas de Análisis de laboratorio");
+
+        jLabel5.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLabel5.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel5.setText("Para ver el detalle de un análisis, seleccione uno en la tabla y presione el botón Ver detalle");
+
+        jBVerDetalle.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jBVerDetalle.setText("Ver detalle");
+        jBVerDetalle.setEnabled(false);
+        jBVerDetalle.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jBVerDetalleActionPerformed(evt);
+            }
+        });
+
+        jLabel6.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLabel6.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel6.setText("ID de análisis seleccionado:");
+
+        jLObjetoSeleccionado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLObjetoSeleccionado.setForeground(new java.awt.Color(0, 0, 0));
+        jLObjetoSeleccionado.setText("#");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -68,10 +680,24 @@ public class PanelGestionAnalisisLaboratorio extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButton21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(500, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(jButton21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jButton20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel5)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel6)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLObjetoSeleccionado)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jBVerDetalle)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING))
+                .addGap(18, 18, 18))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -80,7 +706,20 @@ public class PanelGestionAnalisisLaboratorio extends javax.swing.JPanel {
                 .addComponent(jButton20)
                 .addGap(18, 18, 18)
                 .addComponent(jButton21)
-                .addContainerGap(362, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(jLabel4)
+                .addGap(18, 18, 18)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel5)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(jBVerDetalle)
+                    .addComponent(jLObjetoSeleccionado)
+                    .addComponent(jLabel6))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 308, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -94,9 +733,258 @@ public class PanelGestionAnalisisLaboratorio extends javax.swing.JPanel {
         this.ventanaContenedora.dispose();
     }//GEN-LAST:event_jButton21ActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        cargarTabla(jTable1, organizacion.getAnalisisLaboratorio());
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void botonCriterio8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonCriterio8ActionPerformed
+        BuscarEquipamiento ventana = new BuscarEquipamiento(this.organizacion, ventanaContenedora, this.trayectoriaActual);
+        ventanaContenedora.dispose();
+    }//GEN-LAST:event_botonCriterio8ActionPerformed
+
+    private void botonCriterio7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonCriterio7ActionPerformed
+        BuscarOrdenDeProduccion unaVentana = new BuscarOrdenDeProduccion(this.organizacion, ventanaContenedora, this.trayectoriaActual);
+        ventanaContenedora.dispose();
+    }//GEN-LAST:event_botonCriterio7ActionPerformed
+
+    private void botonCriterio9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonCriterio9ActionPerformed
+        BuscarOrdenCompra ventana = new BuscarOrdenCompra(this.organizacion, ventanaContenedora, this.trayectoriaActual);
+        ventanaContenedora.dispose();
+    }//GEN-LAST:event_botonCriterio9ActionPerformed
+
+    private void jCBCriterio4ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio4ItemStateChanged
+        botonCriterio4.setEnabled(jCBCriterio4.isSelected());
+        jLEstaticoCriterio4.setEnabled(jCBCriterio4.isSelected());
+        jLCriterio4.setEnabled(jCBCriterio4.isSelected());
+        asignarCriterio(3, (JCheckBox) evt.getSource());
+    }//GEN-LAST:event_jCBCriterio4ItemStateChanged
+
+    private void jCBCriterio1ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio1ItemStateChanged
+        botonCriterio1.setEnabled(jCBCriterio1.isSelected());
+        jLEstaticoCriterio1.setEnabled(jCBCriterio1.isSelected());
+        jLCriterio1.setEnabled(jCBCriterio1.isSelected());
+        asignarCriterio(0, (JCheckBox) evt.getSource());
+
+    }//GEN-LAST:event_jCBCriterio1ItemStateChanged
+
+    private void jCBCriterio2ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio2ItemStateChanged
+        datoCriterio2.setEnabled(jCBCriterio2.isSelected());
+        asignarCriterio(1, (JCheckBox) evt.getSource());
+    }//GEN-LAST:event_jCBCriterio2ItemStateChanged
+
+    private void jCBCriterio8ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio8ItemStateChanged
+        botonCriterio8.setEnabled(jCBCriterio8.isSelected());
+        jLEstaticoCriterio8.setEnabled(jCBCriterio8.isSelected());
+        jLCriterio8.setEnabled(jCBCriterio8.isSelected());
+        asignarCriterio(7, (JCheckBox) evt.getSource());
+    }//GEN-LAST:event_jCBCriterio8ItemStateChanged
+
+    private void jCBCriterio9ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio9ItemStateChanged
+        botonCriterio9.setEnabled(jCBCriterio9.isSelected());
+        jLEstaticoCriterio9.setEnabled(jCBCriterio9.isSelected());
+        jLCriterio9.setEnabled(jCBCriterio9.isSelected());
+        asignarCriterio(8, (JCheckBox) evt.getSource());
+    }//GEN-LAST:event_jCBCriterio9ItemStateChanged
+
+    private void jCBCriterio7ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio7ItemStateChanged
+        botonCriterio7.setEnabled(jCBCriterio7.isSelected());
+        jLEstaticoCriterio7.setEnabled(jCBCriterio7.isSelected());
+        jLCriterio7.setEnabled(jCBCriterio7.isSelected());
+        asignarCriterio(6, (JCheckBox) evt.getSource());
+    }//GEN-LAST:event_jCBCriterio7ItemStateChanged
+
+    private void botonCriterio4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonCriterio4ActionPerformed
+        BuscarCriterioAnalisisLaboratorio ventana = new BuscarCriterioAnalisisLaboratorio(this.organizacion, ventanaContenedora, this.trayectoriaActual);
+        ventanaContenedora.dispose();
+    }//GEN-LAST:event_botonCriterio4ActionPerformed
+
+    private void botonCriterio1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonCriterio1ActionPerformed
+        BuscarLote unaVentana = new BuscarLote(organizacion, ventanaContenedora, trayectoriaActual, null);
+        ventanaContenedora.dispose();
+    }//GEN-LAST:event_botonCriterio1ActionPerformed
+
+    private void jCBCriterio6ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio6ItemStateChanged
+        jLEstatico1Criterio6.setEnabled(jCBCriterio6.isSelected());
+        dato1Criterio6.setEnabled(jCBCriterio6.isSelected());
+        jLEstatico2Criterio6.setEnabled(jCBCriterio6.isSelected());
+        dato2Criterio6.setEnabled(jCBCriterio6.isSelected());
+        asignarCriterio(5, (JCheckBox) evt.getSource());
+    }//GEN-LAST:event_jCBCriterio6ItemStateChanged
+
+    private void jCBCriterio3ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio3ItemStateChanged
+        datoCriterio3.setEnabled(jCBCriterio3.isSelected());
+        asignarCriterio(2, (JCheckBox) evt.getSource());
+    }//GEN-LAST:event_jCBCriterio3ItemStateChanged
+
+    private void jCBCriterio5ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio5ItemStateChanged
+        datoCriterio5.setEnabled(jCBCriterio5.isSelected());
+        asignarCriterio(4, (JCheckBox) evt.getSource());
+    }//GEN-LAST:event_jCBCriterio5ItemStateChanged
+
+    private void jCBCriterio10ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio10ItemStateChanged
+        dato1Criterio10.setEnabled(((JCheckBox)evt.getItemSelectable()).isSelected());
+        dato2Criterio10.setEnabled(((JCheckBox)evt.getItemSelectable()).isSelected());
+        asignarCriterio(9, (JCheckBox) evt.getSource());
+    }//GEN-LAST:event_jCBCriterio10ItemStateChanged
+
+    private void dato1Criterio10ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_dato1Criterio10ItemStateChanged
+        if (((JRadioButton)evt.getItemSelectable()).isSelected()){
+            asignarObjetoACriterio(9, true);
+        }
+    }//GEN-LAST:event_dato1Criterio10ItemStateChanged
+
+    private void dato2Criterio10ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_dato2Criterio10ItemStateChanged
+        if (((JRadioButton)evt.getItemSelectable()).isSelected()){
+            asignarObjetoACriterio(9, false);
+        }
+    }//GEN-LAST:event_dato2Criterio10ItemStateChanged
+
+    private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
+        int id = Integer.parseInt(jTable1.getValueAt(jTable1.getSelectedRow(), 0).toString());
+        this.unObjetoSeleccionado = this.organizacion.getAnalisisLaboratorio().get(id);
+        actualizarObjetoSeleccionado();
+        habilitarBotones();
+
+    }//GEN-LAST:event_jTable1MouseClicked
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        generarReporte(organizacion.getAnalisisLaboratorio());
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jBVerDetalleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBVerDetalleActionPerformed
+        if (this.unObjetoSeleccionado == null)
+            return;
+        else
+            JOptionPane.showMessageDialog(null, this.unObjetoSeleccionado.getConclusion()+"\n\n"+this.unObjetoSeleccionado.getCriterioAsociado().generarDetalleDeResultadoDeAnalisis(unObjetoSeleccionado));
+    }//GEN-LAST:event_jBVerDetalleActionPerformed
+
+    private void jCBCriterio11ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio11ItemStateChanged
+        datoCriterio11.setEnabled(((JCheckBox)evt.getItemSelectable()).isSelected());
+        asignarCriterio(10, (JCheckBox) evt.getSource());
+    }//GEN-LAST:event_jCBCriterio11ItemStateChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton botonCriterio1;
+    private javax.swing.JButton botonCriterio4;
+    private javax.swing.JButton botonCriterio7;
+    private javax.swing.JButton botonCriterio8;
+    private javax.swing.JButton botonCriterio9;
+    private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.JRadioButton dato1Criterio10;
+    private com.toedter.calendar.JDateChooser dato1Criterio6;
+    private javax.swing.JRadioButton dato2Criterio10;
+    private com.toedter.calendar.JDateChooser dato2Criterio6;
+    private javax.swing.JComboBox<String> datoCriterio11;
+    private javax.swing.JTextField datoCriterio2;
+    private javax.swing.JComboBox<String> datoCriterio3;
+    private javax.swing.JComboBox<String> datoCriterio5;
+    private javax.swing.JButton jBVerDetalle;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton20;
     private javax.swing.JButton jButton21;
+    private javax.swing.JCheckBox jCBCriterio1;
+    private javax.swing.JCheckBox jCBCriterio10;
+    private javax.swing.JCheckBox jCBCriterio11;
+    private javax.swing.JCheckBox jCBCriterio2;
+    private javax.swing.JCheckBox jCBCriterio3;
+    private javax.swing.JCheckBox jCBCriterio4;
+    private javax.swing.JCheckBox jCBCriterio5;
+    private javax.swing.JCheckBox jCBCriterio6;
+    private javax.swing.JCheckBox jCBCriterio7;
+    private javax.swing.JCheckBox jCBCriterio8;
+    private javax.swing.JCheckBox jCBCriterio9;
+    private javax.swing.JLabel jLCriterio1;
+    private javax.swing.JLabel jLCriterio4;
+    private javax.swing.JLabel jLCriterio7;
+    private javax.swing.JLabel jLCriterio8;
+    private javax.swing.JLabel jLCriterio9;
+    private javax.swing.JLabel jLEstatico1Criterio6;
+    private javax.swing.JLabel jLEstatico2Criterio6;
+    private javax.swing.JLabel jLEstaticoCriterio1;
+    private javax.swing.JLabel jLEstaticoCriterio4;
+    private javax.swing.JLabel jLEstaticoCriterio7;
+    private javax.swing.JLabel jLEstaticoCriterio8;
+    private javax.swing.JLabel jLEstaticoCriterio9;
+    private javax.swing.JLabel jLObjetoSeleccionado;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables
+
+    private void habilitarBotones() {
+        jBVerDetalle.setEnabled(true);
+    }
+
+    private void actualizarObjetoSeleccionado() {
+        jLObjetoSeleccionado.setText(""+this.unObjetoSeleccionado.getId());
+    }
+
+
+    @Override
+    public void actualizarUnObjeto(Object unObjeto) {
+        if (unObjeto instanceof Lote){
+            asignarObjetoACriterio(0, unObjeto);
+            this.unLoteSeleccionado = (Lote) unObjeto;
+            exhibirLote();
+        }
+        if (unObjeto instanceof CriterioAnalisisLaboratorio){
+            asignarObjetoACriterio(3, unObjeto);
+            this.unCriterioSeleccionado = (CriterioAnalisisLaboratorio) unObjeto;
+            exhibirCriterio();
+        }
+        if (unObjeto instanceof OrdenDeProduccion){
+            asignarObjetoACriterio(6, unObjeto);
+            this.unaOrdenDeProduccion = (OrdenDeProduccion) unObjeto;
+            exhibirOrdenDeProduccion();
+        }
+        if (unObjeto instanceof Equipamiento){
+            asignarObjetoACriterio(7, unObjeto);
+            this.unLaboratorio = (Equipamiento) unObjeto;
+            exhibirLaboratorio();
+        }
+        if (unObjeto instanceof OrdenDeCompra){
+            asignarObjetoACriterio(8, unObjeto);
+            this.unaOrdenDeCompra = (OrdenDeCompra) unObjeto;
+            exhibirOrdenDeCompra();
+        }
+    }
+    private void exhibirLote() {
+        jLCriterio1.setText("ID "+unLoteSeleccionado.getId()+", etiqueta: "+unLoteSeleccionado.getEtiqueta());
+    }
+
+    private void exhibirCriterio() {
+        jLCriterio4.setText(unCriterioSeleccionado.getNombre());
+    }
+
+    private void exhibirOrdenDeProduccion() {
+        jLCriterio7.setText(""+this.unaOrdenDeProduccion.getId());
+    }
+
+    private void exhibirLaboratorio() {
+        jLCriterio8.setText(unLaboratorio.getNombre());
+    }
+
+    private void exhibirOrdenDeCompra() {
+        if (unaOrdenDeCompra == null)
+            return;
+        jLCriterio9.setText(""+unaOrdenDeCompra.getId());
+    }
+
+    @Override
+    protected void generarObjetos() {
+        asignarObjetoACriterio(1, datoCriterio2.getText());
+        asignarObjetoACriterio(2, datoCriterio3.getSelectedItem());
+        asignarObjetoACriterio(4, datoCriterio5.getSelectedItem());
+        asignarObjetoACriterio(5, generarListaFecha(dato1Criterio6.getCalendar(), dato2Criterio6.getCalendar()));
+        asignarObjetoACriterio(10, datoCriterio11.getSelectedItem());
+    }
 }

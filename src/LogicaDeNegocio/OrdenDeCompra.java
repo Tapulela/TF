@@ -5,8 +5,9 @@
  */
 package LogicaDeNegocio;
 
+import InterfazGrafica.Consultable;
+import InterfazGrafica.UtilidadesInterfazGrafica;
 import LogicaDeNegocio.GestionUsuariosYRoles.Usuario;
-import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -16,10 +17,9 @@ import java.util.Iterator;
  *
  * @author usuario
  */
-public class OrdenDeCompra extends Evento {
+public class OrdenDeCompra extends Evento implements Reporte, Filtrable, Consultable {
     public static final String ESTADO_REGULAR = "Regular";
     public static final String ESTADO_ANULADO = "Anulado";
-    private int id;
     private float cantidadAComprar;
     private String unidadDeMedida;
     private float costoPorUnidad;
@@ -31,8 +31,7 @@ public class OrdenDeCompra extends Evento {
     private ArrayList analisisRealizados;
 
     public OrdenDeCompra(int id, Usuario unUsuario, java.sql.Date fechaOrigen, float cantidadAComprar, String unidadDeMedida, float costoPorUnidad, String estado, Proveedor proveedorAsociado, OrdenDeProduccion unaOrdenDeProduccion, int idEvento) {
-        super(idEvento, estado, unUsuario, fechaOrigen);
-        this.id = id;
+        super(idEvento, estado, unUsuario, fechaOrigen, id);
         this.cantidadAComprar = cantidadAComprar;
         this.unidadDeMedida = unidadDeMedida;
         this.costoPorUnidad = costoPorUnidad;
@@ -60,14 +59,6 @@ public class OrdenDeCompra extends Evento {
 
     
     
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
 
     public float getCantidadAComprar() {
@@ -147,11 +138,11 @@ public class OrdenDeCompra extends Evento {
     }
     
     
-    boolean seEncuentraRegular(){
+    public boolean seEncuentraRegular(){
         return this.estado.equals(ESTADO_REGULAR);
     }
     
-    boolean seEncuentraAnulada() {
+    public boolean seEncuentraAnulada() {
         return this.estado.equals(ESTADO_ANULADO);
     }
     
@@ -161,17 +152,19 @@ public class OrdenDeCompra extends Evento {
     }
 
 
-    Boolean poseeOrdenDeProduccionAsociada(OrdenDeProduccion unaOrdenDeProduccion) {
+    public Boolean poseeOrdenDeProduccionAsociada(OrdenDeProduccion unaOrdenDeProduccion) {
         return this.ordenDeProduccionAsociada==unaOrdenDeProduccion;
     }
 
     
+    @Override
     public Object[] devolverVector() {
         String unProveedor = "No posee";
+        String fechaOrigen = Organizacion.expresarCalendario(getFechaOrigenC());
         if (this.proveedorAsociado != null){
             unProveedor = this.proveedorAsociado.getRazonSocial();
         }
-        Object[] vec ={this.getId(), ( new SimpleDateFormat( "dd-MM-yyyy" ) ).format( this.getFechaOrigenC().getTime() ), this.getCantidadAComprar(), this.getUnidadDeMedida(), this.getCostoPorUnidad(),this.getEstadoEvento(), this.getOrdenDeProduccionAsociada().getId(), unProveedor};
+        Object[] vec ={this.getId(), fechaOrigen, UtilidadesInterfazGrafica.formatearFlotante(this.getCantidadAComprar()), this.getUnidadDeMedida(), UtilidadesInterfazGrafica.formatearFlotante(getCostoPorUnidad()),this.getEstadoEvento(), this.getOrdenDeProduccionAsociada().getId(), unProveedor};
         return vec;
     }
     
@@ -186,18 +179,18 @@ public class OrdenDeCompra extends Evento {
         return retorno;
     }
 
-    float getCantidadComprada(String unaUnidadMedida) throws ExcepcionCargaParametros {
+    float getCantidadComprada(String unaUnidadMedida)  {
         float retorno = 0;
         Iterator lotesNoAnulados = getLotesAsociadosNoAnulados().iterator();
         while (lotesNoAnulados.hasNext()){
             Lote unLote = (Lote) lotesNoAnulados.next();
-            retorno = retorno + Organizacion.convertirUnidadPeso(unLote.getUnidadDeMedida(), unLote.getCantidad(), unaUnidadMedida);
+            retorno = retorno + Organizacion.convertirUnidadPeso(unLote.getUnidadDeMedida(), unLote.getCantidadTotalPesoIngresado(), unaUnidadMedida);
         }
         return retorno;
     }
 
-    public float getCantidadRestanteARecibir() throws ExcepcionCargaParametros {
-        float retorno = this.cantidadAComprar - this.getCantidadComprada(this.unidadDeMedida);
+    public float getCantidadRestanteARecibir() {
+        float retorno = Math.max(this.cantidadAComprar - this.getCantidadComprada(this.unidadDeMedida),0);
         
         return retorno;
     }
@@ -209,5 +202,79 @@ public class OrdenDeCompra extends Evento {
     public void removerAnalisisDeLaboratorio(AnalisisLaboratorio unAnalisis) {
         this.analisisRealizados.remove(unAnalisis);
     }
+
+    public boolean poseeProveedor(Proveedor unProveedorSeleccionado) {
+        return this.proveedorAsociado == unProveedorSeleccionado;
+    }
+
+    @Override
+    public String getReporte() {
+        String retorno = "";
+            retorno = retorno + "ID: "+this.getId() +"\t\t Fecha: "+Organizacion.expresarCalendario(this.getFechaOrigenC())+"\t\tCantidad: "+this.cantidadAComprar+" "+this.unidadDeMedida;
+            retorno = retorno + "\n";
+            retorno = retorno + "\n";
+            retorno = retorno + "Proveedor asociado: "+obtenerProveedorAsociado()+ "\t\tCantidad Adquirida: "+UtilidadesInterfazGrafica.formatearFlotante(getCantidadComprada(Lote.UNIDAD_MEDIDA_KILOGRAMO))+" Kgs de "+UtilidadesInterfazGrafica.formatearFlotante(Organizacion.convertirUnidadPeso(unidadDeMedida, cantidadAComprar, Lote.UNIDAD_MEDIDA_KILOGRAMO))+" Kgs\n\n"
+                    +"Cantidad restante a recibir: "+ UtilidadesInterfazGrafica.formatearFlotante(Organizacion.convertirUnidadPeso(unidadDeMedida, getCantidadRestanteARecibir(), Lote.UNIDAD_MEDIDA_KILOGRAMO))+" Kgs"+"\t\tOrden de producción asociada: "+this.getOrdenDeProduccionAsociada().getId();
+            retorno = retorno + "\n";
+            retorno = retorno + "\n";
+            retorno = retorno + "ID orden de producción: "+ordenDeProduccionAsociada.getId()+""
+                    + "\t\t\t\tEstado: "+ estado +" \n\n";
+            return retorno;
+    }
+
+    private String obtenerProveedorAsociado() {
+        String retorno;
+        if (poseeProveedorAsociado())
+            retorno = this.proveedorAsociado.getRazonSocial();
+        else
+            retorno = "No posee";
+        return retorno;
+        
+    }
+
+    @Override
+    public boolean cumpleCriterio(String unCriterio, Object unObjeto) {
+        boolean cumpleCriterio = false;
+        if (unObjeto == null)
+            return cumpleCriterio;
+        if (unObjeto instanceof ArrayList && !((ArrayList)unObjeto).isEmpty() && (((ArrayList)unObjeto).get(0)instanceof Calendar)){
+            ArrayList unaLista = (ArrayList) unObjeto;
+            Calendar fechaInferior = (Calendar) unaLista.get(0);
+            Calendar fechaSuperior = (Calendar) unaLista.get(1);
+            return this.fechaOrigenEstaEntre(fechaInferior, fechaSuperior);
+        }
+        if (unObjeto instanceof OrdenDeProduccion){
+            OrdenDeProduccion unaOrdenProduccion = (OrdenDeProduccion) unObjeto;
+            return unaOrdenProduccion.getId() == this.ordenDeProduccionAsociada.getId();
+        }
+        if (unObjeto instanceof Proveedor){
+            Proveedor unProveedor = (Proveedor) unObjeto;
+            return this.poseeProveedor(unProveedor);
+        }
+            
+        return cumpleCriterio;
+    }
+
+    public Boolean poseeEstado(String unEstado) {
+        return this.estado.equals(unEstado);
+    }
+
+    
+    public String getTipo(){
+        String tipo = Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE;
+        Lote unLote = (Lote) lotesAsociados.get(0);
+        if (unLote != null){
+            if (unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE))
+                return Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE;
+            if (unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_ESTACIONADA))
+                return Lote.TIPO_LOTE_YERBA_CANCHADA_ESTACIONADA;
+            if (unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_MOLIDA))
+                return Lote.TIPO_LOTE_YERBA_CANCHADA_MOLIDA;
+        }
+            
+        
+        return tipo;
+    }
+    
     
 }

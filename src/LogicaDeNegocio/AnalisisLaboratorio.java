@@ -5,20 +5,43 @@
  */
 package LogicaDeNegocio;
 
+import InterfazGrafica.Consultable;
+import InterfazGrafica.Paneles.PanelGestionAnalisisLaboratorio;
 import LogicaDeNegocio.GestionUsuariosYRoles.Usuario;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 /**
  *
  * @author usuario
  */
-public class AnalisisLaboratorio extends Evento {
+public class AnalisisLaboratorio extends Evento implements Reporte, Filtrable, Consultable {
     public static final String ESTADO_REGULAR = "Regular";
     public static final String ESTADO_ANULADO = "Anulado";
     
+    public static final String ATRIBUTO_PORCENTAJE_SEMILLA = "Porcentaje de semilla";
+    public static final String ATRIBUTO_PORCENTAJE_PALO = "Porcentaje de palo";
+    public static final String ATRIBUTO_PORCENTAJE_POLVO = "Porcentaje de polvo";
+    public static final String ATRIBUTO_PORCENTAJE_HOJA = "Porcentaje de hoja";
+    public static final String ATRIBUTO_PORCENTAJE_HUMEDAD = "Porcentaje de humedad";
+    public static final String[] ATRIBUTOS_CUANTITATIVOS = {ATRIBUTO_PORCENTAJE_SEMILLA, ATRIBUTO_PORCENTAJE_PALO, ATRIBUTO_PORCENTAJE_POLVO, ATRIBUTO_PORCENTAJE_HOJA, ATRIBUTO_PORCENTAJE_HUMEDAD};
     
-    private int id;
+    public static final String ATRIBUTO_PUNTOS_NEGROS = "Puntos negros";
+    public static final String[] SUB_ATRIBUTO_PUNTOS_NEGROS = {"SI", "NO", "ALGUNOS"};
+    public static final String ATRIBUTO_TORRADA = "Torrada";
+    public static final String[] SUB_ATRIBUTO_TORRADA = {"SI", "NO", "ALGUNOS"};
+    public static final String ATRIBUTO_COLOR = "Color";
+    public static final String[] SUB_ATRIBUTO_COLOR = {"VERDE OSCURO", "VERDE CLARO", "AMARILLENTO"};
+    public static final String ATRIBUTO_AROMA = "Aroma";
+    public static final String[] SUB_ATRIBUTO_AROMA = {"TIPICO", "OLOR LEVE A HUMO", "OLOR FUERTE A HUMO"};
+    public static final String ATRIBUTO_TACTO = "Tacto";
+    public static final String[] SUB_ATRIBUTO_TACTO = {"CRUJIENTE", "SUAVE", "ESPONJOSO"};
+    public static final String ATRIBUTO_DEGUSTACION = "Degustación";
+    public static final String[] SUB_ATRIBUTO_DEGUSTACION = {"SI", "NO"};
+    
+    public static final String[] ATRIBUTOS = {ATRIBUTO_PUNTOS_NEGROS, ATRIBUTO_TORRADA, ATRIBUTO_COLOR, ATRIBUTO_AROMA, ATRIBUTO_TACTO, ATRIBUTO_DEGUSTACION};
+    public static final String[][] SUB_ATRIBUTOS = {SUB_ATRIBUTO_PUNTOS_NEGROS, SUB_ATRIBUTO_TORRADA, SUB_ATRIBUTO_COLOR, SUB_ATRIBUTO_AROMA, SUB_ATRIBUTO_TACTO, SUB_ATRIBUTO_DEGUSTACION};
     private String estado;
     
     private String conclusion;
@@ -43,8 +66,7 @@ public class AnalisisLaboratorio extends Evento {
     private OrdenDeCompra ordenDeCompraImplicada;
 
     public AnalisisLaboratorio(int id, String estado, String puntosNegros, String torrada, String color, String aroma, String tacto, String degustacion, float porcentajePalo, float porcentajePolvo, float porcentajeSemilla, float porcentajeHoja, float porcentajeHumedad, Lote loteImplicado, OrdenDeCompra unaOrdenDeCompra, Laboratorio laboratorioAsociado, CriterioAnalisisLaboratorio criterioAsociado, int idEvento, Usuario unUsuario, Date fechaOrigen, String unComentario, String unaConclusion) {
-        super(idEvento, estado, unUsuario, fechaOrigen);
-        this.id = id;
+        super(idEvento, estado, unUsuario, fechaOrigen, id);
         this.estado = estado;
         this.puntosNegros = puntosNegros;
         this.torrada = torrada;
@@ -119,13 +141,6 @@ public class AnalisisLaboratorio extends Evento {
         return estado;
     }
     
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public Laboratorio getLaboratorioAsociado() {
         return laboratorioAsociado;
@@ -228,7 +243,10 @@ public class AnalisisLaboratorio extends Evento {
     }
 
     public boolean poseeOrdenDeProduccionImplicada(OrdenDeProduccion unaOrdenProduccionSeleccionada) {
-        return this.loteImplicado.poseeOrdenDeProduccionAsociada(unaOrdenProduccionSeleccionada);
+        if (this.loteImplicado != null)
+            return this.loteImplicado.poseeOrdenDeProduccionAsociada(unaOrdenProduccionSeleccionada);
+        else
+            return this.ordenDeCompraImplicada.poseeOrdenDeProduccionAsociada(unaOrdenProduccionSeleccionada);
     }
 
     public boolean poseeCriterio(CriterioAnalisisLaboratorio unCriterioSeleccionado) {
@@ -243,7 +261,7 @@ public class AnalisisLaboratorio extends Evento {
         this.ordenDeCompraImplicada = ordenDeCompraImplicada;
     }
     
-    
+    @Override
     public Object[] devolverVector() {
         String columnaLote = "-----";
         if (this.loteImplicado != null)
@@ -289,27 +307,139 @@ public class AnalisisLaboratorio extends Evento {
     }
 
     public boolean poseeLote() {
-        return this.loteImplicado !=null;
+        return this.loteImplicado != null;
     }
 
     public boolean esDeYerbaCanchadaVerde() {
         return this.criterioAsociado.getTipoLote().equals(CriterioAnalisisLaboratorio.TIPO_YCV);
     }
 
-    
-    
-    
-    
+    public boolean esDeYerbaCanchadaEstacionada() {
+        return this.criterioAsociado.getTipoLote().equals(CriterioAnalisisLaboratorio.TIPO_YCE);
+    }
 
-    
-    
+    @Override
+    public String getReporte() {
+        String retorno = "";
+            retorno = retorno + "ID: "+this.getId() +"\t\t Fecha: "+Organizacion.expresarCalendario(this.getFechaOrigenC())+"\tResultado: "+this.conclusion;
+            retorno = retorno + "\n";
+            retorno = retorno + "\n";
+            retorno = retorno + "Lote implicado: "+obtenerLoteImplicado()+ "\t\tCriterio utilizado: "+this.criterioAsociado.getNombre()+"";
+            //        +"Cantidad restante a recibir: "+ UtilidadesInterfazGrafica.formatearFlotante(Organizacion.convertirUnidadPeso(unidadDeMedida, getCantidadRestanteARecibir(), Lote.UNIDAD_MEDIDA_KILOGRAMO))+" Kgs"+"\t\tOrden de producción asociada: "+this.getOrdenDeProduccionAsociada().getId();
+            retorno = retorno + "\n";
+            retorno = retorno + "\n";
+            retorno = retorno + "ID orden de producción: "+this.obtenerOrdenDeProduccion()+"\t\tID orden de Compra: "+this.obtenerOrdenDeCompra()
+                    + "\t\tEstado: "+ estado;
+            retorno = retorno + "\n";
+            retorno = retorno + "\n";
+            retorno = retorno + "Laboratorio implicado: "+this.laboratorioAsociado.getNombre();
+            return retorno;
+    }
 
-
+    private String obtenerLoteImplicado() {
+        if (poseeLote())
+            return this.loteImplicado.getEtiqueta();
+        else
+            return "No posee";
+    }
     
-
+    private String obtenerOrdenDeProduccion(){
+        if (poseeLote())
+            return ""+loteImplicado.getOrdenDeProduccionAsociada().getId();
+        if (poseeOrdenDeCompra())
+            return ""+ordenDeCompraImplicada.getOrdenDeProduccionAsociada().getId();
+        return "No disponible";
+    }
     
+    private String obtenerOrdenDeCompra(){
+        if (poseeLote())
+            return ""+loteImplicado.getOrdenDeCompraAsociada().getId();
+        if (poseeOrdenDeCompra())
+            return ""+ordenDeCompraImplicada.getId();
+        return "No disponible";
+    }    
 
-    
+    public boolean poseeOrdenDeCompra() {
+        return this.ordenDeCompraImplicada != null;
+    }
+
+    public boolean estaRechazado() {
+        return this.conclusion.equals(CriterioAnalisisLaboratorio.ESTADO_RECHAZADO);
+    }
+
+    @Override
+    public boolean cumpleCriterio(String unCriterio, Object unObjeto) {
+        boolean cumpleCriterio = false;
+        if (unObjeto == null)
+            return cumpleCriterio;
+        if (unObjeto instanceof Lote)
+            return this.poseeLote((Lote) unObjeto);
+        if (unObjeto instanceof String && unCriterio.equals(PanelGestionAnalisisLaboratorio.criterios[1]))//Comentario
+            return this.poseeComentario((String) unObjeto);
+        if (unObjeto instanceof String && unCriterio.equals(PanelGestionAnalisisLaboratorio.criterios[2]))//Tipo de lote
+            return this.poseeTipoDeLote((String) unObjeto);
+        if (unObjeto instanceof CriterioAnalisisLaboratorio)
+            return this.poseeCriterio((CriterioAnalisisLaboratorio) unObjeto);
+        if (unObjeto instanceof String && unCriterio.equals(PanelGestionAnalisisLaboratorio.criterios[4]))//Estado
+            return this.poseeEstado((String) unObjeto);
+        if (unObjeto instanceof String && unCriterio.equals(PanelGestionAnalisisLaboratorio.criterios[10]))//posee conclusion
+            return this.poseeConclusion((String) unObjeto);
+        if (unObjeto instanceof ArrayList && !((ArrayList)unObjeto).isEmpty() && (((ArrayList)unObjeto).get(0)instanceof Calendar)){
+            ArrayList unaLista = (ArrayList) unObjeto;
+            Calendar fechaInferior = (Calendar) unaLista.get(0);
+            Calendar fechaSuperior = (Calendar) unaLista.get(1);
+            return this.fechaOrigenEstaEntre(fechaInferior, fechaSuperior);
+        }
+        if (unObjeto instanceof OrdenDeProduccion)
+            return this.poseeOrdenDeProduccionImplicada((OrdenDeProduccion) unObjeto);
+        if (unObjeto instanceof Laboratorio)
+            return this.poseeLaboratorio((Laboratorio) unObjeto);
+        if (unObjeto instanceof OrdenDeCompra)
+            return this.poseeOrdenDeCompra((OrdenDeCompra) unObjeto);
+        if (unObjeto instanceof Boolean && ((Boolean)unObjeto))
+            return this.poseeLote();
+        if (unObjeto instanceof Boolean && (!(Boolean)unObjeto))
+            return !this.poseeLote();
+            
+        
+        return cumpleCriterio;
+    }
+
+    public Float getValorUnAtributo(String unAtributo, String unSubAtributo) {
+        Float retorno = 0f;
+        switch (unAtributo){
+            case ATRIBUTO_AROMA:
+                if (aroma.toUpperCase().equals(unSubAtributo))
+                    retorno = 1f;
+                break;
+            case ATRIBUTO_COLOR:
+                if (color.toUpperCase().equals(unSubAtributo))
+                    retorno = 1f;
+                break;
+            case ATRIBUTO_PUNTOS_NEGROS:
+                if (puntosNegros.toUpperCase().equals(unSubAtributo))
+                    retorno = 1f;
+                break;
+            case ATRIBUTO_TACTO:
+                if (tacto.toUpperCase().equals(unSubAtributo))
+                    retorno = 1f;
+                break;
+            case ATRIBUTO_TORRADA:
+                if (torrada.toUpperCase().equals(unSubAtributo))
+                    retorno = 1f;
+                break;
+            case ATRIBUTO_DEGUSTACION:
+                if (degustacion.toUpperCase().equals(unSubAtributo))
+                    retorno = 1f;
+                break;
+        }
+        return retorno;
+    }
+
+    private boolean poseeConclusion(String unaConclusion) {
+        return this.conclusion.equals(unaConclusion);
+    }
+
     
     
 }

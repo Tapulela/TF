@@ -12,10 +12,13 @@ package Persistencia;
 import LogicaDeNegocio.Proveedor;
 import LogicaDeNegocio.Bascula;
 import LogicaDeNegocio.*;
+import LogicaDeNegocio.Auditoria.Auditoria;
+import LogicaDeNegocio.Auditoria.DetalleAuditoria;
 import LogicaDeNegocio.CamaraEstacionamiento;
 import LogicaDeNegocio.Molino;
 import LogicaDeNegocio.Deposito;
 import LogicaDeNegocio.CriterioAnalisisLaboratorio;
+import LogicaDeNegocio.DetalleTransformacion;
 import LogicaDeNegocio.GestionUsuariosYRoles.Usuario;
 import java.sql.*;
 import java.text.SimpleDateFormat;
@@ -47,6 +50,15 @@ public class Persistencia {
         //STEP 3: Conectarse a la base de datos
         System.out.println("Conectandome a la BD");
         String DB_URL = "jdbc:postgresql://localhost/postgres";
+        conexion = DriverManager.getConnection(DB_URL, "c"+usuario, pass);
+    }
+    
+    public void iniciarSesionRecuperador(String usuario, String pass) throws ClassNotFoundException, SQLException {
+        //STEP 2: Inicializar el driver de postgres
+        Class.forName("org.postgresql.Driver");
+        //STEP 3: Conectarse a la base de datos
+        System.out.println("Conectandome a la BD");
+        String DB_URL = "jdbc:postgresql://localhost/postgres";
         conexion = DriverManager.getConnection(DB_URL, usuario, pass);
     }
 
@@ -56,14 +68,17 @@ public class Persistencia {
         //STEP 3: Conectarse a la base de datos
         System.out.println("Conectandome a la BD");
         String DB_URL = "jdbc:postgresql://localhost/postgres";
-        conexion = DriverManager.getConnection(DB_URL, usuario, pass);
+        conexion = DriverManager.getConnection(DB_URL, "c"+usuario, pass);
         Usuario unUsuario = unaOrganizacion.recuperarUsuario(usuario);
-        if (usuario.equals("postgres")) {
-            unUsuario = new Usuario(0, "Admin", "", "Activo", "----", "GerenteAreaProduccion", "Admin");
-        }
         if (unUsuario == null) {
             throw new ExcepcionCargaParametros("El usuario no se encuentra registrado.");
         }
+        if (unUsuario.estaDadoDeBaja())
+            throw new ExcepcionCargaParametros("El usuario no se encuentra activo.");
+        if (usuario.equals("postgres")) {
+            unUsuario = new Usuario(0, "Admin", "", "Activo", "----", "gerenteareaproduccion", "Admin");
+        }
+        
         unaOrganizacion.setUsuarioActivo(unUsuario);
     }
 
@@ -86,13 +101,12 @@ public class Persistencia {
     }
 
     public void recuperarOrganizacion(Organizacion unaOrganizacion) throws SQLException, ClassNotFoundException {
-        this.iniciarSesion("recuperador", "recuperador");
+        this.iniciarSesionRecuperador("recuperador", "recuperador");
         String sql;
         Statement consulta;
         Statement subConsulta;
         ResultSet resultadoDeConsulta;
         ResultSet resultadoDeSubConsulta;
-
         
         //USUARIOS
         // <editor-fold defaultstate="collapsed">
@@ -268,6 +282,7 @@ public class Persistencia {
                 Usuario unUsuario = unaOrganizacion.getUsuarios().get(resultadoDeConsulta.getInt("IdUsuario"));
                 OrdenDeProduccion unaOrden = new OrdenDeProduccion(resultadoDeConsulta.getInt("ID"), resultadoDeConsulta.getDate("Fecha_Origen"), resultadoDeConsulta.getFloat("Cantidad_A_Producir"), resultadoDeConsulta.getString("Unidad_De_Medida"), resultadoDeConsulta.getDate("Fecha_Entrega"), resultadoDeConsulta.getString("Estado"), resultadoDeConsulta.getString("Descripcion"), resultadoDeConsulta.getInt("ID_Evento"), unUsuario);
                 unaOrganizacion.getOrdenesProduccion().put(unaOrden.getId(), unaOrden);
+                unaOrganizacion.getEventos().put(unaOrden.getIdEvento(), unaOrden);
             }
         } catch (SQLException e) {
             System.err.println(e.getMessage());
@@ -289,6 +304,7 @@ public class Persistencia {
                 }
                 unaOrdenProduccion.agregarEvento(unaOrdenCompra);
                 unaOrganizacion.getOrdenesCompra().put(unaOrdenCompra.getId(), unaOrdenCompra);
+                unaOrganizacion.getEventos().put(unaOrdenCompra.getIdEvento(), unaOrdenCompra);
             }
         } catch (SQLException e) {
             System.err.println(e.getMessage());
@@ -302,7 +318,7 @@ public class Persistencia {
             resultadoDeConsulta = consulta.executeQuery(sql);
             while (resultadoDeConsulta.next()) {
                 OrdenDeCompra unaOrdenCompra = unaOrganizacion.getOrdenesCompra().get(resultadoDeConsulta.getInt("IdOrdenCompra"));
-                Lote unLote = new Lote(resultadoDeConsulta.getInt("ID"), resultadoDeConsulta.getString("Etiqueta"), resultadoDeConsulta.getFloat("Cantidad"), resultadoDeConsulta.getString("Tipo_Lote"), resultadoDeConsulta.getString("Unidad_De_Medida"), resultadoDeConsulta.getString("Estado"), unaOrdenCompra, resultadoDeConsulta.getDate("Fecha_Adquisicion"));
+                Lote unLote = new Lote(resultadoDeConsulta.getInt("ID"), resultadoDeConsulta.getString("Etiqueta"), resultadoDeConsulta.getFloat("Cantidad"), resultadoDeConsulta.getString("Tipo_Lote"), resultadoDeConsulta.getString("Unidad_De_Medida"), resultadoDeConsulta.getString("Estado"), unaOrdenCompra, resultadoDeConsulta.getDate("Fecha_Adquisicion"), resultadoDeConsulta.getString("Unidad_De_Medida_Transporte"), resultadoDeConsulta.getInt("Cantidad_Unidades_Transporte"));
                 Equipamiento unEquipamientoDondeReside = unaOrganizacion.getEquipamientos().get(resultadoDeConsulta.getInt("IdEquipamiento"));
                 if (unaOrdenCompra != null) {
                     unaOrdenCompra.agregarLote(unLote);
@@ -334,16 +350,19 @@ public class Persistencia {
                 //OrdenDeCompra unaOrdenDeCompra = unaOrganizacion.getOrdenesCompra().get(resultadoDeConsulta.getInt("IdProveedorTransporte"));
                 MovimientoInternoMateriaPrima unMovimiento = new MovimientoInternoMateriaPrima(resultadoDeConsulta.getInt("ID"), unUsuario, resultadoDeConsulta.getDate("Fecha_Origen"), resultadoDeConsulta.getTime("Hora_Entrada"), resultadoDeConsulta.getTime("Hora_Salida"), resultadoDeConsulta.getString("Tipo_Unidad_Transporte"), resultadoDeConsulta.getInt("cantidad_Unidades"), resultadoDeConsulta.getString("Unidad_De_Medida_Peso"), resultadoDeConsulta.getFloat("Peso_Entrada"), resultadoDeConsulta.getFloat("Peso_Salida"), resultadoDeConsulta.getString("N_Hoja_Ruta"), resultadoDeConsulta.getString("N_Remito"), resultadoDeConsulta.getString("N_Precinto"), resultadoDeConsulta.getString("Nombre_Conductor"), resultadoDeConsulta.getString("Patente_Chasis"), resultadoDeConsulta.getString("Patente_Acoplado"), resultadoDeConsulta.getString("Estado"), loteImplicado, equipamientoOrigen, equipamientoDestino, basculaAsociada, unProveedor, resultadoDeConsulta.getInt("ID_Evento"));
                 unaOrganizacion.getMovimientos().put(unMovimiento.getId(), unMovimiento);
-
+                unaOrganizacion.getEventos().put(unMovimiento.getIdEvento(), unMovimiento);
                 loteImplicado.agregarMovimiento(unMovimiento);
                 loteImplicado.getOrdenDeProduccionAsociada().agregarEvento(unMovimiento);
                 if (!unMovimiento.poseeEquipamientoOrigen()) {
                     unaOrganizacion.getMovimientosDeIngreso().put(unMovimiento.getId(), unMovimiento);
                 }
-
                 if (unMovimiento.estaRegular()) {
                     loteImplicado.asignarUltimoMovimiento(unMovimiento);
                 }
+                if (equipamientoOrigen != null)
+                    equipamientoOrigen.agregarMovimientoSalida(unMovimiento);
+                if (equipamientoDestino != null)
+                    equipamientoDestino.agregarMovimientoEntrada(unMovimiento);
             }
         } catch (SQLException e) {
             System.err.println(e.getMessage());
@@ -370,12 +389,55 @@ public class Persistencia {
                 while (resultadoDeSubConsulta.next()) {
                     int unIdDeLote = resultadoDeSubConsulta.getInt("IdLote");
                     Lote unLote = unaOrganizacion.getLotes().get(unIdDeLote);
-                    unEstacionamiento.agregarLote(unLote);
+                    String unidadMedidaTransporte = resultadoDeSubConsulta.getString("Unidad_De_Medida_Transporte");
+                    int cantidadUtilizadaUnidades = resultadoDeSubConsulta.getInt("Cantidad_Unidades_Utilizadas");
+                    String unaUnidadMedidaPeso = resultadoDeSubConsulta.getString("Unidad_De_Medida_Peso");
+                    Float pesoUtilizado = resultadoDeSubConsulta.getFloat("Peso_Utilizado");
+                    DetalleTransformacion unDetalle = new DetalleTransformacion(unidadMedidaTransporte, cantidadUtilizadaUnidades, unaUnidadMedidaPeso, pesoUtilizado, unLote, unEstacionamiento);
+                    unEstacionamiento.agregarDetalle(unDetalle);
                     unLote.agregarEstacionamiento(unEstacionamiento);
                     unLote.getOrdenDeProduccionAsociada().agregarEvento(unEstacionamiento);
                 }
                 unaOrganizacion.getTransformaciones().put(unEstacionamiento.getId(), unEstacionamiento);
                 unaOrganizacion.getEstacionamientos().put(unEstacionamiento.getId(), unEstacionamiento);
+                unaOrganizacion.getEventos().put(unEstacionamiento.getIdEvento(), unEstacionamiento);
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            //No hacer nada. Si devuelve un error es porque la tabla está vacía.
+        }
+        // </editor-fold>
+        //MOLIENDAS
+        // <editor-fold defaultstate="collapsed">
+        sql = "SELECT * FROM public.TRANSFORMACIONES where (Tipo_Transformacion = 'Molienda') order by ID;";
+        try {
+            resultadoDeConsulta = consulta.executeQuery(sql);
+            while (resultadoDeConsulta.next()) {
+
+                Usuario unUsuario = unaOrganizacion.getUsuarios().get(resultadoDeConsulta.getInt("IdUsuario"));
+                Molino unMolino = (Molino) unaOrganizacion.getEquipamientos().get(resultadoDeConsulta.getInt("IdEquipamiento"));
+                Molienda unaMolienda = new Molienda(resultadoDeConsulta.getInt("ID"), unUsuario, resultadoDeConsulta.getDate("Fecha_Origen"), resultadoDeConsulta.getString("Estado"), resultadoDeConsulta.getInt("ID_Evento"), unMolino, resultadoDeConsulta.getString("Sector"), resultadoDeConsulta.getString("Turno"));
+
+                int idTransformacion = resultadoDeConsulta.getInt("ID");
+
+                sql = "SELECT * FROM public.DETALLES_TRANSFORMACION where (IdTransformacion = " + idTransformacion + ") order by ID;";
+                resultadoDeSubConsulta = subConsulta.executeQuery(sql);
+
+                while (resultadoDeSubConsulta.next()) {
+                    int unIdDeLote = resultadoDeSubConsulta.getInt("IdLote");
+                    Lote unLote = unaOrganizacion.getLotes().get(unIdDeLote);
+                    String unidadMedidaTransporte = resultadoDeSubConsulta.getString("Unidad_De_Medida_Transporte");
+                    int cantidadUtilizadaUnidades = resultadoDeSubConsulta.getInt("Cantidad_Unidades_Utilizadas");
+                    String unaUnidadMedidaPeso = resultadoDeSubConsulta.getString("Unidad_De_Medida_Peso");
+                    Float pesoUtilizado = resultadoDeSubConsulta.getFloat("Peso_Utilizado");
+                    DetalleTransformacion unDetalle = new DetalleTransformacion(unidadMedidaTransporte, cantidadUtilizadaUnidades, unaUnidadMedidaPeso, pesoUtilizado, unLote, unaMolienda);
+                    unaMolienda.agregarDetalle(unDetalle);
+                    unLote.agregarMolienda(unaMolienda);
+                    unLote.getOrdenDeProduccionAsociada().agregarEvento(unaMolienda);
+                }
+                unaOrganizacion.getTransformaciones().put(unaMolienda.getId(), unaMolienda);
+                unaOrganizacion.getMoliendas().put(unaMolienda.getId(), unaMolienda);
+                unaOrganizacion.getEventos().put(unaMolienda.getIdEvento(), unaMolienda);
             }
         } catch (SQLException e) {
             System.err.println(e.getMessage());
@@ -407,6 +469,7 @@ public class Persistencia {
                 resultadoDeSubConsulta = subConsulta.executeQuery(sql);
                 while (resultadoDeSubConsulta.next()) {
                     int unIdOrdenDeProduccion = resultadoDeSubConsulta.getInt("IdOrdenProduccion");
+                    
                     OrdenDeProduccion unaOrdenDeProduccion = unaOrganizacion.getOrdenesProduccion().get(unIdOrdenDeProduccion);
                     unaOrdenDeProduccion.agregarCriterioLaboratorio(unCriterio);
                     unCriterio.agregarOrdenDeProduccion(unaOrdenDeProduccion);
@@ -461,18 +524,20 @@ public class Persistencia {
                         resultadoDeConsulta.getString("Comentario"), resultadoDeConsulta.getString("Conclusion"));
                 if (unLote != null) {
                     unLote.agregarAnalisis(unAnalisis);
+                    unLote.getOrdenDeCompraAsociada().getProveedorAsociado().agregarAnalisis(unAnalisis);
                 }
                 if (unaOrdenDeCompra != null) {
                     unaOrdenDeCompra.agregarAnalisisDeLaboratorio(unAnalisis);
+                    unaOrdenDeCompra.getProveedorAsociado().agregarAnalisis(unAnalisis);
                 }
                 unaOrdenDeProduccion.agregarEvento(unAnalisis);
                 unLaboratorio.agregarAnalisis(unAnalisis);
                 unCriterio.agregarAnalisis(unAnalisis);
-                unCriterio.agregarOrdenDeProduccion(unaOrdenDeProduccion);
+                //unCriterio.agregarOrdenDeProduccion(unaOrdenDeProduccion);
+                //System.out.println("ACA ESTA EL PROBLEMA");
                 unaOrganizacion.getAnalisisLaboratorio().put(unAnalisis.getId(), unAnalisis);
+                unaOrganizacion.getEventos().put(unAnalisis.getIdEvento(), unAnalisis);
 
-                //BORRAME
-                System.out.println(unAnalisis.getCriterioAsociado().generarDetalleDeResultadoDeAnalisis(unAnalisis));
             }
         
         } catch (SQLException e) {
@@ -480,7 +545,115 @@ public class Persistencia {
             //No hacer nada. Si devuelve un error es porque la tabla está vacía.
         }
         // </editor-fold>
-
+        //EGRESOS
+        // <editor-fold defaultstate="collapsed">
+        sql = "SELECT * FROM public.SALIDAS where (Tipo_Salida = 'Egreso') order by ID;";
+        try {
+            resultadoDeConsulta = consulta.executeQuery(sql);
+            while (resultadoDeConsulta.next()) {
+                int unId = resultadoDeConsulta.getInt("ID");
+                String unEstado = resultadoDeConsulta.getString("Estado");
+                String unaDescripcion = resultadoDeConsulta.getString("Descripcion");
+                String unComentario = resultadoDeConsulta.getString("Comentario");
+                int idEvento = resultadoDeConsulta.getInt("ID_Evento");
+                Usuario unUsuario = unaOrganizacion.getUsuarios().get(resultadoDeConsulta.getInt("IdUsuario"));
+                java.sql.Date unaFechaOrigen = resultadoDeConsulta.getDate("Fecha_Origen");
+                
+                String unaUnidadDeMedidaTransporte = resultadoDeConsulta.getString("Unidad_De_Medida_Transporte");
+                int cantidadUnidadesUtilizadas = resultadoDeConsulta.getInt("Cantidad_Unidades_Utilizadas");
+                String unidadMedidaPeso = resultadoDeConsulta.getString("Unidad_De_Medida_Peso");
+                Float unPeso = resultadoDeConsulta.getFloat("Peso_Utilizado");
+                
+                Molienda unaMolienda = (Molienda) unaOrganizacion.getTransformaciones().get(resultadoDeConsulta.getInt("IdTransformacion"));
+                //Equipamiento unEquipamiento = this.organizacionAsociada.getEquipamientos().get(resultadoDeConsulta.getInt(""));   //En las PERDIDAS
+                
+                //Evento unEvento = organizacionAsociada.getEventos().get(idEvento); ESTA MAL
+                
+                Egreso unEgreso = new Egreso(unId, unEstado, unaDescripcion, unComentario, idEvento, unUsuario, unaFechaOrigen, unaMolienda, unaUnidadDeMedidaTransporte, cantidadUnidadesUtilizadas, unidadMedidaPeso, unPeso);
+                unaMolienda.agregarSalida(unEgreso);
+                unaMolienda.getOrdenDeProduccionAsociada().agregarEvento(unEgreso);
+                unaOrganizacion.getEventos().put(unEgreso.getIdEvento(), unEgreso);
+                unaOrganizacion.getSalidas().put(unEgreso.getId(), unEgreso);
+                unaOrganizacion.getEgresos().put(unEgreso.getId(), unEgreso);
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            //No hacer nada. Si devuelve un error es porque la tabla está vacía.
+        }
+        // </editor-fold>
+        //MERMAS
+        // <editor-fold defaultstate="collapsed">
+        sql = "SELECT * FROM public.SALIDAS where (Tipo_Salida = 'Merma') order by ID;";
+        try {
+            resultadoDeConsulta = consulta.executeQuery(sql);
+            while (resultadoDeConsulta.next()) {
+                int unId = resultadoDeConsulta.getInt("ID");
+                String unEstado = resultadoDeConsulta.getString("Estado");
+                String unaDescripcion = resultadoDeConsulta.getString("Descripcion");
+                String unComentario = resultadoDeConsulta.getString("Comentario");
+                int idEvento = resultadoDeConsulta.getInt("ID_Evento");
+                Usuario unUsuario = unaOrganizacion.getUsuarios().get(resultadoDeConsulta.getInt("IdUsuario"));
+                java.sql.Date unaFechaOrigen = resultadoDeConsulta.getDate("Fecha_Origen");
+                
+                String unaUnidadDeMedidaTransporte = resultadoDeConsulta.getString("Unidad_De_Medida_Transporte");
+                int cantidadUnidadesUtilizadas = resultadoDeConsulta.getInt("Cantidad_Unidades_Utilizadas");
+                String unidadMedidaPeso = resultadoDeConsulta.getString("Unidad_De_Medida_Peso");
+                Float unPeso = resultadoDeConsulta.getFloat("Peso_Utilizado");
+                
+                Estacionamiento unEstacionamiento = (Estacionamiento) unaOrganizacion.getTransformaciones().get(resultadoDeConsulta.getInt("IdTransformacion"));
+                Lote unLoteImplicado = unaOrganizacion.getLotes().get(resultadoDeConsulta.getInt("IdLote"));
+                MovimientoInternoMateriaPrima unMovimientoImplicado = unaOrganizacion.getMovimientos().get(resultadoDeConsulta.getInt("IdMovimiento"));
+                
+                Merma unaMerma = new Merma(unId, unEstado, unaDescripcion, unComentario, idEvento, unUsuario, unaFechaOrigen, unEstacionamiento, unaUnidadDeMedidaTransporte, cantidadUnidadesUtilizadas, unidadMedidaPeso, unPeso, unLoteImplicado, unMovimientoImplicado);
+                unMovimientoImplicado.agregarMerma(unaMerma);
+                unEstacionamiento.agregarSalida(unaMerma);
+                unEstacionamiento.agregarMerma(unaMerma);
+                unLoteImplicado.getOrdenDeProduccionAsociada().agregarEvento(unaMerma);
+                unLoteImplicado.agregarMerma(unaMerma);
+                unaOrganizacion.getEventos().put(unaMerma.getIdEvento(), unaMerma);
+                unaOrganizacion.getSalidas().put(unaMerma.getId(), unaMerma);
+                unaOrganizacion.getMermas().put(unaMerma.getId(), unaMerma);
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            //No hacer nada. Si devuelve un error es porque la tabla está vacía.
+        }
+        // </editor-fold>        
+        
+        //PERDIDAS
+        // <editor-fold defaultstate="collapsed">
+        sql = "SELECT * FROM public.SALIDAS where (Tipo_Salida = 'Perdida') order by ID;";
+        try {
+            resultadoDeConsulta = consulta.executeQuery(sql);
+            while (resultadoDeConsulta.next()) {
+                int unId = resultadoDeConsulta.getInt("ID");
+                String unEstado = resultadoDeConsulta.getString("Estado");
+                String unaDescripcion = resultadoDeConsulta.getString("Descripcion");
+                String unComentario = resultadoDeConsulta.getString("Comentario");
+                int idEvento = resultadoDeConsulta.getInt("ID_Evento");
+                Usuario unUsuario = unaOrganizacion.getUsuarios().get(resultadoDeConsulta.getInt("IdUsuario"));
+                java.sql.Date unaFechaOrigen = resultadoDeConsulta.getDate("Fecha_Origen");
+                
+                String unaUnidadDeMedidaTransporte = resultadoDeConsulta.getString("Unidad_De_Medida_Transporte");
+                int cantidadUnidadesUtilizadas = resultadoDeConsulta.getInt("Cantidad_Unidades_Utilizadas");
+                String unidadMedidaPeso = resultadoDeConsulta.getString("Unidad_De_Medida_Peso");
+                Float unPeso = resultadoDeConsulta.getFloat("Peso_Utilizado");
+                
+                Lote unLoteImplicado = unaOrganizacion.getLotes().get(resultadoDeConsulta.getInt("IdLote"));
+                MovimientoInternoMateriaPrima unMovimientoImplicado = unaOrganizacion.getMovimientos().get(resultadoDeConsulta.getInt("IdMovimiento"));
+                
+                Perdida unaPerdida = new Perdida(unId, unEstado, unaDescripcion, unComentario, idEvento, unUsuario, unaFechaOrigen, unLoteImplicado, unMovimientoImplicado, null, Lote.UNIDAD_MEDIDA_Tranporte, cantidadUnidadesUtilizadas, unidadMedidaPeso, unPeso);
+                unLoteImplicado.getOrdenDeProduccionAsociada().agregarEvento(unaPerdida);
+                unLoteImplicado.agregarPerdida(unaPerdida);
+                unaOrganizacion.getEventos().put(unaPerdida.getIdEvento(), unaPerdida);
+                unaOrganizacion.getSalidas().put(unaPerdida.getId(), unaPerdida);
+                unaOrganizacion.getPerdidas().put(unaPerdida.getId(), unaPerdida);
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            //No hacer nada. Si devuelve un error es porque la tabla está vacía.
+        }
+        // </editor-fold>                
         this.cerrarSesion();
     }
 
@@ -738,7 +911,7 @@ public class Persistencia {
                 idEvento = resultadoDeConsulta.getInt(1);
                 unaOrdenDeCompra.setIdEvento(idEvento);
                 break;                
-// </editor-fold>                
+// </editor-fold>   
             //lote
             // <editor-fold defaultstate="collapsed">
             case "Lote":
@@ -746,14 +919,16 @@ public class Persistencia {
                 //Un lote siempre que se inserta sera en un equipamiento.
                 //LA ETIQUETA SE CALCULA A PARTIR DEL ID UNA VEZ PERSISTIDO
 
-                ps = this.conexion.prepareStatement("insert into public.LOTES (Tipo_Lote, Estado, Cantidad, Unidad_De_Medida, Fecha_Adquisicion, IdOrdenCompra, IdEquipamiento) values (?, ?, ?, ?, ?, ?, ?);");
+                ps = this.conexion.prepareStatement("insert into public.LOTES (Tipo_Lote, Estado, Cantidad, Unidad_De_Medida, Fecha_Adquisicion, Unidad_De_Medida_Transporte, Cantidad_Unidades_Transporte, IdOrdenCompra, IdEquipamiento) values (?, ?, ?, ?, ?, ?, ?, ?, ?);");
                 ps.setObject(1, unLote.getTipo_Lote());
                 ps.setObject(2, unLote.getEstado());
-                ps.setObject(3, unLote.getCantidad());
+                ps.setObject(3, unLote.getCantidadTotalPesoIngresado());
                 ps.setObject(4, unLote.getUnidadDeMedida());
-                ps.setObject(5, unLote.getFechaAdquisicion());//DEBERIA HACER PRIMERO ORDENES DE PRODUCCION Y DE COMPRA           
-                ps.setObject(6, unLote.getOrdenDeCompraAsociada().getId());
-                ps.setObject(7, unLote.getEquipamientoDondeReside().getId());
+                ps.setObject(5, unLote.getFechaAdquisicion());
+                ps.setObject(6, unLote.getUnidadDeMedidaTransporte());
+                ps.setObject(7, unLote.getCantidadTotalUnidadesDeTransporteIngresadas());
+                ps.setObject(8, unLote.getOrdenDeCompraAsociada().getId());
+                ps.setObject(9, unLote.getEquipamientoDondeReside().getId());
 
                 //
                 ps.execute();
@@ -769,12 +944,13 @@ public class Persistencia {
             case "Usuario":
                 
                 Usuario unUsuario = (Usuario) unObjeto;
-                ps = this.conexion.prepareStatement("insert into public.USUARIOS (Nombre, Apellido, DNI, Rol, Estado) values (?, ?, ?, ?, ?);");
-                ps.setObject(1, unUsuario.getNombre());
-                ps.setObject(2, unUsuario.getApellido());
-                ps.setObject(3, unUsuario.getDni());
-                ps.setObject(4, unUsuario.getRol());
-                ps.setObject(5, unUsuario.getEstado());
+                ps = this.conexion.prepareStatement("insert into public.USUARIOS (Nombre_usuario, Nombre, Apellido, DNI, Rol, Estado) values (?, ?, ?, ?, ?, ?);");
+                ps.setObject(1, unUsuario.getNombreUsuario());
+                ps.setObject(2, unUsuario.getNombre());
+                ps.setObject(3, unUsuario.getApellido());
+                ps.setObject(4, unUsuario.getDni());
+                ps.setObject(5, unUsuario.getRol());
+                ps.setObject(6, unUsuario.getEstado());
                 ps.execute();
                 sql = "SELECT max(Id) from public.USUARIOS;";
                 resultadoDeConsulta = stmt.executeQuery(sql);
@@ -852,12 +1028,16 @@ public class Persistencia {
                 id = resultadoDeConsulta.getInt(1);
                 unEstacionamiento.setId(id);
 
-                Iterator lotesEstacionados = unEstacionamiento.getLotesImplicados().iterator();
-                while (lotesEstacionados.hasNext()) {
-                    Lote unLoteEstacionado = (Lote) lotesEstacionados.next();
-                    ps = this.conexion.prepareStatement("insert into public.DETALLES_TRANSFORMACION (IdTransformacion, IdLote) values (? , ?); ");
-                    ps.setObject(1, id);
-                    ps.setObject(2, unLoteEstacionado.getId());
+                Iterator detallesDeEstacionamiento = unEstacionamiento.getDetallesAsociados().iterator();
+                while (detallesDeEstacionamiento.hasNext()) {
+                    DetalleTransformacion unDetalle = (DetalleTransformacion) detallesDeEstacionamiento.next();
+                    ps = this.conexion.prepareStatement("insert into public.DETALLES_TRANSFORMACION (Cantidad_Unidades_Utilizadas, Unidad_De_Medida_Transporte, Peso_Utilizado, Unidad_De_Medida_Peso,IdTransformacion, IdLote) values (?, ?, ?, ?, ?, ?); ");
+                    ps.setObject(1, unDetalle.getCantidadUtilizada());
+                    ps.setObject(2, unDetalle.getUnidadMedidaTransporte());
+                    ps.setObject(3, unDetalle.getPesoUtilizdo());
+                    ps.setObject(4, unDetalle.getUnidadMedidaPeso());
+                    ps.setObject(5, id);
+                    ps.setObject(6, unDetalle.getLoteImplicado().getId());
                     ps.execute();
                 }
 
@@ -869,6 +1049,51 @@ public class Persistencia {
                 unEstacionamiento.setIdEvento(idEvento);
                 break;
 // </editor-fold>  
+            //Molienda
+            // <editor-fold defaultstate="collapsed">
+            case "Molienda":
+                //Para dar de alta una molienda, se deben hacer tres cosas:
+                //Dar de alta una transformacion
+                //Dar de alta una molienda
+                //ASOCIAR  cada lote como un detalle de transformacion.
+                Molienda unaMolienda = (Molienda) unObjeto;
+                ps = this.conexion.prepareStatement("insert into public.TRANSFORMACIONES (Tipo_Transformacion, Estado, Fecha_Origen, IdEquipamiento, IdUsuario, Sector, Turno) values (?, ?, ?, ?, ?, ?, ?);");
+                ps.setObject(1, "Molienda");
+                ps.setObject(2, unaMolienda.getEstado());
+                ps.setObject(3, unaMolienda.getFechaOrigen());
+                ps.setObject(4, unaMolienda.getEquipamientoAsociado().getId());
+                ps.setObject(5, unaMolienda.getUsuarioAsociado().getId());
+                ps.setObject(6, unaMolienda.getSector());
+                ps.setObject(7, unaMolienda.getTurno());
+
+                ps.execute();
+                sql = "SELECT max(Id) from public.TRANSFORMACIONES;";
+                resultadoDeConsulta = stmt.executeQuery(sql);
+                resultadoDeConsulta.next();
+                id = resultadoDeConsulta.getInt(1);
+                unaMolienda.setId(id);
+
+                Iterator detallesDeMolienda = unaMolienda.getDetallesAsociados().iterator();
+                while (detallesDeMolienda.hasNext()) {
+                    DetalleTransformacion unDetalle = (DetalleTransformacion) detallesDeMolienda.next();
+                    ps = this.conexion.prepareStatement("insert into public.DETALLES_TRANSFORMACION (Cantidad_Unidades_Utilizadas, Unidad_De_Medida_Transporte, Peso_Utilizado, Unidad_De_Medida_Peso,IdTransformacion, IdLote) values (?, ?, ?, ?, ?, ?); ");
+                    ps.setObject(1, unDetalle.getCantidadUtilizada());
+                    ps.setObject(2, unDetalle.getUnidadMedidaTransporte());
+                    ps.setObject(3, unDetalle.getPesoUtilizdo());
+                    ps.setObject(4, unDetalle.getUnidadMedidaPeso());
+                    ps.setObject(5, id);
+                    ps.setObject(6, unDetalle.getLoteImplicado().getId());
+                    ps.execute();
+                }
+
+                //Establecer numero de evento.
+                sql = "SELECT max(ID_Evento) from public.TRANSFORMACIONES;";
+                resultadoDeConsulta = stmt.executeQuery(sql);
+                resultadoDeConsulta.next();
+                idEvento = resultadoDeConsulta.getInt(1);
+                unaMolienda.setIdEvento(idEvento);
+                break;
+// </editor-fold>
             //Analisis de laboratorio
             // <editor-fold defaultstate="collapsed">
             case "AnalisisLaboratorio":
@@ -977,7 +1202,126 @@ public class Persistencia {
                 id = resultadoDeConsulta.getInt(1);
                 unCriterio.setId(id);
                 break;                
-// </editor-fold>  
+            // </editor-fold>
+            //Egresos
+            // <editor-fold defaultstate="collapsed">
+            case "Egreso":
+                Egreso unEgreso = (Egreso) unObjeto;
+                ps = this.conexion.prepareStatement("insert into public.SALIDAS ("
+                        + "Tipo_Salida, Estado, Fecha_Origen, Descripcion, Comentario, "
+                        + "Unidad_De_Medida_Transporte, Cantidad_Unidades_Utilizadas, "
+                        + "Unidad_De_Medida_Peso, Peso_Utilizado, "
+                        + "IdUsuario, IdTransformacion) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+                ps.setObject(1, Salida.TIPO_EGRESO);
+                ps.setObject(2, unEgreso.getEstado());
+                ps.setObject(3, unEgreso.getFechaOrigen());
+                ps.setObject(4, unEgreso.getDescripcion());
+                ps.setObject(5, unEgreso.getComentario());
+                
+                ps.setObject(6, unEgreso.getUnidadMedidaTransporte());
+                ps.setObject(7, unEgreso.getCantidadBolsasUtilizada());
+                ps.setObject(8, unEgreso.getUnidadMedidaPeso());
+                ps.setObject(9, unEgreso.getPesoUtilizdo());
+                
+                ps.setObject(10, unEgreso.getUsuarioAsociado().getId());
+                ps.setObject(11, unEgreso.getMoliendaImplicada().getId());
+
+                ps.execute();
+                sql = "SELECT max(Id) from public.SALIDAS;";
+                resultadoDeConsulta = stmt.executeQuery(sql);
+                resultadoDeConsulta.next();
+                id = resultadoDeConsulta.getInt(1);
+                unEgreso.setId(id);
+
+                //Establecer numero de evento.
+                sql = "SELECT max(ID_Evento) from public.SALIDAS;";
+                resultadoDeConsulta = stmt.executeQuery(sql);
+                resultadoDeConsulta.next();
+                idEvento = resultadoDeConsulta.getInt(1);
+                unEgreso.setIdEvento(idEvento);
+                break;
+// </editor-fold>      
+            //Mermas
+            // <editor-fold defaultstate="collapsed">
+            case "Merma":
+                Merma unaMerma = (Merma) unObjeto;
+                ps = this.conexion.prepareStatement("insert into public.SALIDAS ("
+                        + "Tipo_Salida, Estado, Fecha_Origen, Descripcion, Comentario, "
+                        + "Unidad_De_Medida_Transporte, Cantidad_Unidades_Utilizadas, "
+                        + "Unidad_De_Medida_Peso, Peso_Utilizado, "
+                        + "IdUsuario, IdTransformacion, IdLote, IdMovimiento) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+                ps.setObject(1, Salida.TIPO_Merma);
+                ps.setObject(2, unaMerma.getEstado());
+                ps.setObject(3, unaMerma.getFechaOrigen());
+                ps.setObject(4, unaMerma.getDescripcion());
+                ps.setObject(5, unaMerma.getComentario());
+                
+                ps.setObject(6, unaMerma.getUnidadMedidaTransporte());
+                ps.setObject(7, unaMerma.getCantidadBolsasUtilizada());
+                ps.setObject(8, unaMerma.getUnidadMedidaPeso());
+                ps.setObject(9, unaMerma.getPesoUtilizdo());
+                
+                ps.setObject(10, unaMerma.getUsuarioAsociado().getId());
+                ps.setObject(11, unaMerma.getEstacionamientoImplicado().getId());
+                ps.setObject(12, unaMerma.getLoteImplicado().getId());
+                ps.setObject(13, unaMerma.getMovimientoImplicado().getId());
+
+                ps.execute();
+                sql = "SELECT max(Id) from public.SALIDAS;";
+                resultadoDeConsulta = stmt.executeQuery(sql);
+                resultadoDeConsulta.next();
+                id = resultadoDeConsulta.getInt(1);
+                unaMerma.setId(id);
+
+                //Establecer numero de evento.
+                sql = "SELECT max(ID_Evento) from public.SALIDAS;";
+                resultadoDeConsulta = stmt.executeQuery(sql);
+                resultadoDeConsulta.next();
+                idEvento = resultadoDeConsulta.getInt(1);
+                unaMerma.setIdEvento(idEvento);
+                break;
+// </editor-fold>        
+            //PERDIDAS
+            // <editor-fold defaultstate="collapsed">
+            case "Perdida":
+                Perdida unaPerdida = (Perdida) unObjeto;
+                ps = this.conexion.prepareStatement("insert into public.SALIDAS ("
+                        + "Tipo_Salida, Estado, Fecha_Origen, Descripcion, Comentario, "
+                        + "Unidad_De_Medida_Transporte, Cantidad_Unidades_Utilizadas, "
+                        + "Unidad_De_Medida_Peso, Peso_Utilizado, "
+                        + "IdUsuario, IdLote, IdMovimiento) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+                ps.setObject(1, Salida.TIPO_PERDIDA);
+                ps.setObject(2, unaPerdida.getEstado());
+                ps.setObject(3, unaPerdida.getFechaOrigen());
+                ps.setObject(4, unaPerdida.getDescripcion());
+                ps.setObject(5, unaPerdida.getComentario());
+                
+                ps.setObject(6, unaPerdida.getUnidadMedidaTransporte());
+                ps.setObject(7, unaPerdida.getCantidadBolsasUtilizada());
+                ps.setObject(8, unaPerdida.getUnidadMedidaPeso());
+                ps.setObject(9, unaPerdida.getPesoUtilizdo());
+                
+                ps.setObject(10, unaPerdida.getUsuarioAsociado().getId());
+                ps.setObject(11, unaPerdida.getLoteImplicado().getId());
+                ps.setObject(12, unaPerdida.getEventoAsociado().getId());
+
+                ps.execute();
+                sql = "SELECT max(Id) from public.SALIDAS;";
+                resultadoDeConsulta = stmt.executeQuery(sql);
+                resultadoDeConsulta.next();
+                id = resultadoDeConsulta.getInt(1);
+                unaPerdida.setId(id);
+
+                //Establecer numero de evento.
+                sql = "SELECT max(ID_Evento) from public.SALIDAS;";
+                resultadoDeConsulta = stmt.executeQuery(sql);
+                resultadoDeConsulta.next();
+                idEvento = resultadoDeConsulta.getInt(1);
+                unaPerdida.setIdEvento(idEvento);
+                break;
+// </editor-fold>                      
+            
+                
         }
     }
 
@@ -1173,7 +1517,7 @@ public class Persistencia {
                 ps.setObject(1, unLote.getTipo_Lote());
                 ps.setObject(2, unLote.getEtiqueta());
                 ps.setObject(3, unLote.getEstado());
-                ps.setObject(4, unLote.getCantidad());
+                ps.setObject(4, unLote.getCantidadTotalPesoIngresado());
                 ps.setObject(5, unLote.getUnidadDeMedida());
                 ps.setObject(6, unLote.getFechaAdquisicion());
                 ps.setObject(7, unLote.getOrdenDeCompraAsociada().getId());
@@ -1264,8 +1608,20 @@ public class Persistencia {
                 ps.setObject(2, unEstacionamiento.getFechaExtraccion());
                 ps.setObject(3, unEstacionamiento.getId());
                 ps.execute();
-                break;            
+                break;
             // </editor-fold>                
+            //Moliendas
+            // <editor-fold defaultstate="collapsed">            
+            case "Molienda":
+                Molienda unaMolienda = (Molienda) unObjeto;
+                ps = this.conexion.prepareStatement("UPDATE public.TRANSFORMACIONES SET "
+                        + "Estado = ? "
+                        + "WHERE ID = ?;");
+                ps.setObject(1, unaMolienda.getEstado());
+                ps.setObject(2, unaMolienda.getId());
+                ps.execute();
+                break;
+            // </editor-fold> 
             //analisis de laboratorio
             // <editor-fold defaultstate="collapsed">            
             case "AnalisisLaboratorio":
@@ -1328,7 +1684,41 @@ public class Persistencia {
                 ps.setObject(22, unCriterio.getId());
                 ps.execute();
                 break;            
-            // </editor-fold>                
+            // </editor-fold>  
+            //Egreso
+            // <editor-fold defaultstate="collapsed">            
+            case "Egreso":
+                Egreso unEgreso = (Egreso) unObjeto;
+                ps = this.conexion.prepareStatement("UPDATE public.SALIDAS SET "
+                        + "Estado = ? "
+                        + "WHERE ID = ?;");
+                ps.setObject(1, unEgreso.getEstado());
+                ps.setObject(2, unEgreso.getId());
+                ps.execute();
+                break;
+            // </editor-fold>      
+                //Egreso
+            // <editor-fold defaultstate="collapsed">            
+        case "Salida":
+            Salida unaSalida = (Salida) unObjeto;
+            ps = this.conexion.prepareStatement("UPDATE public.SALIDAS SET "
+                    + "Estado = ? "
+                    + "WHERE ID = ?;");
+            ps.setObject(1, unaSalida.getEstado());
+            ps.setObject(2, unaSalida.getId());
+            ps.execute();
+            break;
+            
+        case "Merma":
+            Merma unaMerma = (Merma) unObjeto;
+            ps = this.conexion.prepareStatement("UPDATE public.SALIDAS SET "
+                    + "Estado = ? "
+                    + "WHERE ID = ?;");
+            ps.setObject(1, unaMerma.getEstado());
+            ps.setObject(2, unaMerma.getId());
+            ps.execute();
+            break;
+            // </editor-fold>  
             default:
                 throw new ExcepcionPersistencia("La clase " + unObjeto.getClass().getSimpleName() + " no es valida para realizar una modificación.");
         }
@@ -1398,6 +1788,47 @@ public class Persistencia {
         }
         return retorno;
     }
+    
+    public ArrayList obtenerAuditoria(String unaTabla,String unaCantidadDeRegistros, String unaOperacionACensar) throws SQLException, ExcepcionCargaParametros {
+        if (!Validaciones.esUnNumeroEnteroValido(unaCantidadDeRegistros)) {
+            throw new ExcepcionCargaParametros("No se ingreso un numero valido de registros a recuperar.");
+        }
+        int cantidadDeRegistros = Integer.parseInt(unaCantidadDeRegistros);
+        ArrayList retorno = new ArrayList();
+        String sql;
+        Statement stmt;
+        ResultSet rc;
+
+        if (unaTabla.equals("cualquiera")){
+            sql = "select * from public.AUDITORIAS LIMIT " + cantidadDeRegistros + ";";
+            if (!unaOperacionACensar.equals("cualquiera"))
+                sql = "select * from public.AUDITORIAS WHERE (operacion = '"+unaOperacionACensar+"') LIMIT " + cantidadDeRegistros + ";";
+        }
+        else{
+            sql = "select * from public.AUDITORIAS where (Nombre_Tabla = '"+unaTabla.toLowerCase()+"') LIMIT " + cantidadDeRegistros + ";";
+            if (!unaOperacionACensar.equals("cualquiera"))
+                sql = "select * from public.AUDITORIAS where (Nombre_Tabla = '"+unaTabla.toLowerCase()+"') and (operacion = '"+unaOperacionACensar+"') LIMIT " + cantidadDeRegistros + ";";
+        }
+        stmt = this.conexion.createStatement();
+        try {
+            rc = stmt.executeQuery(sql);
+            while (rc.next()) {
+                
+                java.sql.Date unaFechaOcurrencia = rc.getDate("Fecha_Origen");
+                String unNombreTabla = rc.getString("Nombre_Tabla");
+                int unIdAsociado = rc.getInt("Id_Asociado");
+                String unaOperacion = rc.getString("Operacion");
+                
+                Usuario unUsuario = this.organizacionAsociada.getUsuarios().get(rc.getInt("IdUsuario"));
+                Auditoria unaAuditoria = new Auditoria(rc.getInt("ID"), unaFechaOcurrencia, unNombreTabla, unIdAsociado, unaOperacion, unUsuario);
+                retorno.add(unaAuditoria);
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            //No hacer nada. Si devuelve un error es porque la tabla está vacía.
+        }
+        return retorno;
+    }
 
     public Organizacion getOrganizacionAsociada() {
         return organizacionAsociada;
@@ -1406,5 +1837,52 @@ public class Persistencia {
     public void setOrganizacionAsociada(Organizacion organizacionAsociada) {
         this.organizacionAsociada = organizacionAsociada;
     }
+
+    public boolean seCargoInicialmenteLosCampos() {
+        try {
+            ResultSet resultadoDeConsulta;
+            int id;
+            Statement stmt = this.conexion.createStatement();
+            String sql;
+            
+            sql = "SELECT max(Id) from public.MOVIMIENTOS_INTERNOS_MP;";
+            resultadoDeConsulta = stmt.executeQuery(sql);
+            resultadoDeConsulta.next();
+            id = resultadoDeConsulta.getInt(1);
+            return (id!=0);
+        } catch (SQLException ex) {
+            System.err.println(ex.getMessage());
+            return false;
+        }
+        
+        
+    }
+
+    public ArrayList obtenerDetalleAuditoria(int id) throws SQLException {
+        ArrayList retorno = new ArrayList();
+        String sql;
+        Statement stmt;
+        ResultSet rc;
+
+        sql = "select * from DETALLES_AUDITORIA where (IdAuditoria = "+id+");";
+        stmt = this.conexion.createStatement();
+        try {
+            rc = stmt.executeQuery(sql);
+            while (rc.next()) {
+                
+                String unCampo = rc.getString("Campo");
+                String unValorAnterior = rc.getString("Valor_Anterior");
+                String unValorPosterior = rc.getString("Valor_Posterior");
+                
+                DetalleAuditoria unDetalleAuditoria = new DetalleAuditoria(unCampo, unValorAnterior, unValorPosterior);
+                retorno.add(unDetalleAuditoria);
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            //No hacer nada. Si devuelve un error es porque la tabla está vacía.
+        }
+        return retorno;
+    }
+    
 
 }

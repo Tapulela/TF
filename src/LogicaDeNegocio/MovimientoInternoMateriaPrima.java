@@ -5,29 +5,28 @@
  */
 package LogicaDeNegocio;
 
-import LogicaDeNegocio.Lote;
-import LogicaDeNegocio.Equipamiento;
+import InterfazGrafica.Consultable;
+import InterfazGrafica.Paneles.PanelGestionIngresos;
+import InterfazGrafica.UtilidadesInterfazGrafica;
 import LogicaDeNegocio.GestionUsuariosYRoles.Usuario;
-import LogicaDeNegocio.Organizacion;
-import java.sql.Date;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
 
 /**
  *
  * @author usuario
  */
-public class MovimientoInternoMateriaPrima extends Evento{
+public class MovimientoInternoMateriaPrima extends Evento implements Reporte, Filtrable,Consultable{
     public static final String ESTADO_REGULAR = "Regular";
     public static final String ESTADO_ANULADO = "Anulado";
     
     
-    private int id;
     private LocalTime horaEntrada;
     private LocalTime horaSalida;
     private String unidadTransporte;
@@ -50,10 +49,13 @@ public class MovimientoInternoMateriaPrima extends Evento{
     private Equipamiento equipamientoDestino;
     private Proveedor proveedorTransporte;
     
+    private ArrayList mermas;
+    
+    private MovimientoInternoMateriaPrima movimientoInmediatamentePosterior;
+    
 
     public MovimientoInternoMateriaPrima(int id, Usuario unOperador, java.sql.Date fechaOrigen, java.sql.Time horaEntrada, java.sql.Time horaSalida, String unidadTransporte, int cantidadUnidades, String unidadDeMedidaPeso, float pesoEntrada, float pesoSalida, String nHojaRuta, String nRemito, String precinto, String nombreConductor, String patenteChasis, String patenteAcoplado, String unEstado,Lote loteAMover, Equipamiento origen,Equipamiento destino, Bascula unaBasculaAsociada, Proveedor unProveedor, int idEvento) {
-        super(idEvento, unEstado, unOperador, fechaOrigen);
-        this.id = id;
+        super(idEvento, unEstado, unOperador, fechaOrigen, id);
         
         this.horaEntrada = horaEntrada.toLocalTime();
         this.horaSalida = horaSalida.toLocalTime();
@@ -76,9 +78,10 @@ public class MovimientoInternoMateriaPrima extends Evento{
         this.equipamientoDestino = destino;
         this.basculaAsociada = unaBasculaAsociada;
         this.proveedorTransporte = unProveedor;
+        this.mermas = new ArrayList();
     }
     
-    public MovimientoInternoMateriaPrima(Usuario unOperador, LocalTime horaEntrada, LocalTime horaSalida, String unidadTransporte, int cantidadUnidades, String unidadDeMedidaPeso, float pesoEntrada, float pesoSalida, String nHojaRuta, String nRemito, String precinto, String nombreConductor, String patenteChasis, String patenteAcoplado, Lote loteAMover, Equipamiento origen, Equipamiento destino, Proveedor unProveedorDeTransporte) {
+    public MovimientoInternoMateriaPrima(Calendar unaFechaOrigen, Usuario unOperador, LocalTime horaEntrada, LocalTime horaSalida, String unidadTransporte, int cantidadUnidades, String unidadDeMedidaPeso, float pesoEntrada, float pesoSalida, String nHojaRuta, String nRemito, String precinto, String nombreConductor, String patenteChasis, String patenteAcoplado, Lote loteAMover, Equipamiento origen, Equipamiento destino, Proveedor unProveedorDeTransporte) {
         super(Evento.ESTADO_REGULAR, unOperador);
         this.horaEntrada = horaEntrada;
         this.horaSalida = horaSalida;
@@ -95,11 +98,15 @@ public class MovimientoInternoMateriaPrima extends Evento{
         this.patenteAcoplado = patenteAcoplado;
         this.estado = ESTADO_REGULAR;
         
+        setFechaOrigen(unaFechaOrigen);
+        
         this.loteAsociado = loteAMover;
         this.equipamientoOrigen = origen;
         this.equipamientoDestino = destino;
         this.basculaAsociada = this.equipamientoDestino.getBasculaAsociada();
         this.proveedorTransporte = unProveedorDeTransporte;
+        
+        this.mermas = new ArrayList();
     }
 
     public Bascula getBasculaAsociada() {
@@ -119,13 +126,6 @@ public class MovimientoInternoMateriaPrima extends Evento{
     }
 
     
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
 
 
@@ -272,16 +272,12 @@ public class MovimientoInternoMateriaPrima extends Evento{
         this.estado = ESTADO_ANULADO;
     }
     
-    
-    
-    
-    
     public boolean estaRegular(){
         return this.estado.equals(ESTADO_REGULAR);
     }
 
 
-    public float getPesoNeto(String unidadDeMedida) throws ExcepcionCargaParametros {
+    public float getPesoNeto(String unidadDeMedida){
         return Organizacion.convertirUnidadPeso(this.unidadDeMedidaPeso, this.pesoEntrada-this.pesoSalida, unidadDeMedida);
     }
 
@@ -315,7 +311,7 @@ public class MovimientoInternoMateriaPrima extends Evento{
 
     public Object[] devolverVectorIngreso() {
         String fecha = ( new SimpleDateFormat( "dd/MM/yyyy" ) ).format( this.getFechaOrigenC().getTime() );
-        Object[] vec ={this.getId(), this.getEstadoEvento(), this.getLoteAsociado().getOrdenDeProduccionAsociada().getId(), this.getLoteAsociado().getOrdenDeCompraAsociada().getId(),this.getEquipamientoDestino().getNombre(), this.proveedorTransporte.getRazonSocial(), fecha, this.loteAsociado.getEtiqueta()};
+        Object[] vec ={this.getId(), this.getEstadoEvento(), UtilidadesInterfazGrafica.formatearFlotante(this.getPesoNeto(Lote.UNIDAD_MEDIDA_KILOGRAMO))+" Kg(s)",this.getLoteAsociado().getOrdenDeProduccionAsociada().getId(), this.getLoteAsociado().getOrdenDeCompraAsociada().getId(),this.getEquipamientoDestino().getNombre(), this.proveedorTransporte.getRazonSocial(), fecha, this.loteAsociado.getEtiqueta()};
         return vec;
     }
     
@@ -328,6 +324,119 @@ public class MovimientoInternoMateriaPrima extends Evento{
     public Boolean poseeProveedorAsociado(Proveedor unProveedor) {
         return this.loteAsociado.getOrdenDeCompraAsociada().getProveedorAsociado().equals(unProveedor);
     }
+
+    @Override
+    public String getReporte(){
+        if (!poseeEquipamientoOrigen()){
+            String retorno = "";
+            retorno = retorno + "ID: "+this.getId() +"\t\t Fecha: "+Organizacion.expresarCalendario(this.getFechaOrigenC()) +"\tHora de Entrada: "+horaEntrada+ "\t\tHora de Salida: "+horaSalida+"";
+            retorno = retorno + "\n";
+            retorno = retorno + "\n";
+            retorno = retorno + "Etiqueta de lote: "+this.getLoteAsociado().getEtiqueta()+ "\tCantidad de unidades: "+ this.getCantidadUnidades()+" "+this.getUnidadTransporte()+"(s) " +"\tPeso Neto: "+UtilidadesInterfazGrafica.formatearFlotante(Organizacion.convertirUnidadPeso(this.getUnidadDeMedidaPeso(), this.getPesoNeto(unidadDeMedidaPeso), Lote.UNIDAD_MEDIDA_KILOGRAMO))+" Kgs\n\n"
+                    + "Destino: "+this.equipamientoDestino.getNombre() +"\tBascula asociada: "+ this.getBasculaAsociada().getNombre()+" ";
+            retorno = retorno + "\n";
+            retorno = retorno + "\n";
+            retorno = retorno + "N° de hoja de ruta: "+this.getnHojaRuta()+""
+                    + "\t\tEstado: "+ this.getEstado();
+            return retorno;
+        }else{
+            String retorno = "";
+            retorno = retorno + "ID: "+this.getId() +"\t\t Fecha: "+Organizacion.expresarCalendario(this.getFechaOrigenC()) +"\tHora de Entrada: "+horaEntrada+ "\t\tHora de Salida: "+horaSalida+"";
+            retorno = retorno + "\n";
+            retorno = retorno + "\n";
+            retorno = retorno + "Etiqueta de lote: "+this.getLoteAsociado().getEtiqueta()+ "\tCantidad de unidades: "+ this.getCantidadUnidades()+" "+this.getUnidadTransporte()+"(s) " +"\tPeso Neto: "+UtilidadesInterfazGrafica.formatearFlotante(Organizacion.convertirUnidadPeso(this.getUnidadDeMedidaPeso(), this.getPesoNeto(unidadDeMedidaPeso), Lote.UNIDAD_MEDIDA_KILOGRAMO))+" Kgs\n\n"
+                    + "Origen "+this.equipamientoOrigen.getNombre()+ "\tDestino: "+this.equipamientoDestino.getNombre() +"\tBascula asociada: "+ this.getBasculaAsociada().getNombre()+" ";
+            retorno = retorno + "\n";
+            retorno = retorno + "N° de hoja de ruta: "+this.getnHojaRuta()+""
+                    + "\t\tEstado: "+ this.getEstado();
+            return retorno;
+        }
+    }
+
+    @Override
+    public Object[] devolverVector() {
+        if (!this.poseeEquipamientoOrigen())
+            return devolverVectorIngreso();
+        else
+            return devolverVectorMovimiento();
+        
+    }
+
+    @Override
+    public boolean cumpleCriterio(String unCriterio, Object unObjeto) {
+        boolean cumpleCriterio = false;
+        if (unObjeto == null)
+            return cumpleCriterio;
+        if (unObjeto instanceof ArrayList && !((ArrayList)unObjeto).isEmpty() && (((ArrayList)unObjeto).get(0)instanceof Calendar)){
+            ArrayList unaLista = (ArrayList) unObjeto;
+            Calendar fechaInferior = (Calendar) unaLista.get(0);
+            Calendar fechaSuperior = (Calendar) unaLista.get(1);
+            return this.fechaOrigenEstaEntre(fechaInferior, fechaSuperior);
+        }
+        if (unObjeto instanceof String && unCriterio.equals(PanelGestionIngresos.criterios[0]))
+            return ((String)unObjeto).equals(this.estado);
+        if (unObjeto instanceof String && unCriterio.equals(PanelGestionIngresos.criterios[1]))
+            return this.getLoteAsociado().getEtiqueta().contains(((String)unObjeto));
+        if (unObjeto instanceof OrdenDeProduccion){
+            OrdenDeProduccion unaOrdenProduccion = (OrdenDeProduccion) unObjeto;
+            return this.poseeOrdenDeProduccionAsociada(unaOrdenProduccion);
+        }
+        if (unObjeto instanceof OrdenDeCompra){
+            OrdenDeCompra unaOrdenDeCompra = (OrdenDeCompra) unObjeto;
+            return this.poseeOrdenDeCompraAsociada(unaOrdenDeCompra);
+        }
+        if (unObjeto instanceof Equipamiento){
+            Equipamiento unEquipamiento = (Equipamiento) unObjeto;
+            return this.poseeEquipamientoDestino(unEquipamiento);
+        }
+        if (unObjeto instanceof Proveedor && unCriterio.equals(PanelGestionIngresos.criterios[5])){
+            Proveedor unProveedor = (Proveedor) unObjeto;
+            return this.poseeProveedorTransporteAsociado(unProveedor);
+        }
+        if (unObjeto instanceof Proveedor && unCriterio.equals(PanelGestionIngresos.criterios[6])){
+            Proveedor unProveedor = (Proveedor) unObjeto;
+            return this.poseeProveedorAsociado(unProveedor);
+        }
+        if (unObjeto instanceof ArrayList && !((ArrayList)unObjeto).isEmpty() && (((ArrayList)unObjeto).get(0)instanceof Calendar)){
+            ArrayList unaLista = (ArrayList) unObjeto;
+            Calendar fechaInferior = (Calendar) unaLista.get(0);
+            Calendar fechaSuperior = (Calendar) unaLista.get(1);
+            return this.fechaOrigenEstaEntre(fechaInferior, fechaSuperior);
+        }
+        return cumpleCriterio;
+    }
     
+    public void agregarMerma(Merma unaMerma){
+        this.mermas.add(unaMerma);
+    }
+
+    public boolean poseeMermaRegular() {
+        boolean seEncontroMermaRegular = false;
+        Iterator recMermas = this.mermas.iterator();
+        while (recMermas.hasNext() && !seEncontroMermaRegular){
+            Merma unaMerma = (Merma) recMermas.next();
+            seEncontroMermaRegular = unaMerma.estaRegular();
+        }
+        return seEncontroMermaRegular;
+    }
+    
+    public Merma obtenerMermaRegular() {
+        Merma retorno = null;
+        Iterator recMermas = this.mermas.iterator();
+        while (recMermas.hasNext() && retorno == null){
+            Merma unaMerma = (Merma) recMermas.next();
+            if (unaMerma.estaRegular())
+                retorno = unaMerma;
+        }
+        return retorno;
+    }
+
+    public MovimientoInternoMateriaPrima getMovimientoInmediatamentePosterior() {
+        return movimientoInmediatamentePosterior;
+    }
+
+    public void setMovimientoInmediatamentePosterior(MovimientoInternoMateriaPrima movimientoInmediatamentePosterior) {
+        this.movimientoInmediatamentePosterior = movimientoInmediatamentePosterior;
+    }
     
 }

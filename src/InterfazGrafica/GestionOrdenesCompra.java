@@ -198,9 +198,9 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
         jLEstaticoEstado.setText("Estado");
         jLEstaticoEstado.setEnabled(false);
 
-        jCB1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jCB1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Kilogramo", "Tonelada" }));
+        jCB1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Kilogramo" }));
         jCB1.setEnabled(false);
+        jCB1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
         jLStaticCB1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLStaticCB1.setText("Unidad de Medida");
@@ -315,7 +315,6 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.DEFAULT_SIZE, 1344, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jBConcretarAccion)
                                 .addGap(18, 18, 18)
                                 .addComponent(jBCancelar))
@@ -330,10 +329,7 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(jLStaticEtiqueta4)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jBBuscarOrdenProduccion)))
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jBBuscarOrdenProduccion))
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(jLStaticEtiqueta6)
                                         .addGap(18, 18, 18)

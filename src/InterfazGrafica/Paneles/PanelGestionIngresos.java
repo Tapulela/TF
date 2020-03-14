@@ -5,30 +5,56 @@
  */
 package InterfazGrafica.Paneles;
 
+import InterfazGrafica.Busqueda.BuscarEquipamiento;
+import InterfazGrafica.Busqueda.BuscarOrdenCompra;
+import InterfazGrafica.Busqueda.BuscarOrdenDeProduccion;
+import InterfazGrafica.Busqueda.BuscarProveedor;
 import InterfazGrafica.GestionIngresoMP;
 import InterfazGrafica.Inicio;
+import InterfazGrafica.ParametrosDeInterfaz;
+import InterfazGrafica.TransferenciaInstancias;
+import InterfazGrafica.UtilidadesInterfazGrafica;
+import static InterfazGrafica.UtilidadesInterfazGrafica.establecerAlineacionDeTabla;
+import LogicaDeNegocio.Equipamiento;
+import LogicaDeNegocio.OrdenDeCompra;
+import LogicaDeNegocio.OrdenDeProduccion;
 import LogicaDeNegocio.Organizacion;
+import LogicaDeNegocio.Proveedor;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
+import javax.swing.SwingConstants;
 
 /**
  *
  * @author usuario
  */
-public class PanelGestionIngresos extends javax.swing.JPanel {
+public class PanelGestionIngresos extends Panel implements TransferenciaInstancias{
 
     /**
      * Creates new form PanelGestionEstacionamientos
      */
+    
+    private OrdenDeProduccion unaOrdenDeProduccionSeleccionada;
+    private OrdenDeCompra unaOrdenDeCompraSeleccionada;
+    private Equipamiento equipamientoDestinoSeleccionado;
+    private String tipoProveedorBuscado; //Variable utilizada para saber si es de transporte o de mp.
+    private Proveedor unProveedorTransporteSeleccionado;
+    private Proveedor unProveedorSeleccionado;
+    
+    public static final String[] criterios = new String[] {"Estado", "Etiqueta", "Orden de produccion", "Orden de compra", "Equipamiento destino", "Proveedor de transporte", "Proveedor de la orden de compra", "Fecha de origen"};
+    
     public PanelGestionIngresos() {
         initComponents();
     }
-    private JFrame ventanaContenedora;
 
-    public PanelGestionIngresos(JFrame ventanaContenedora) {
-        this.ventanaContenedora = ventanaContenedora;
+    public PanelGestionIngresos(JFrame ventanaContenedora, String trayectoriaActual, Organizacion unaOrganizacion, String tituloReporte) {
+        super(ventanaContenedora, trayectoriaActual, unaOrganizacion, criterios, tituloReporte);
         initComponents();
         this.setVisible(true);
         
+        establecerAlineacionDeTabla(jTable1, SwingConstants.CENTER);
+        UtilidadesInterfazGrafica.configurarTabla(jTable1);
+        ParametrosDeInterfaz.confeccionarComponentes(this.getComponents());
     }
     
 
@@ -42,14 +68,392 @@ public class PanelGestionIngresos extends javax.swing.JPanel {
     private void initComponents() {
 
         jButton10 = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
+        jCBCriterio2 = new javax.swing.JCheckBox();
+        jCBCriterio3 = new javax.swing.JCheckBox();
+        jCBCriterio4 = new javax.swing.JCheckBox();
+        datoCriterio2 = new javax.swing.JTextField();
+        jCBCriterio8 = new javax.swing.JCheckBox();
+        jCBCriterio6 = new javax.swing.JCheckBox();
+        jCBCriterio5 = new javax.swing.JCheckBox();
+        jLEstatico1Criterio8 = new javax.swing.JLabel();
+        dato1Criterio8 = new com.toedter.calendar.JDateChooser();
+        jLEstatico2Criterio8 = new javax.swing.JLabel();
+        botonCriterio5 = new javax.swing.JButton();
+        botonCriterio3 = new javax.swing.JButton();
+        jLEstaticoCriterio3 = new javax.swing.JLabel();
+        jLCriterio3 = new javax.swing.JLabel();
+        botonCriterio4 = new javax.swing.JButton();
+        jLEstaticoCriterio4 = new javax.swing.JLabel();
+        jLCriterio4 = new javax.swing.JLabel();
+        jLEstaticoCriterio5 = new javax.swing.JLabel();
+        jLCriterio5 = new javax.swing.JLabel();
+        botonCriterio6 = new javax.swing.JButton();
+        jLCriterio6 = new javax.swing.JLabel();
+        jLEstaticoCriterio6 = new javax.swing.JLabel();
+        dato2Criterio8 = new com.toedter.calendar.JDateChooser();
+        jCBCriterio1 = new javax.swing.JCheckBox();
+        datoCriterio1 = new javax.swing.JComboBox<>();
+        botonCriterio7 = new javax.swing.JButton();
+        jLCriterio7 = new javax.swing.JLabel();
+        jLEstaticoCriterio7 = new javax.swing.JLabel();
+        jCBCriterio7 = new javax.swing.JCheckBox();
+        jButton2 = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+
+        setBackground(new java.awt.Color(204, 204, 204));
 
         jButton10.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jButton10.setText("Gestionar Ingreso de materia prima");
+        jButton10.setIcon(new javax.swing.ImageIcon(getClass().getResource("/InterfazGrafica/Assets/icono-Opcion.png"))); // NOI18N
+        jButton10.setText("Gestionar ingresos de materia prima");
         jButton10.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton10ActionPerformed(evt);
             }
         });
+
+        jLabel3.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        jLabel3.setText("Criterios de búsqueda");
+
+        jCBCriterio2.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        jCBCriterio2.setText("Etiqueta");
+        jCBCriterio2.setPressedIcon(new javax.swing.ImageIcon(getClass().getResource("/InterfazGrafica/Assets/CheckTic.png"))); // NOI18N
+        jCBCriterio2.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio2ItemStateChanged(evt);
+            }
+        });
+
+        jCBCriterio3.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        jCBCriterio3.setText("Orden de produccion asociada");
+        jCBCriterio3.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio3ItemStateChanged(evt);
+            }
+        });
+
+        jCBCriterio4.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        jCBCriterio4.setText("Orden de compra asociada");
+        jCBCriterio4.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio4ItemStateChanged(evt);
+            }
+        });
+
+        datoCriterio2.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        datoCriterio2.setEnabled(false);
+
+        jCBCriterio8.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        jCBCriterio8.setText("Fecha de origen");
+        jCBCriterio8.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio8ItemStateChanged(evt);
+            }
+        });
+
+        jCBCriterio6.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        jCBCriterio6.setText("Proveedor de servicio de transporte asociado");
+        jCBCriterio6.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio6ItemStateChanged(evt);
+            }
+        });
+
+        jCBCriterio5.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        jCBCriterio5.setText("Equipamiento donde se registro el ingreso.");
+        jCBCriterio5.setPressedIcon(new javax.swing.ImageIcon(getClass().getResource("/InterfazGrafica/Assets/CheckTic.png"))); // NOI18N
+        jCBCriterio5.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio5ItemStateChanged(evt);
+            }
+        });
+
+        jLEstatico1Criterio8.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        jLEstatico1Criterio8.setText("Desde");
+        jLEstatico1Criterio8.setEnabled(false);
+
+        dato1Criterio8.setEnabled(false);
+        dato1Criterio8.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLEstatico2Criterio8.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        jLEstatico2Criterio8.setText("Hasta");
+        jLEstatico2Criterio8.setEnabled(false);
+
+        botonCriterio5.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        botonCriterio5.setText("Buscar un Equipamiento");
+        botonCriterio5.setEnabled(false);
+        botonCriterio5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonCriterio5ActionPerformed(evt);
+            }
+        });
+
+        botonCriterio3.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        botonCriterio3.setText("Buscar una Orden de Produccion");
+        botonCriterio3.setEnabled(false);
+        botonCriterio3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonCriterio3ActionPerformed(evt);
+            }
+        });
+
+        jLEstaticoCriterio3.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        jLEstaticoCriterio3.setText("ID de orden de producción seleccionada");
+
+        jLCriterio3.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+
+        botonCriterio4.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        botonCriterio4.setText("Buscar una Orden de Compra");
+        botonCriterio4.setEnabled(false);
+        botonCriterio4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonCriterio4ActionPerformed(evt);
+            }
+        });
+
+        jLEstaticoCriterio4.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        jLEstaticoCriterio4.setText("ID de orden de compra seleccionada");
+
+        jLCriterio4.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+
+        jLEstaticoCriterio5.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        jLEstaticoCriterio5.setText("Equipamiento Seleccionado:");
+
+        jLCriterio5.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+
+        botonCriterio6.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        botonCriterio6.setText("Buscar un Proveedor");
+        botonCriterio6.setEnabled(false);
+        botonCriterio6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonCriterio6ActionPerformed(evt);
+            }
+        });
+
+        jLCriterio6.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+
+        jLEstaticoCriterio6.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        jLEstaticoCriterio6.setText("Proveedor asociado");
+
+        dato2Criterio8.setEnabled(false);
+        dato2Criterio8.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jCBCriterio1.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        jCBCriterio1.setText("Estado");
+        jCBCriterio1.setPressedIcon(new javax.swing.ImageIcon(getClass().getResource("/InterfazGrafica/Assets/CheckTic.png"))); // NOI18N
+        jCBCriterio1.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio1ItemStateChanged(evt);
+            }
+        });
+
+        datoCriterio1.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        datoCriterio1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Regular", "Anulado" }));
+        datoCriterio1.setEnabled(false);
+
+        botonCriterio7.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        botonCriterio7.setText("Buscar un Proveedor");
+        botonCriterio7.setEnabled(false);
+        botonCriterio7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonCriterio7ActionPerformed(evt);
+            }
+        });
+
+        jLCriterio7.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+
+        jLEstaticoCriterio7.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        jLEstaticoCriterio7.setText("Proveedor asociado");
+
+        jCBCriterio7.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        jCBCriterio7.setText("Proveedor del producto asociado");
+        jCBCriterio7.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio7ItemStateChanged(evt);
+            }
+        });
+
+        jButton2.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        jButton2.setText("Realizar consulta");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
+        jButton1.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        jButton1.setText("Generar reporte");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addComponent(jLabel3)
+                        .addGap(0, 1232, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jButton2)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton1))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLCriterio5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLEstaticoCriterio3)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLCriterio3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLEstaticoCriterio4)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLCriterio4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLCriterio6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLCriterio7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jCBCriterio8)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jLEstatico1Criterio8)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(dato1Criterio8, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLEstatico2Criterio8)
+                                        .addGap(24, 24, 24)
+                                        .addComponent(dato2Criterio8, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jLEstaticoCriterio5)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jCBCriterio4)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(botonCriterio4))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jCBCriterio6)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(botonCriterio6))
+                                    .addComponent(jLEstaticoCriterio6)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jCBCriterio2)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(datoCriterio2, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jCBCriterio1)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(datoCriterio1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jCBCriterio3)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(botonCriterio3))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jCBCriterio5)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(botonCriterio5))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jCBCriterio7)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(botonCriterio7))
+                                    .addComponent(jLEstaticoCriterio7))
+                                .addGap(0, 0, Short.MAX_VALUE)))))
+                .addGap(18, 18, 18))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCBCriterio1)
+                    .addComponent(datoCriterio1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCBCriterio2)
+                    .addComponent(datoCriterio2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCBCriterio3)
+                    .addComponent(botonCriterio3))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLEstaticoCriterio3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLCriterio3, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCBCriterio4)
+                    .addComponent(botonCriterio4))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLEstaticoCriterio4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLCriterio4, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCBCriterio5)
+                    .addComponent(botonCriterio5))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLEstaticoCriterio5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLCriterio5, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCBCriterio6)
+                    .addComponent(botonCriterio6))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLEstaticoCriterio6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLCriterio6, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCBCriterio7)
+                    .addComponent(botonCriterio7))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLEstaticoCriterio7)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLCriterio7, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jCBCriterio8)
+                        .addComponent(jLEstatico1Criterio8))
+                    .addComponent(jLEstatico2Criterio8)
+                    .addComponent(dato1Criterio8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(dato2Criterio8, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(12, 12, 12)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(jButton2))
+                .addGap(18, 18, 18))
+        );
+
+        jTable1.setAutoCreateRowSorter(true);
+        jTable1.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "ID", "Estado", "Cantidad ingresada", "ID O,P.", "ID O.C.", "Equipamiento de ingreso", "Proveedor", "fecha", "Etiqueta"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, true, false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane1.setViewportView(jTable1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -57,15 +461,24 @@ public class PanelGestionIngresos extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButton10, javax.swing.GroupLayout.PREFERRED_SIZE, 680, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButton10)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jButton10)
-                .addContainerGap(422, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 451, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -74,8 +487,214 @@ public class PanelGestionIngresos extends javax.swing.JPanel {
         this.ventanaContenedora.dispose();
     }//GEN-LAST:event_jButton10ActionPerformed
 
+    private void jCBCriterio2ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio2ItemStateChanged
+        datoCriterio2.setEnabled(jCBCriterio2.isSelected());
+        asignarCriterio(1, (JCheckBox) evt.getSource());
+
+    }//GEN-LAST:event_jCBCriterio2ItemStateChanged
+
+    private void jCBCriterio3ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio3ItemStateChanged
+        botonCriterio3.setEnabled(jCBCriterio3.isSelected());
+        jLEstaticoCriterio3.setEnabled(jCBCriterio3.isSelected());
+        jLCriterio3.setEnabled(jCBCriterio3.isSelected());
+
+        asignarCriterio(2, (JCheckBox) evt.getSource());
+    }//GEN-LAST:event_jCBCriterio3ItemStateChanged
+
+    private void jCBCriterio4ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio4ItemStateChanged
+        botonCriterio4.setEnabled(jCBCriterio4.isSelected());
+        jLEstaticoCriterio4.setEnabled(jCBCriterio4.isSelected());
+        jLCriterio4.setEnabled(jCBCriterio4.isSelected());
+
+        asignarCriterio(3, (JCheckBox) evt.getSource());
+
+        /*if (jCBCriterio4.isSelected() && jCBCriterio7.isSelected()){
+            jCBCriterio7.doClick();
+        }*/
+    }//GEN-LAST:event_jCBCriterio4ItemStateChanged
+
+    private void jCBCriterio8ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio8ItemStateChanged
+        jLEstatico1Criterio8.setEnabled(jCBCriterio8.isSelected());
+        dato1Criterio8.setEnabled(jCBCriterio8.isSelected());
+        jLEstatico2Criterio8.setEnabled(jCBCriterio8.isSelected());
+        dato2Criterio8.setEnabled(jCBCriterio8.isSelected());
+
+        asignarCriterio(7, (JCheckBox) evt.getSource());
+    }//GEN-LAST:event_jCBCriterio8ItemStateChanged
+
+    private void jCBCriterio6ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio6ItemStateChanged
+        botonCriterio6.setEnabled(jCBCriterio6.isSelected());
+        jLEstaticoCriterio6.setEnabled(jCBCriterio6.isSelected());
+        jLCriterio6.setEnabled(jCBCriterio6.isSelected());
+
+        asignarCriterio(5, (JCheckBox) evt.getSource());
+    }//GEN-LAST:event_jCBCriterio6ItemStateChanged
+
+    private void jCBCriterio5ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio5ItemStateChanged
+        botonCriterio5.setEnabled(jCBCriterio5.isSelected());
+        jLEstaticoCriterio5.setEnabled(jCBCriterio5.isSelected());
+        jLCriterio5.setEnabled(jCBCriterio5.isSelected());
+
+        asignarCriterio(4, (JCheckBox) evt.getSource());
+    }//GEN-LAST:event_jCBCriterio5ItemStateChanged
+
+    private void botonCriterio5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonCriterio5ActionPerformed
+        BuscarEquipamiento unaVentana = new BuscarEquipamiento(organizacion, ventanaContenedora, trayectoriaActual);
+        ventanaContenedora.dispose();
+    }//GEN-LAST:event_botonCriterio5ActionPerformed
+
+    private void botonCriterio3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonCriterio3ActionPerformed
+
+        BuscarOrdenDeProduccion unaVentana = new BuscarOrdenDeProduccion(organizacion, ventanaContenedora, trayectoriaActual);
+        ventanaContenedora.dispose();
+    }//GEN-LAST:event_botonCriterio3ActionPerformed
+
+    private void botonCriterio4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonCriterio4ActionPerformed
+        BuscarOrdenCompra unaVentana = new BuscarOrdenCompra(organizacion, ventanaContenedora, trayectoriaActual);
+        ventanaContenedora.dispose();
+    }//GEN-LAST:event_botonCriterio4ActionPerformed
+
+    private void botonCriterio6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonCriterio6ActionPerformed
+        tipoProveedorBuscado = "transporte";
+        BuscarProveedor unaVentana = new BuscarProveedor(organizacion, ventanaContenedora, trayectoriaActual);
+        ventanaContenedora.dispose();
+    }//GEN-LAST:event_botonCriterio6ActionPerformed
+
+    private void jCBCriterio1ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio1ItemStateChanged
+        datoCriterio1.setEnabled(jCBCriterio1.isSelected());
+
+        asignarCriterio(0, (JCheckBox) evt.getSource());
+    }//GEN-LAST:event_jCBCriterio1ItemStateChanged
+
+    private void botonCriterio7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonCriterio7ActionPerformed
+        tipoProveedorBuscado = "mp";
+        BuscarProveedor unaVentana = new BuscarProveedor(organizacion, ventanaContenedora, trayectoriaActual);
+        ventanaContenedora.dispose();
+    }//GEN-LAST:event_botonCriterio7ActionPerformed
+
+    private void jCBCriterio7ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio7ItemStateChanged
+        botonCriterio7.setEnabled(jCBCriterio7.isSelected());
+        jLEstaticoCriterio7.setEnabled(jCBCriterio7.isSelected());
+        jLCriterio7.setEnabled(jCBCriterio7.isSelected());
+
+        asignarCriterio(6, (JCheckBox) evt.getSource());
+
+    }//GEN-LAST:event_jCBCriterio7ItemStateChanged
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        cargarTabla(jTable1, organizacion.getMovimientosDeIngreso());
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        generarReporte(organizacion.getMovimientosDeIngreso());
+    }//GEN-LAST:event_jButton1ActionPerformed
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton botonCriterio3;
+    private javax.swing.JButton botonCriterio4;
+    private javax.swing.JButton botonCriterio5;
+    private javax.swing.JButton botonCriterio6;
+    private javax.swing.JButton botonCriterio7;
+    private com.toedter.calendar.JDateChooser dato1Criterio8;
+    private com.toedter.calendar.JDateChooser dato2Criterio8;
+    private javax.swing.JComboBox<String> datoCriterio1;
+    private javax.swing.JTextField datoCriterio2;
+    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton10;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JCheckBox jCBCriterio1;
+    private javax.swing.JCheckBox jCBCriterio2;
+    private javax.swing.JCheckBox jCBCriterio3;
+    private javax.swing.JCheckBox jCBCriterio4;
+    private javax.swing.JCheckBox jCBCriterio5;
+    private javax.swing.JCheckBox jCBCriterio6;
+    private javax.swing.JCheckBox jCBCriterio7;
+    private javax.swing.JCheckBox jCBCriterio8;
+    private javax.swing.JLabel jLCriterio3;
+    private javax.swing.JLabel jLCriterio4;
+    private javax.swing.JLabel jLCriterio5;
+    private javax.swing.JLabel jLCriterio6;
+    private javax.swing.JLabel jLCriterio7;
+    private javax.swing.JLabel jLEstatico1Criterio8;
+    private javax.swing.JLabel jLEstatico2Criterio8;
+    private javax.swing.JLabel jLEstaticoCriterio3;
+    private javax.swing.JLabel jLEstaticoCriterio4;
+    private javax.swing.JLabel jLEstaticoCriterio5;
+    private javax.swing.JLabel jLEstaticoCriterio6;
+    private javax.swing.JLabel jLEstaticoCriterio7;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void actualizarUnObjeto(Object unObjeto) {
+        if (unObjeto instanceof OrdenDeProduccion){
+            asignarObjetoACriterio(2, unObjeto);
+            this.unaOrdenDeProduccionSeleccionada = (OrdenDeProduccion) unObjeto;
+            actualizarOrdenDeProduccion();
+        }
+        if (unObjeto instanceof OrdenDeCompra){
+            asignarObjetoACriterio(3, unObjeto);
+            this.unaOrdenDeCompraSeleccionada = (OrdenDeCompra) unObjeto;
+            actualizarOrdenDeCompra();
+        }
+        if (unObjeto instanceof Equipamiento){
+            asignarObjetoACriterio(4, unObjeto);
+            this.equipamientoDestinoSeleccionado = (Equipamiento) unObjeto;
+            actualizarEquipamiento();
+        }
+        if (unObjeto instanceof Proveedor){
+            if (tipoProveedorBuscado.equals("transporte")){
+                asignarObjetoACriterio(5, unObjeto);
+                this.unProveedorTransporteSeleccionado = (Proveedor) unObjeto;
+                actualizarProveedorTransporte();   
+            }
+            if (tipoProveedorBuscado.equals("mp")){
+                asignarObjetoACriterio(6, unObjeto);
+                this.unProveedorSeleccionado = (Proveedor) unObjeto;
+                actualizarProveedor();   
+            }
+            
+        }   
+    }
+    
+    private void actualizarOrdenDeProduccion() {
+        jLEstaticoCriterio3.setEnabled(true);
+        jLCriterio3.setEnabled(true);
+        jLCriterio3.setText(""+this.unaOrdenDeProduccionSeleccionada.getId());
+    }
+
+    private void actualizarOrdenDeCompra() {
+        jLEstaticoCriterio4.setEnabled(true);
+        jLCriterio4.setEnabled(true);
+        jLCriterio4.setText(""+this.unaOrdenDeCompraSeleccionada.getId());
+    }
+
+    private void actualizarEquipamiento() {
+        jLEstaticoCriterio5.setEnabled(true);
+        jLCriterio5.setEnabled(true);
+        jLCriterio5.setText(this.equipamientoDestinoSeleccionado.getNombre());
+    }
+
+    private void actualizarProveedorTransporte() {
+        jLEstaticoCriterio6.setEnabled(true);
+        jLCriterio6.setEnabled(true);
+        jLCriterio6.setText(unProveedorTransporteSeleccionado.getRazonSocial());
+    }
+
+    private void actualizarProveedor() {
+        jLEstaticoCriterio7.setEnabled(true);
+        jLCriterio7.setEnabled(true);
+        jLCriterio7.setText(unProveedorSeleccionado.getRazonSocial());
+    }
+
+    @Override
+    protected void generarObjetos() {
+        asignarObjetoACriterio(0, datoCriterio1.getSelectedItem());
+        asignarObjetoACriterio(1, datoCriterio2.getText());
+        asignarObjetoACriterio(7, generarListaFecha(dato1Criterio8.getCalendar(), dato2Criterio8.getCalendar()));
+    }
 }

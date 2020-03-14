@@ -5,6 +5,7 @@
  */
 package LogicaDeNegocio;
 
+import InterfazGrafica.UtilidadesInterfazGrafica;
 import LogicaDeNegocio.Bascula;
 import java.sql.Date;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.Iterator;
  *
  * @author usuario
  */
-public class Equipamiento {
+public class Equipamiento implements Reporte{
     private int id;
     private String nombre;
     private String direccion;
@@ -31,7 +32,15 @@ public class Equipamiento {
     private ArrayList lotesEnExistenciaActuales;
     
     private Bascula basculaAsociada;
-
+    
+    public static Calendar FECHA_REPORTE_INYM = Calendar.getInstance();
+    
+    public static final String TIPO_LABORATORIO = "Laboratorio";
+    public static final String TIPO_BASCULA = "Bascula";
+    public static final String TIPO_DEPOSITO = "Deposito";
+    public static final String TIPO_CAMARA_ESTACIONAMIENTO = "Camara de estacionamiento acelerado";
+    public static final String TIPO_MOLINO = "Molino";
+    
     public Equipamiento(int id, String nombre, String direccion, java.sql.Date fechaAdquisicion, java.sql.Date fechaUltimoMantenimiento, float capacidadMaxima, String unidadDeMedida, String estado) {
         this.id = id;
         this.nombre = nombre;
@@ -86,7 +95,7 @@ public class Equipamiento {
         Iterator recorredorLotes = this.lotesEnExistenciaActuales.iterator();
         while (recorredorLotes.hasNext()){
             Lote unLote = (Lote) recorredorLotes.next();
-            retorno = retorno - Organizacion.convertirUnidadPeso(unLote.getUnidadDeMedida(), unLote.getCantidad(), this.unidadDeMedida);
+            retorno = retorno - Organizacion.convertirUnidadPeso(unLote.getUnidadDeMedida(), unLote.getCantidadTotalPesoIngresado(), this.unidadDeMedida);
         }
         
         return retorno;
@@ -179,10 +188,6 @@ public class Equipamiento {
         return movimientosAsociadosDeSalidaActuales;
     }
 
-    public void setMovimientosAsociadosDeSalidaActuales(ArrayList movimientosAsociadosDeSalidaActuales) {
-        this.movimientosAsociadosDeSalidaActuales = movimientosAsociadosDeSalidaActuales;
-    }
-
     public Bascula getBasculaAsociada() {
         return basculaAsociada;
     }
@@ -191,9 +196,6 @@ public class Equipamiento {
         this.basculaAsociada = basculaAsociada;
     }
     
-    public String Nombre(){
-        return this.nombre;
-    }
     
     
 
@@ -286,6 +288,8 @@ public class Equipamiento {
             retorno = "Camara Est. Acel.";
         if (this instanceof Bascula)
             retorno = "Bascula";
+        if (this instanceof Laboratorio)
+            retorno = "Laboratorio";
         return retorno;
     }
     public String getBasculaAsociadaS(){        //METODO PARA REPORTES
@@ -316,7 +320,7 @@ public class Equipamiento {
         Iterator lotesNoAnulados = getLotesAsociadosNoAnulados().iterator();
         while (lotesNoAnulados.hasNext()){
             Lote unLote = (Lote) lotesNoAnulados.next();
-            retorno = retorno + Organizacion.convertirUnidadPeso(unLote.getUnidadDeMedida(), unLote.getCantidad(), unaUnidadMedida);
+            retorno = retorno + Organizacion.convertirUnidadPeso(unLote.getUnidadDeMedida(), unLote.getCantidadTotalPesoIngresado(), unaUnidadMedida);
         }
         return retorno;
     }
@@ -339,13 +343,532 @@ public class Equipamiento {
         fechaAdquisicionLimiteInferior.set(Calendar.HOUR, 0);
         fechaAdquisicionLimiteInferior.set(Calendar.MINUTE, 0);
         fechaAdquisicionLimiteInferior.set(Calendar.SECOND, 0);
+        fechaAdquisicionLimiteInferior.set(Calendar.MILLISECOND, 0);
 
         fechaAdquisicionLimiteSuperior.set(Calendar.HOUR_OF_DAY, 24);
         fechaAdquisicionLimiteSuperior.set(Calendar.MINUTE, 59);
         fechaAdquisicionLimiteSuperior.set(Calendar.SECOND, 59);        
         return (this.fechaAdquisicion.after(fechaAdquisicionLimiteInferior) && this.fechaAdquisicion.before(fechaAdquisicionLimiteSuperior));
     }
+    @Override
+    public String getReporte(){
+        String retorno = "";
+        retorno = retorno + "Nombre: "+this.nombre +""
+                + "\t\tTipo: "+ this.getTipoEquipamiento()+" \n\n";
+        retorno = retorno + "Fecha de adquisicion: "+Organizacion.expresarCalendario(fechaAdquisicion)+""
+                + "\t\t\tBascula asociada: "+ this.getBasculaAsociadaS()+" \n\n";
+        retorno = retorno + "Fecha de ultimo mantenimiento: "+Organizacion.expresarCalendario(fechaUltimoMantenimiento)+""
+                + "\t\tEstado: "+ this.getEstado()+" \n\n";
+        retorno = retorno + "Direccion: "+ direccion;
+        return retorno;
+    }
+
+    public Float getPesoTotalDeYCVKg() {
+        Float pesoTotal = 0f;
+        Iterator recorredorLotes = this.lotesEnExistenciaActuales.iterator();
+        while (recorredorLotes.hasNext()){
+            Lote unLote = (Lote) recorredorLotes.next();
+            if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE)){
+                Float unPeso = unLote.obtenerPesoIngresadoConPerdidasIncluidasKg();
+                pesoTotal = pesoTotal + unPeso;
+            }
+        }
+        return pesoTotal;
+    }
     
+    public Float getPesoTotalDeYCVKgV2() {
+        Float pesoTotal = 0f;
+        
+        Iterator recorredorMovimientosEntrada = this.movimientosAsociadosDeEntradaActuales.iterator();
+        while (recorredorMovimientosEntrada.hasNext()){
+            boolean seMovioElLote;
+            MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) recorredorMovimientosEntrada.next();
+            MovimientoInternoMateriaPrima unMovimientoPosterior = unMovimiento.getMovimientoInmediatamentePosterior();
+            seMovioElLote = (unMovimientoPosterior != null && unMovimiento.estaRegular() && unMovimientoPosterior.estaRegular() && unMovimientoPosterior.esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)); //hubo movimientos posteriores
+            if (!seMovioElLote){
+                //System.out.println("no se movio el lote");
+                Lote unLote = unMovimiento.getLoteAsociado();
+                /*if (unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM))
+                    System.out.println("el movimiento de ingreso de este lote es anterior a la fecha " +Organizacion.expresarCalendario(FECHA_REPORTE_INYM)+" solicitada");
+                else
+                    System.out.println("el movimiento de ingreso "+unLote.getMovimientoDeIngreso().getId()+" de este lote "+unLote.getId()+" (Fecha :"+Organizacion.expresarCalendario(unLote.getMovimientoDeIngreso().getFechaOrigenC())+") NO es anterior a la fecha " +Organizacion.expresarCalendario(FECHA_REPORTE_INYM)+" solicitada");*/
+                if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE) && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)){
+                    System.out.println("sume un lote mas");
+                    Float unPeso = unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(Equipamiento.FECHA_REPORTE_INYM);
+                    pesoTotal = pesoTotal + unPeso;
+                }
+            }
+        }
+        return pesoTotal;
+    }
+    
+    public Float getPesoTotalDeYCVKgV4() {
+        Float pesoTotal = 0f;
+        
+        Iterator recorredorMovimientosEntrada = this.movimientosAsociadosDeEntradaActuales.iterator();
+        while (recorredorMovimientosEntrada.hasNext()){
+            boolean seMovioElLote;
+            MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) recorredorMovimientosEntrada.next();
+            MovimientoInternoMateriaPrima unMovimientoPosterior = unMovimiento.getMovimientoInmediatamentePosterior();
+            seMovioElLote = (unMovimientoPosterior != null && unMovimiento.estaRegular() && unMovimientoPosterior.estaRegular() && unMovimientoPosterior.esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)); //hubo movimientos posteriores
+            if (!seMovioElLote){
+                //System.out.println("no se movio el lote");
+                Lote unLote = unMovimiento.getLoteAsociado();
+                /*if (unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM))
+                    System.out.println("el movimiento de ingreso de este lote es anterior a la fecha " +Organizacion.expresarCalendario(FECHA_REPORTE_INYM)+" solicitada");
+                else
+                    System.out.println("el movimiento de ingreso "+unLote.getMovimientoDeIngreso().getId()+" de este lote "+unLote.getId()+" (Fecha :"+Organizacion.expresarCalendario(unLote.getMovimientoDeIngreso().getFechaOrigenC())+") NO es anterior a la fecha " +Organizacion.expresarCalendario(FECHA_REPORTE_INYM)+" solicitada");*/
+                if (unLote.estaRegular() && unLote.esDeYerbaCancadaVerde(Equipamiento.FECHA_REPORTE_INYM) && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)){
+                    Float unPeso = unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(Equipamiento.FECHA_REPORTE_INYM);
+                    pesoTotal = pesoTotal + unPeso;
+                }
+            }
+        }
+        return pesoTotal;
+    }
+    
+    public Float getPesoTotalDeYCVKgV2(Calendar unaFecha) {
+        Float pesoTotal = 0f;
+        
+        Iterator recorredorMovimientosEntrada = this.movimientosAsociadosDeEntradaActuales.iterator();
+        while (recorredorMovimientosEntrada.hasNext()){
+            boolean seMovioElLote;
+            MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) recorredorMovimientosEntrada.next();
+            MovimientoInternoMateriaPrima unMovimientoPosterior = unMovimiento.getMovimientoInmediatamentePosterior();
+            seMovioElLote = (unMovimientoPosterior != null && unMovimiento.estaRegular() && unMovimientoPosterior.estaRegular() && unMovimientoPosterior.esAnteriorOIgualA(unaFecha)); //hubo movimientos posteriores
+            if (!seMovioElLote){
+                //System.out.println("no se movio el lote");
+                Lote unLote = unMovimiento.getLoteAsociado();
+                /*if (unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM))
+                    System.out.println("el movimiento de ingreso de este lote es anterior a la fecha " +Organizacion.expresarCalendario(FECHA_REPORTE_INYM)+" solicitada");
+                else
+                    System.out.println("el movimiento de ingreso "+unLote.getMovimientoDeIngreso().getId()+" de este lote "+unLote.getId()+" (Fecha :"+Organizacion.expresarCalendario(unLote.getMovimientoDeIngreso().getFechaOrigenC())+") NO es anterior a la fecha " +Organizacion.expresarCalendario(FECHA_REPORTE_INYM)+" solicitada");*/
+                if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE) && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(unaFecha)){
+                    //System.out.println("sume un lote mas");
+                    Float unPeso = unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(unaFecha);
+                    pesoTotal = pesoTotal + unPeso;
+                }
+            }
+        }
+        return pesoTotal;
+    }
+
+    public int getUnidadesTotalYCV() {
+        int cantidadTotal = 0;
+        
+        Iterator recorredorLotes = this.lotesEnExistenciaActuales.iterator();
+        while (recorredorLotes.hasNext()){
+            Lote unLote = (Lote) recorredorLotes.next();
+            if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE)){
+                int unaCantidad = unLote.obtenerUnidadesTransporteIngresadoConPerdidasIncluidas();
+                cantidadTotal = cantidadTotal + unaCantidad;
+            }
+        }
+        return cantidadTotal;
+    }
+    
+    public int getUnidadesTotalYCVV2() {
+        int cantidadTotal = 0;
+        
+        Iterator recorredorMovimientosEntrada = this.movimientosAsociadosDeEntradaActuales.iterator();
+        while (recorredorMovimientosEntrada.hasNext()){
+            boolean seMovioElLote;
+            MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) recorredorMovimientosEntrada.next();
+            MovimientoInternoMateriaPrima unMovimientoPosterior = unMovimiento.getMovimientoInmediatamentePosterior();
+            seMovioElLote = (unMovimientoPosterior != null && unMovimiento.estaRegular() && unMovimientoPosterior.estaRegular() && unMovimientoPosterior.esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)); //hubo movimientos posteriores
+            if (!seMovioElLote){
+                Lote unLote = unMovimiento.getLoteAsociado();
+                if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE) && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)){
+                    int unaCantidad = unLote.obtenerUnidadesTransporteIngresadoConPerdidasIncluidas(Equipamiento.FECHA_REPORTE_INYM);
+                    cantidadTotal = cantidadTotal + unaCantidad;
+                }
+            }
+        }
+        
+        return cantidadTotal;
+    }
+    public int getUnidadesTotalYCVV4() {
+        int cantidadTotal = 0;
+        
+        Iterator recorredorMovimientosEntrada = this.movimientosAsociadosDeEntradaActuales.iterator();
+        while (recorredorMovimientosEntrada.hasNext()){
+            boolean seMovioElLote;
+            MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) recorredorMovimientosEntrada.next();
+            MovimientoInternoMateriaPrima unMovimientoPosterior = unMovimiento.getMovimientoInmediatamentePosterior();
+            seMovioElLote = (unMovimientoPosterior != null && unMovimiento.estaRegular() && unMovimientoPosterior.estaRegular() && unMovimientoPosterior.esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)); //hubo movimientos posteriores
+            if (!seMovioElLote){
+                Lote unLote = unMovimiento.getLoteAsociado();
+                if (unLote.estaRegular() && unLote.esDeYerbaCancadaVerde(Equipamiento.FECHA_REPORTE_INYM) && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)){
+                    int unaCantidad = unLote.obtenerUnidadesTransporteIngresadoConPerdidasIncluidas(Equipamiento.FECHA_REPORTE_INYM);
+                    cantidadTotal = cantidadTotal + unaCantidad;
+                }
+            }
+        }
+        
+        return cantidadTotal;
+    }
+
+    public Float getPesoTotalDeYCEKg() {
+        Float pesoTotal = 0f;
+        Iterator recorredorLotes = this.lotesEnExistenciaActuales.iterator();
+        while (recorredorLotes.hasNext()){
+            Lote unLote = (Lote) recorredorLotes.next();
+            if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_ESTACIONADA)){
+                Float unPeso = unLote.obtenerPesoIngresadoConPerdidasIncluidasKg();
+                pesoTotal = pesoTotal + unPeso;
+            }
+        }
+        return pesoTotal;
+    }
+    
+    public Float getPesoTotalDeYCEKgV2() {
+        Float pesoTotal = 0f;
+        
+        Iterator recorredorMovimientosEntrada = this.movimientosAsociadosDeEntradaActuales.iterator();
+        while (recorredorMovimientosEntrada.hasNext()){
+            boolean seMovioElLote;
+            MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) recorredorMovimientosEntrada.next();
+            MovimientoInternoMateriaPrima unMovimientoPosterior = unMovimiento.getMovimientoInmediatamentePosterior();
+            seMovioElLote = (unMovimientoPosterior != null && unMovimiento.estaRegular() && unMovimientoPosterior.estaRegular() && unMovimientoPosterior.esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)); //hubo movimientos posteriores
+            if (!seMovioElLote){
+                Lote unLote = unMovimiento.getLoteAsociado();
+                if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_ESTACIONADA) && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)){
+                    Float unPeso = unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(Equipamiento.FECHA_REPORTE_INYM);
+                    pesoTotal = pesoTotal + unPeso;
+                }
+            }
+        }
+        return pesoTotal;
+    }
+    
+    public Float getPesoTotalDeYCEKgV4() {
+        Float pesoTotal = 0f;
+        
+        Iterator recorredorMovimientosEntrada = this.movimientosAsociadosDeEntradaActuales.iterator();
+        while (recorredorMovimientosEntrada.hasNext()){
+            boolean seMovioElLote;
+            MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) recorredorMovimientosEntrada.next();
+            MovimientoInternoMateriaPrima unMovimientoPosterior = unMovimiento.getMovimientoInmediatamentePosterior();
+            seMovioElLote = (unMovimientoPosterior != null && unMovimiento.estaRegular() && unMovimientoPosterior.estaRegular() && unMovimientoPosterior.esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)); //hubo movimientos posteriores
+            if (!seMovioElLote){
+                Lote unLote = unMovimiento.getLoteAsociado();
+                if (unLote.estaRegular() && unLote.esDeYerbaCancadaEstacionada(Equipamiento.FECHA_REPORTE_INYM) && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)){
+                    Float unPeso = unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(Equipamiento.FECHA_REPORTE_INYM);
+                    pesoTotal = pesoTotal + unPeso;
+                }
+            }
+        }
+        return pesoTotal;
+    }
+    
+        public Float getPesoTotalDeYCEKgV2(Calendar unaFecha) {
+        Float pesoTotal = 0f;
+        
+        Iterator recorredorMovimientosEntrada = this.movimientosAsociadosDeEntradaActuales.iterator();
+        while (recorredorMovimientosEntrada.hasNext()){
+            boolean seMovioElLote;
+            MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) recorredorMovimientosEntrada.next();
+            MovimientoInternoMateriaPrima unMovimientoPosterior = unMovimiento.getMovimientoInmediatamentePosterior();
+            seMovioElLote = (unMovimientoPosterior != null && unMovimiento.estaRegular() && unMovimientoPosterior.estaRegular() && unMovimientoPosterior.esAnteriorOIgualA(unaFecha)); //hubo movimientos posteriores
+            if (!seMovioElLote){
+                Lote unLote = unMovimiento.getLoteAsociado();
+                if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_ESTACIONADA) && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(unaFecha)){
+                    Float unPeso = unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(unaFecha);
+                    pesoTotal = pesoTotal + unPeso;
+                }
+            }
+        }
+        return pesoTotal;
+    }
+
+    public int getUnidadesTotalYCE() {
+        int cantidadTotal = 0;
+        
+        Iterator recorredorLotes = this.lotesEnExistenciaActuales.iterator();
+        while (recorredorLotes.hasNext()){
+            Lote unLote = (Lote) recorredorLotes.next();
+            if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_ESTACIONADA)){
+                int unaCantidad = unLote.obtenerUnidadesTransporteIngresadoConPerdidasIncluidas();
+                cantidadTotal = cantidadTotal + unaCantidad;
+            }
+        }
+        
+        return cantidadTotal;
+    }
+    
+    public int getUnidadesTotalYCEV2() {
+        int cantidadTotal = 0;
+        Iterator recorredorMovimientosEntrada = this.movimientosAsociadosDeEntradaActuales.iterator();
+        while (recorredorMovimientosEntrada.hasNext()){
+            boolean seMovioElLote;
+            MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) recorredorMovimientosEntrada.next();
+            MovimientoInternoMateriaPrima unMovimientoPosterior = unMovimiento.getMovimientoInmediatamentePosterior();
+            seMovioElLote = (unMovimientoPosterior != null && unMovimiento.estaRegular() && unMovimientoPosterior.estaRegular() && unMovimientoPosterior.esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)); //hubo movimientos posteriores
+            if (!seMovioElLote){
+                Lote unLote = unMovimiento.getLoteAsociado();
+                if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_ESTACIONADA) && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)){
+                    int unaCantidad = unLote.obtenerUnidadesTransporteIngresadoConPerdidasIncluidas(Equipamiento.FECHA_REPORTE_INYM);
+                    cantidadTotal = cantidadTotal + unaCantidad;
+                }
+            }
+        }
+        return cantidadTotal;
+    }
+    
+    public int getUnidadesTotalYCEV4() {
+        int cantidadTotal = 0;
+        Iterator recorredorMovimientosEntrada = this.movimientosAsociadosDeEntradaActuales.iterator();
+        while (recorredorMovimientosEntrada.hasNext()){
+            boolean seMovioElLote;
+            MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) recorredorMovimientosEntrada.next();
+            MovimientoInternoMateriaPrima unMovimientoPosterior = unMovimiento.getMovimientoInmediatamentePosterior();
+            seMovioElLote = (unMovimientoPosterior != null && unMovimiento.estaRegular() && unMovimientoPosterior.estaRegular() && unMovimientoPosterior.esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)); //hubo movimientos posteriores
+            if (!seMovioElLote){
+                Lote unLote = unMovimiento.getLoteAsociado();
+                if (unLote.estaRegular() && unLote.esDeYerbaCancadaEstacionada(Equipamiento.FECHA_REPORTE_INYM) && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)){
+                    int unaCantidad = unLote.obtenerUnidadesTransporteIngresadoConPerdidasIncluidas(Equipamiento.FECHA_REPORTE_INYM);
+                    cantidadTotal = cantidadTotal + unaCantidad;
+                }
+            }
+        }
+        return cantidadTotal;
+    }    
+
+    
+    public Float getPesoTotalDeYCMKg() {
+        Float pesoTotal = 0f;
+        Iterator recorredorLotes = this.lotesEnExistenciaActuales.iterator();
+        while (recorredorLotes.hasNext()){
+            Lote unLote = (Lote) recorredorLotes.next();
+            if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_MOLIDA) && unLote.getCantidadDisponibleParaMolerKg()>0){
+                Float unPeso = unLote.getCantidadDisponibleParaMolerKg();
+                pesoTotal = pesoTotal + unPeso;
+            }
+        }
+        return pesoTotal;
+    }
+    
+    public Float getPesoTotalDeYCMKgV2() {
+        Float pesoTotal = 0f;
+        
+        Iterator recorredorMovimientosEntrada = this.movimientosAsociadosDeEntradaActuales.iterator();
+        while (recorredorMovimientosEntrada.hasNext()){
+            boolean seMovioElLote;
+            MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) recorredorMovimientosEntrada.next();
+            MovimientoInternoMateriaPrima unMovimientoPosterior = unMovimiento.getMovimientoInmediatamentePosterior();
+            seMovioElLote = (unMovimientoPosterior != null && unMovimiento.estaRegular() && unMovimientoPosterior.estaRegular() && unMovimientoPosterior.esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)); //hubo movimientos posteriores
+            if (!seMovioElLote){
+                Lote unLote = unMovimiento.getLoteAsociado();
+                if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_MOLIDA) && unLote.getCantidadDisponibleParaMolerKg()>0 && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)){
+                    Float unPeso = unLote.getCantidadDisponibleParaMolerKg(Equipamiento.FECHA_REPORTE_INYM);
+                    pesoTotal = pesoTotal + unPeso;
+                }
+            }
+        }
+        
+        return pesoTotal;
+    }
+    
+    public Float getPesoTotalDeYCMKgV2(Calendar unaFecha) {
+        Float pesoTotal = 0f;
+        Iterator recorredorMovimientosEntrada = this.movimientosAsociadosDeEntradaActuales.iterator();
+        while (recorredorMovimientosEntrada.hasNext()){
+            boolean seMovioElLote;
+            MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) recorredorMovimientosEntrada.next();
+            MovimientoInternoMateriaPrima unMovimientoPosterior = unMovimiento.getMovimientoInmediatamentePosterior();
+            seMovioElLote = (unMovimientoPosterior != null && unMovimiento.estaRegular() && unMovimientoPosterior.estaRegular() && unMovimientoPosterior.esAnteriorOIgualA(unaFecha)); //hubo movimientos posteriores
+            if (!seMovioElLote){
+                Lote unLote = unMovimiento.getLoteAsociado();
+                if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_MOLIDA) && unLote.getCantidadDisponibleParaMolerKg()>0 && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(unaFecha)){
+                    Float unPeso = unLote.getCantidadDisponibleParaMolerKg(unaFecha);
+                    pesoTotal = pesoTotal + unPeso;
+                }
+            }
+        }
+        
+        return pesoTotal;
+    }
+
+    public int getUnidadesTotalYCM() {
+        int cantidadTotal = 0;
+        Iterator recorredorLotes = this.lotesEnExistenciaActuales.iterator();
+        while (recorredorLotes.hasNext()){
+            Lote unLote = (Lote) recorredorLotes.next();
+            if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_MOLIDA)){
+                int unaCantidad = unLote.obtenerUnidadesTransporteIngresadoConPerdidasIncluidas();
+                cantidadTotal = cantidadTotal + unaCantidad;
+            }
+        }
+        return cantidadTotal;
+    }
+    
+    public int getUnidadesTotalYCMV2() {
+        int cantidadTotal = 0;
+        
+        Iterator recorredorMovimientosEntrada = this.movimientosAsociadosDeEntradaActuales.iterator();
+        while (recorredorMovimientosEntrada.hasNext()){
+            boolean seMovioElLote;
+            MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) recorredorMovimientosEntrada.next();
+            MovimientoInternoMateriaPrima unMovimientoPosterior = unMovimiento.getMovimientoInmediatamentePosterior();
+            seMovioElLote = (unMovimientoPosterior != null && unMovimiento.estaRegular() && unMovimientoPosterior.estaRegular() && unMovimientoPosterior.esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)); //hubo movimientos posteriores
+            if (!seMovioElLote){
+                Lote unLote = unMovimiento.getLoteAsociado();
+                if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_MOLIDA) && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM)){
+                    int unaCantidad = unLote.obtenerUnidadesTransporteIngresadoConPerdidasIncluidas(Equipamiento.FECHA_REPORTE_INYM);
+                    cantidadTotal = cantidadTotal + unaCantidad;
+                }
+            }
+        }
+        
+        return cantidadTotal;
+    }
+    
+    public String getReporteINYM(){
+        String retorno = "";
+        retorno = retorno + this.getTipoEquipamiento()+": "+this.getNombre()+", Direccion: "+this.getDireccion();
+        retorno = retorno + "\n";
+        retorno = retorno + "\n";
+        retorno = retorno + "Yerba canchada verde: se tienen "+UtilidadesInterfazGrafica.formatearFlotante(this.getPesoTotalDeYCVKgV2())+" kgs distribuidos en "+this.getUnidadesTotalYCVV2()+ " bolsas.";
+        retorno = retorno + "\n";
+        retorno = retorno + "\n";
+        retorno = retorno + "Yerba canchada estacionada: se tienen "+UtilidadesInterfazGrafica.formatearFlotante(this.getPesoTotalDeYCEKgV2())+" kgs distribuidos en "+this.getUnidadesTotalYCEV2()+ " bolsas";
+        retorno = retorno + "\n";
+        retorno = retorno + "\n";
+        retorno = retorno + "Yerba canchada molida: se tienen "+UtilidadesInterfazGrafica.formatearFlotante(this.getPesoTotalDeYCMKgV2())+" kgs";// distribuidos en "+unEquipamiento.getUnidadesTotalYCM()+ " bolsas";
+       return retorno;
+    }
+    /*public String getReporteINYM(){
+        String retorno = "";
+        retorno = retorno + this.getTipoEquipamiento()+": "+this.getNombre()+", Direccion: "+this.getDireccion();
+        retorno = retorno + "\n";
+        retorno = retorno + "\n";
+        retorno = retorno + "Yerba canchada verde: se tienen "+UtilidadesInterfazGrafica.formatearFlotante(this.getPesoTotalDeYCVKgV4())+" kgs distribuidos en "+this.getUnidadesTotalYCVV4()+ " bolsas.";
+        retorno = retorno + "\n";
+        retorno = retorno + "\n";
+        retorno = retorno + "Yerba canchada estacionada: se tienen "+UtilidadesInterfazGrafica.formatearFlotante(this.getPesoTotalDeYCEKgV4())+" kgs distribuidos en "+this.getUnidadesTotalYCEV4()+ " bolsas";
+        retorno = retorno + "\n";
+        retorno = retorno + "\n";
+        retorno = retorno + "Yerba canchada molida: se tienen "+UtilidadesInterfazGrafica.formatearFlotante(this.getPesoTotalDeYCMKgV2())+" kgs";// distribuidos en "+unEquipamiento.getUnidadesTotalYCM()+ " bolsas";
+        return retorno;
+    }*/
+    
+    /*public Float getYCV(){
+        return this.getPesoTotalDeYCVKg();
+    }
+    
+    public Float getYCE(){
+        return this.getPesoTotalDeYCEKg();
+    }
+    
+    public Float getYM(){
+        return this.getPesoTotalDeYCMKg();
+    }*/
+    
+    public Float getYCV(){
+        return this.getPesoTotalDeYCVKgV2();
+    }
+    
+    public Float getYCE(){
+        return this.getPesoTotalDeYCEKgV2();
+    }
+    
+    public Float getYM(){
+        return this.getPesoTotalDeYCMKgV2();
+    }
+    
+    public void agregarMovimientoEntrada(MovimientoInternoMateriaPrima unMovimiento){
+        this.movimientosAsociadosDeEntradaActuales.add(unMovimiento);
+    }
+    
+    public void agregarMovimientoSalida(MovimientoInternoMateriaPrima unMovimiento){
+        this.movimientosAsociadosDeSalidaActuales.add(unMovimiento);
+    }
+
+    public Float getUnidadesTotalYCV(Calendar unaFecha) {
+        Float pesoTotal = 0f;
+        
+        Iterator recorredorMovimientosEntrada = this.movimientosAsociadosDeEntradaActuales.iterator();
+        while (recorredorMovimientosEntrada.hasNext()){
+            boolean seMovioElLote;
+            MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) recorredorMovimientosEntrada.next();
+            MovimientoInternoMateriaPrima unMovimientoPosterior = unMovimiento.getMovimientoInmediatamentePosterior();
+            seMovioElLote = (unMovimientoPosterior != null && unMovimiento.estaRegular() && unMovimientoPosterior.estaRegular() && unMovimientoPosterior.esAnteriorOIgualA(unaFecha)); //hubo movimientos posteriores
+            if (!seMovioElLote){
+                //System.out.println("no se movio el lote");
+                Lote unLote = unMovimiento.getLoteAsociado();
+                /*if (unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM))
+                    System.out.println("el movimiento de ingreso de este lote es anterior a la fecha " +Organizacion.expresarCalendario(FECHA_REPORTE_INYM)+" solicitada");
+                else
+                    System.out.println("el movimiento de ingreso "+unLote.getMovimientoDeIngreso().getId()+" de este lote "+unLote.getId()+" (Fecha :"+Organizacion.expresarCalendario(unLote.getMovimientoDeIngreso().getFechaOrigenC())+") NO es anterior a la fecha " +Organizacion.expresarCalendario(FECHA_REPORTE_INYM)+" solicitada");*/
+                //if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE) && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(unaFecha)){
+                if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE) && unMovimiento.esAnteriorOIgualA(unaFecha)){
+                    //System.out.println("sume un lote mas");
+                    Float unPeso = unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(unaFecha);
+                    pesoTotal = pesoTotal + unPeso;
+                }
+            }
+        }
+        return pesoTotal;
+    }
+
+    public Float getUnidadesTotalYCE(Calendar unaFecha) {
+        Float pesoTotal = 0f;
+        Iterator recorredorMovimientosEntrada = this.movimientosAsociadosDeEntradaActuales.iterator();
+        while (recorredorMovimientosEntrada.hasNext()){
+            boolean seMovioElLote;
+            MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) recorredorMovimientosEntrada.next();
+            MovimientoInternoMateriaPrima unMovimientoPosterior = unMovimiento.getMovimientoInmediatamentePosterior();
+            seMovioElLote = (unMovimientoPosterior != null && unMovimiento.estaRegular() && unMovimientoPosterior.estaRegular() && unMovimientoPosterior.esAnteriorOIgualA(unaFecha)); //hubo movimientos posteriores
+            if (!seMovioElLote){
+                Lote unLote = unMovimiento.getLoteAsociado();
+                if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_ESTACIONADA) && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(unaFecha)){
+                    Float unPeso = unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(unaFecha);
+                    pesoTotal = pesoTotal + unPeso;
+                }
+            }
+        }
+        return pesoTotal;
+    }
+
+    public Float getUnidadesTotalYCM(Calendar unaFecha) {
+        Float cantidadTotal = 0f;
+        
+        Iterator recorredorMovimientosEntrada = this.movimientosAsociadosDeEntradaActuales.iterator();
+        while (recorredorMovimientosEntrada.hasNext()){
+            boolean seMovioElLote;
+            MovimientoInternoMateriaPrima unMovimiento = (MovimientoInternoMateriaPrima) recorredorMovimientosEntrada.next();
+            MovimientoInternoMateriaPrima unMovimientoPosterior = unMovimiento.getMovimientoInmediatamentePosterior();
+            seMovioElLote = (unMovimientoPosterior != null && unMovimiento.estaRegular() && unMovimientoPosterior.estaRegular() && unMovimientoPosterior.esAnteriorOIgualA(unaFecha)); //hubo movimientos posteriores
+            if (!seMovioElLote){
+                Lote unLote = unMovimiento.getLoteAsociado();
+                if (unLote.estaRegular() && unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_MOLIDA) && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(unaFecha)){
+                    int unaCantidad = unLote.obtenerUnidadesTransporteIngresadoConPerdidasIncluidas(unaFecha);
+                    cantidadTotal = cantidadTotal + unaCantidad;
+                }
+            }
+        }
+        
+        return cantidadTotal;
+    }
+    
+    
+    public Float[][] getCantidadAvistamientos(Calendar fechaLimiteInferior, Calendar FechaLimiteSuperior){
+        int cantidadDias = (int) Organizacion.calcularCantidadDiasDiferencia(fechaLimiteInferior, FechaLimiteSuperior);
+        Float[][] retorno = new Float[cantidadDias][Lote.TIPO_LOTES.length];
+        System.out.println("cantidad de dias "+cantidadDias);
+        for (int i = 0; i<cantidadDias; i++){
+            Calendar unaFecha = (Calendar) fechaLimiteInferior.clone();
+            unaFecha.add(Calendar.DATE, i);
+            retorno[i][0] = getPesoTotalDeYCVKgV2(unaFecha);
+            //System.out.println("peso total YCV de dia "+Organizacion.expresarCalendario(unaFecha)+": "+retorno[i][0]);
+            retorno[i][1] = getPesoTotalDeYCEKgV2(unaFecha);
+            //System.out.println("peso total YCE de dia "+Organizacion.expresarCalendario(unaFecha)+": "+retorno[i][1]);
+            retorno[i][2] = getPesoTotalDeYCMKgV2(unaFecha);
+            //System.out.println("peso total YCM de dia "+Organizacion.expresarCalendario(unaFecha)+": "+retorno[i][2]);
+        }
+        return retorno;
+    }
+
 }
 
 

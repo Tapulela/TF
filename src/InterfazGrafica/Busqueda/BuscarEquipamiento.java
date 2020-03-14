@@ -7,9 +7,17 @@ package InterfazGrafica.Busqueda;
 
 import InterfazGrafica.ABMEquipamiento;
 import InterfazGrafica.GestionAnalisisLaboratorio;
+import InterfazGrafica.GestionEgresos;
 import InterfazGrafica.GestionEstacionamientos;
 import InterfazGrafica.GestionIngresoMP;
+import InterfazGrafica.GestionMoliendas;
 import InterfazGrafica.GestionMovimientos;
+import InterfazGrafica.Inicio;
+import InterfazGrafica.Paneles.PanelGestionAnalisisLaboratorio;
+import InterfazGrafica.Paneles.PanelGestionEstacionamientos;
+import InterfazGrafica.Paneles.PanelGestionIngresos;
+import InterfazGrafica.Paneles.PanelGestionMoliendas;
+import InterfazGrafica.Paneles.PanelGestionSalidas;
 import InterfazGrafica.ParametrosDeInterfaz;
 import InterfazGrafica.TransferenciaInstancias;
 import static InterfazGrafica.UtilidadesInterfazGrafica.establecerAlineacionDeTabla;
@@ -17,20 +25,14 @@ import LogicaDeNegocio.Bascula;
 import LogicaDeNegocio.Equipamiento;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.Organizacion;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.Toolkit;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
@@ -95,7 +97,7 @@ public class BuscarEquipamiento extends javax.swing.JFrame {
                 jComboBox2.setEnabled(false);
             }
         }
-        if (ventanaAnterior instanceof GestionMovimientos || ventanaAnterior instanceof GestionIngresoMP){
+        if (ventanaAnterior instanceof GestionMovimientos || ventanaAnterior instanceof GestionIngresoMP || (ventanaAnterior instanceof Inicio && ((Inicio)ventanaAnterior).getSubPanel() instanceof PanelGestionIngresos)){
             //Solo voy a poder seleccionar equipamiento en estado activo.
             jCBTipoEquipamiento.removeItem("Bascula");
             jCBEstado.doClick();
@@ -104,7 +106,7 @@ public class BuscarEquipamiento extends javax.swing.JFrame {
             jComboBox2.setEnabled(false);
         }
         
-        if (ventanaAnterior instanceof GestionEstacionamientos || ventanaAnterior instanceof BuscarEstacionamiento){
+        if (ventanaAnterior instanceof GestionEstacionamientos || ventanaAnterior instanceof BuscarEstacionamiento || (ventanaAnterior instanceof Inicio && ((Inicio)ventanaAnterior).getSubPanel() instanceof PanelGestionEstacionamientos)){
             //Solo voy a poder seleccionar equipamiento en estado activo.
             //Solo voy a poder seleccionar equipamiento que sea camara de estacionamiento.
             jCheckBoxTipoEquipamiento.doClick();
@@ -116,7 +118,19 @@ public class BuscarEquipamiento extends javax.swing.JFrame {
             jComboBox2.setSelectedItem("Activo");
             jComboBox2.setEnabled(false);
         }
-        if (ventanaAnterior instanceof GestionAnalisisLaboratorio || ventanaAnterior instanceof BuscarAnalisisLaboratorio){
+        if (ventanaAnterior instanceof GestionMoliendas || ventanaAnterior instanceof BuscarMolienda || ventanaAnterior instanceof GestionEgresos || (ventanaAnterior instanceof Inicio && ((Inicio)ventanaAnterior).getSubPanel() instanceof PanelGestionMoliendas) || (ventanaAnterior instanceof Inicio && ((Inicio)ventanaAnterior).getSubPanel() instanceof PanelGestionSalidas)){
+            //Solo voy a poder seleccionar equipamiento en estado activo.
+            //Solo voy a poder seleccionar equipamiento que sea molino.
+            jCheckBoxTipoEquipamiento.doClick();
+            jCBTipoEquipamiento.setSelectedItem("Molino");
+            jCheckBoxTipoEquipamiento.setEnabled(false);
+            jCBTipoEquipamiento.setEnabled(false);
+            jCBEstado.doClick();
+            jCBEstado.setEnabled(false);
+            jComboBox2.setSelectedItem("Activo");
+            jComboBox2.setEnabled(false);
+        }
+        if (ventanaAnterior instanceof GestionAnalisisLaboratorio || ventanaAnterior instanceof BuscarAnalisisLaboratorio || (ventanaAnterior instanceof Inicio && ((Inicio)ventanaAnterior).getSubPanel() instanceof PanelGestionAnalisisLaboratorio)){
             //Solo voy a poder seleccionar equipamiento en estado activo.
             //Solo voy a poder seleccionar equipamiento que sea Laboratorio.
             jCheckBoxTipoEquipamiento.doClick();
@@ -320,54 +334,53 @@ public class BuscarEquipamiento extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(12, 12, 12)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jCBDireccion)
+                        .addGap(18, 18, 18)
+                        .addComponent(jTFDireccion, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel3)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jCBNombre)
+                        .addGap(18, 18, 18)
+                        .addComponent(jTFNombre, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jCheckBoxTipoEquipamiento)
+                        .addGap(18, 18, 18)
+                        .addComponent(jCBTipoEquipamiento, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jCBFechaAdquisicion)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jCFechaAdquisicionInferior, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jCFechaAdquisicionSuperior, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jCheckBox11)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel6)
+                        .addGap(6, 6, 6)
+                        .addComponent(jCFechaUltimoMantenimientoInferior, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jCFechaUltimoMantenimientoSuperior, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jCBEstado)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jCBBasculaAsociada)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jCBBascula, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton1))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jCBDireccion)
-                                .addGap(18, 18, 18)
-                                .addComponent(jTFDireccion, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jLabel3)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jCBNombre)
-                                .addGap(18, 18, 18)
-                                .addComponent(jTFNombre, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jCheckBoxTipoEquipamiento)
-                                .addGap(18, 18, 18)
-                                .addComponent(jCBTipoEquipamiento, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jCBFechaAdquisicion)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLabel4)
-                                .addGap(6, 6, 6)
-                                .addComponent(jCFechaAdquisicionInferior, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jLabel5)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jCFechaAdquisicionSuperior, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jCheckBox11)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLabel6)
-                                .addGap(6, 6, 6)
-                                .addComponent(jCFechaUltimoMantenimientoInferior, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jLabel7)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jCFechaUltimoMantenimientoSuperior, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jCBEstado)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(jCBBascula, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton1)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -376,52 +389,41 @@ public class BuscarEquipamiento extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel3)
                 .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jCBNombre)
-                    .addComponent(jTFNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jCheckBoxTipoEquipamiento)
-                    .addComponent(jCBTipoEquipamiento, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jCBDireccion)
-                    .addComponent(jTFDireccion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 4, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jCFechaAdquisicionSuperior, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel5)
-                            .addComponent(jCFechaAdquisicionInferior, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(4, 4, 4))
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel4)
-                        .addComponent(jCBFechaAdquisicion)))
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 4, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jCFechaUltimoMantenimientoSuperior, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel7)
-                            .addComponent(jCFechaUltimoMantenimientoInferior, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel6)
-                        .addComponent(jCheckBox11)))
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jCBEstado)
-                            .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(10, 10, 10)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jCBBasculaAsociada)
-                            .addComponent(jCBBascula, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 36, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jButton1)))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(jTFNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jCBNombre))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(jCBTipoEquipamiento, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jCheckBoxTipoEquipamiento))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(jTFDireccion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jCBDireccion))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(jLabel5)
+                    .addComponent(jCFechaAdquisicionSuperior, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jCFechaAdquisicionInferior, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4)
+                    .addComponent(jCBFechaAdquisicion))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(jCFechaUltimoMantenimientoSuperior, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7)
+                    .addComponent(jCFechaUltimoMantenimientoInferior, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6)
+                    .addComponent(jCheckBox11))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jCBEstado))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(jCBBascula, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jCBBasculaAsociada))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton1)
                 .addContainerGap())
         );
 
@@ -478,7 +480,7 @@ public class BuscarEquipamiento extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 838, Short.MAX_VALUE))
+                        .addComponent(jScrollPane1))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jLEquipamientoSeleccionado)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -495,9 +497,9 @@ public class BuscarEquipamiento extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -574,7 +576,7 @@ public class BuscarEquipamiento extends javax.swing.JFrame {
         Bascula unaBascula = this.organizacion.getUnaBascula((String) jCBBascula.getSelectedItem());
         ArrayList listaFiltrada = null;
         try {
-            if (ventanaAnterior instanceof ABMEquipamiento || ventanaAnterior instanceof GestionAnalisisLaboratorio || ventanaAnterior instanceof BuscarAnalisisLaboratorio){
+            if (ventanaAnterior instanceof ABMEquipamiento || ventanaAnterior instanceof GestionAnalisisLaboratorio || ventanaAnterior instanceof BuscarAnalisisLaboratorio || (ventanaAnterior instanceof Inicio && ((Inicio)ventanaAnterior).getSubPanel() instanceof PanelGestionAnalisisLaboratorio)){
                 listaFiltrada = this.organizacion.filtrarEquipamientos(this.criteriosSeleccionados, jTFNombre.getText(), (String)jCBTipoEquipamiento.getSelectedItem(), jTFDireccion.getText(), jCFechaAdquisicionInferior.getCalendar(), jCFechaAdquisicionSuperior.getCalendar(), jCFechaUltimoMantenimientoInferior.getCalendar(), jCFechaUltimoMantenimientoSuperior.getCalendar(),(String) jComboBox2.getSelectedItem(), unaBascula);
             }else{
                 listaFiltrada = this.organizacion.filtrarEquipamientosSinBasculasNiLaboratorios(this.criteriosSeleccionados, jTFNombre.getText(), (String)jCBTipoEquipamiento.getSelectedItem(), jTFDireccion.getText(), jCFechaAdquisicionInferior.getCalendar(), jCFechaAdquisicionSuperior.getCalendar(), jCFechaUltimoMantenimientoInferior.getCalendar(), jCFechaUltimoMantenimientoSuperior.getCalendar(),(String) jComboBox2.getSelectedItem(), unaBascula);

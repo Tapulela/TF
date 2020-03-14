@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.11.0.final using JasperReports Library version 6.11.0-0c4056ccaa4d25a5a8c45672d2f764ea3498bebb  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="379de868-abe2-4d8c-b785-32c05d2cd9f7">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="ReporteDe" class="java.lang.String"/>
+	<parameter name="reportLogo" class="java.lang.String"/>
+	<parameter name="Cabecera" class="java.lang.String"/>
+	<parameter name="unResumen" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="subReporte" class="net.sf.jasperreports.engine.JasperReport"/>
+	<field name="subDatos" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
+	<field name="subCabecera" class="java.lang.String"/>
+	<variable name="YCV" class="java.lang.Float" calculation="System"/>
+	<variable name="YCE" class="java.lang.Float"/>
+	<variable name="YM" class="java.lang.Float"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="125" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<textField evaluationTime="Report">
+				<reportElement x="0" y="69" width="420" height="51" uuid="d1b54138-aab4-416d-ab43-1ed110f4f523"/>
+				<textFieldExpression><![CDATA[$P{unResumen}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="70" y="39" width="280" height="21" uuid="f53d788a-b867-44da-9a77-a3f1a1fa94c5"/>
+				<text><![CDATA[YerbaSoft - Sistema de Gestión de Producción de Yerba]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="70" y="-1" width="130" height="41" uuid="e7399d39-6bd5-483c-9644-d765c421a31e"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="24"/>
+				</textElement>
+				<text><![CDATA[Reporte de ]]></text>
+			</staticText>
+			<image>
+				<reportElement x="0" y="-1" width="60" height="56" uuid="74a2aa70-5e16-41c1-911b-47ce8b7f6c87"/>
+				<imageExpression><![CDATA[$P{reportLogo}]]></imageExpression>
+			</image>
+			<textField>
+				<reportElement x="200" y="-1" width="355" height="40" uuid="573d09ae-192d-4342-a132-de6c7508faae"/>
+				<textElement verticalAlignment="Middle">
+					<font size="24"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{ReporteDe}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="38" splitType="Prevent">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<subreport>
+				<reportElement x="0" y="18" width="554" height="10" uuid="36b19b47-9a69-470f-b2d7-f65bb53ce376"/>
+				<subreportParameter name="subCabecera">
+					<subreportParameterExpression><![CDATA[$F{subCabecera}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[$F{subDatos}]]></dataSourceExpression>
+				<returnValue subreportVariable="subTotalYCV" toVariable="YCV" calculation="Sum"/>
+				<returnValue subreportVariable="subTotalYCE" toVariable="YCE" calculation="Sum"/>
+				<returnValue subreportVariable="subTotalYM" toVariable="YM" calculation="Sum"/>
+				<subreportExpression><![CDATA[$F{subReporte}]]></subreportExpression>
+			</subreport>
+			<line>
+				<reportElement x="-20" y="4" width="595" height="3" uuid="aa78dff7-a708-47f1-a444-ec9a4954f774"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="66" splitType="Stretch">
+			<textField evaluationTime="Master">
+				<reportElement x="450" y="36" width="104" height="30" uuid="754ddb27-a454-4472-8c61-cf66c0b67128"/>
+				<textFieldExpression><![CDATA["Pagina "+ $V{MASTER_CURRENT_PAGE}+ " de "+ $V{MASTER_TOTAL_PAGES}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="273" y="4" width="281" height="30" uuid="ad13ea64-a65c-432b-8e4e-20fea49c8f16"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$P{Cabecera}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="4" width="273" height="21" uuid="381427a7-5ce1-4a4b-99ab-fc7e8f404194"/>
+				<text><![CDATA[YerbaSoft - Sistema de Gestión de Producción de Yerba]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="18" splitType="Stretch"/>
+	</summary>
+</jasperReport>

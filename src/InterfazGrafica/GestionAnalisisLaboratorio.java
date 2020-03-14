@@ -302,14 +302,19 @@ public class GestionAnalisisLaboratorio extends javax.swing.JFrame implements Tr
             }
         });
 
+        jTFCampo1.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         jTFCampo1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
+        jTFCampo2.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         jTFCampo2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
+        jTFCampo3.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         jTFCampo3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
+        jTFCampo4.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         jTFCampo4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
+        jTFCampo5.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         jTFCampo5.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
         jLStaticEtiqueta11.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
@@ -521,6 +526,36 @@ public class GestionAnalisisLaboratorio extends javax.swing.JFrame implements Tr
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLStaticCampo5)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTFCampo5))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLStaticCampo1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTFCampo1))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLStaticCampo2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTFCampo2))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLStaticCampo3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTFCampo3))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLStaticCampo4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jTFCampo4)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLStaticEtiqueta9)
+                            .addComponent(jLStaticEtiqueta8)
+                            .addComponent(jLStaticEtiqueta7)
+                            .addComponent(jLStaticEtiqueta10)
+                            .addComponent(jLStaticEtiqueta11))
+                        .addGap(1017, 1017, 1017))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLStaticEtiqueta1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jBBuscarLaboratorio)
@@ -533,33 +568,6 @@ public class GestionAnalisisLaboratorio extends javax.swing.JFrame implements Tr
                                 .addComponent(jLStaticEtiqueta2)
                                 .addGap(18, 18, 18)
                                 .addComponent(jLStaticEtiqueta3))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                        .addComponent(jLStaticCampo5)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jTFCampo5))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jLStaticCampo3)
-                                            .addComponent(jLStaticCampo4)
-                                            .addComponent(jLStaticCampo2))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                            .addComponent(jTFCampo3, javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jTFCampo2, javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jTFCampo4, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                        .addComponent(jLStaticCampo1)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jTFCampo1, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLStaticEtiqueta7)
-                                    .addComponent(jLStaticEtiqueta9)
-                                    .addComponent(jLStaticEtiqueta8)
-                                    .addComponent(jLStaticEtiqueta11)
-                                    .addComponent(jLStaticEtiqueta10)))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLStaticEtiqueta13)
                                 .addGap(18, 18, 18)
@@ -591,7 +599,7 @@ public class GestionAnalisisLaboratorio extends javax.swing.JFrame implements Tr
                                     .addComponent(jCB4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jCB3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addComponent(jLStaticCampo12))
-                        .addGap(0, 516, Short.MAX_VALUE))
+                        .addGap(516, 516, 516))
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -798,6 +806,10 @@ public class GestionAnalisisLaboratorio extends javax.swing.JFrame implements Tr
     }//GEN-LAST:event_jBBuscarLoteActionPerformed
 
     private void jBBuscarCriterioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBBuscarCriterioActionPerformed
+        if (this.unaOrdenDeCompra == null && this.unLote == null){
+            JOptionPane.showMessageDialog(null, "Debe seleccionar una orden de compra o un lote para poder elegir el criterio de análisis asociado");
+            deshabilitarSeleccionCriterio();
+        }
         BuscarCriterioAnalisisLaboratorio unaVentana = new BuscarCriterioAnalisisLaboratorio(this.organizacion, this, this.trayectoriaActual);
         this.dispose();
     }//GEN-LAST:event_jBBuscarCriterioActionPerformed
@@ -1250,7 +1262,25 @@ public class GestionAnalisisLaboratorio extends javax.swing.JFrame implements Tr
         if (unaOrdenDeCompra != null)
             jLStaticEtiqueta16.setText(""+unaOrdenDeCompra.getId());
     }
-    
 
+    public OrdenDeCompra getUnaOrdenDeCompra() {
+        return unaOrdenDeCompra;
+    }
+
+    private void deshabilitarSeleccionCriterio() {
+        jLStaticEtiqueta12.setEnabled(false);
+        jBBuscarCriterio.setEnabled(false);
+    }
+
+    public Lote getUnLote() {
+        return unLote;
+    }
+
+    public void setUnLote(Lote unLote) {
+        this.unLote = unLote;
+    }
+    
+    
+    
 }
 

@@ -5,11 +5,11 @@
  */
 package InterfazGrafica;
 
-import static InterfazGrafica.UtilidadesInterfazGrafica.deshabilitarCamposEditablesContenedor;
+import LogicaDeNegocio.ExcepcionCargaParametros;
+import LogicaDeNegocio.Validaciones;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -41,10 +41,12 @@ public class ParametrosDeInterfaz {
     public static final Color COLOR_PANEL_SIN_PRESIONAR = new Color(0,102,51);
     
     
+    
     //Verde pastel: new Color(119, 221, 119);
     //Verde oscuro: new Color(5, 68, 23);
     public static final String rutaIcono = "../InterfazGrafica/Assets/Icono.png";
-    public static Font fuentePorDefecto = new Font("Arial", 0 , 22);
+    public static final String rutaLogo = "C:\\Users\\usuario\\Documents\\NetBeansProjects\\TrabajoFinal\\src\\InterfazGrafica\\Assets\\Logo.png";
+    public static Font fuentePorDefecto = new Font("Arial", 0 , 24);
     
     
     public static void configurarVentana(JFrame unaVentana){
@@ -69,6 +71,9 @@ public class ParametrosDeInterfaz {
                 UtilidadesInterfazGrafica.configurarTabla((JTable) unComponente);
                 UtilidadesInterfazGrafica.establecerAlineacionDeTabla((JTable) unComponente, SwingConstants.CENTER);
             }
+            if (unComponente instanceof javax.swing.JTabbedPane){
+                 confeccionarComponentes(((javax.swing.JTabbedPane)unComponente).getComponents());
+            }
             
         }
     }
@@ -81,6 +86,18 @@ public class ParametrosDeInterfaz {
             if (unComponente instanceof JPanel){
                 habilitarContenedor(((JPanel) unComponente).getComponents());
             }
+        }
+    }
+    
+    public static void cambiarTamanoFuente(String unTamano) throws ExcepcionCargaParametros{
+        if (Validaciones.esUnNumeroEnteroValido(unTamano)){
+            Integer unTamanoInt = Integer.parseInt(unTamano);
+            if (unTamanoInt > 10 && unTamanoInt <40){
+                Font fuentePorDefecto = new Font("Arial", 0 , unTamanoInt);
+                ParametrosDeInterfaz.fuentePorDefecto = fuentePorDefecto;
+            }
+        }else{
+            throw new ExcepcionCargaParametros("Debe ingresarse un numero entero para especificar el tamaño de letra.");
         }
     }
 }

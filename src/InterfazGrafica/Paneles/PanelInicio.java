@@ -48,7 +48,7 @@ public class PanelInicio extends javax.swing.JPanel {
         jLabel14.setBackground(new java.awt.Color(0, 0, 0));
         jLabel14.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel14.setForeground(new java.awt.Color(0, 0, 0));
-        jLabel14.setText("Notificaciones nuevas");
+        jLabel14.setText("Bienvenido al sistema de gestión de la producción de Yerba, YerbaSoft");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -57,14 +57,14 @@ public class PanelInicio extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel14)
-                .addContainerGap(1002, Short.MAX_VALUE))
+                .addContainerGap(468, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel14)
-                .addContainerGap(431, Short.MAX_VALUE))
+                .addContainerGap(493, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 

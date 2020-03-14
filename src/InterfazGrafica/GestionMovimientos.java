@@ -287,7 +287,7 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
         jLStaticCB2.setEnabled(false);
         jLStaticCB2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jCB2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Kilogramo", "Tonelada" }));
+        jCB2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Kilogramo" }));
         jCB2.setEnabled(false);
         jCB2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
@@ -359,7 +359,7 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
                         .addGap(18, 18, 18)
                         .addComponent(jLStaticCampo1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jTFCampo1, javax.swing.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE))
+                        .addComponent(jTFCampo1))
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                         .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                             .addComponent(jLStaticCampo5)
@@ -627,7 +627,7 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
                         .addComponent(jLStaticEtiqueta17)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLStaticEtiqueta18)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -674,7 +674,7 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLStaticEtiqueta17)
                     .addComponent(jLStaticEtiqueta18))
-                .addContainerGap(74, Short.MAX_VALUE))
+                .addGap(18, 18, 18))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -685,22 +685,25 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel12)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(jBBuscar))
-                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(18, 18, 18)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jBConcretarAccion)
-                        .addGap(18, 18, 18)
-                        .addComponent(jBCancelar)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(jBConcretarAccion)
+                                .addGap(18, 18, 18)
+                                .addComponent(jBCancelar))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel12)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jBBuscar))
+                                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGap(18, 18, 18)
+                                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addGap(18, 18, 18)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -708,23 +711,22 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(cabeceraDeVentana, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel12)
+                    .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jBBuscar))
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel12)
-                            .addComponent(jCBOperacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jBBuscar))
-                        .addGap(18, 18, 18)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jBCancelar)
-                            .addComponent(jBConcretarAccion))))
-                .addContainerGap())
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jBCancelar)
+                    .addComponent(jBConcretarAccion))
+                .addGap(30, 30, 30))
         );
 
         pack();
@@ -738,7 +740,7 @@ public class GestionMovimientos extends javax.swing.JFrame implements Transferen
                 case "Alta":
                     LocalTime unHorarioEntrada = jC2.getTime();
                     LocalTime unHorarioSalida = jC3.getTime();
-                    organizacion.registrarMovmimiento(jC1.getCalendar(), unHorarioEntrada, unHorarioSalida, (String) jCB1.getSelectedItem(), jTFCampo1.getText(), (String) jCB2.getSelectedItem(), jTFCampo2.getText(), jTFCampo3.getText(), jTFCampo8.getText(), jTFCampo9.getText(), jTFCampo7.getText(), jTFCampo4.getText(), jTFCampo5.getText(), jTFCampo6.getText(), unLoteSeleccionado,unEquipamientoDestinoSeleccionado, unProveedorDeServicioTransporte);
+                    organizacion.registrarMovimimiento(jC1.getCalendar(), unHorarioEntrada, unHorarioSalida, (String) jCB1.getSelectedItem(), jTFCampo1.getText(), (String) jCB2.getSelectedItem(), jTFCampo2.getText(), jTFCampo3.getText(), jTFCampo8.getText(), jTFCampo9.getText(), jTFCampo7.getText(), jTFCampo4.getText(), jTFCampo5.getText(), jTFCampo6.getText(), unLoteSeleccionado,unEquipamientoDestinoSeleccionado, unProveedorDeServicioTransporte);
                     break;
                 case "Baja":
                     organizacion.anularMovimientoDeMateriaPrima(unMovimientoSeleccionado);

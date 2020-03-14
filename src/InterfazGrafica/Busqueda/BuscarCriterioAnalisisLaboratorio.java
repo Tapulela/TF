@@ -7,6 +7,7 @@ package InterfazGrafica.Busqueda;
 
 
 import InterfazGrafica.ABMProveedor;
+import InterfazGrafica.GestionAnalisisLaboratorio;
 import InterfazGrafica.ParametrosDeInterfaz;
 import InterfazGrafica.TransferenciaInstancias;
 import static InterfazGrafica.UtilidadesInterfazGrafica.establecerAlineacionDeTabla;
@@ -93,15 +94,21 @@ public class BuscarCriterioAnalisisLaboratorio extends javax.swing.JFrame implem
         criteriosSeleccionados.put(criterio4, false);
         criteriosSeleccionados.put(criterio5, false);
         criteriosSeleccionados.put(criterio6, false);
-        if (ventanaAnterior instanceof ABMProveedor){   //EJEMPLO GENERICO, ESTO DEBERIA CAMBIARSE
-            ABMProveedor abmProveedor = (ABMProveedor) ventanaAnterior;
-            if (abmProveedor.getOperacionActual().equals("Baja")){
-                //Si voy a dar de baja, solo puedo seleccionar proveedor activo.
+        if (ventanaAnterior instanceof GestionAnalisisLaboratorio){   //EJEMPLO GENERICO, ESTO DEBERIA CAMBIARSE
+            GestionAnalisisLaboratorio gestionAnalisisLab = (GestionAnalisisLaboratorio) ventanaAnterior;
                 jCBCriterio3.doClick();
                 jCBCriterio3.setEnabled(false);
-                datoCriterio3.setSelectedItem("Activo");
+                datoCriterio3.setSelectedItem(CriterioAnalisisLaboratorio.ESTADO_ALTA);
                 datoCriterio3.setEnabled(false);
-            }
+                
+                jCBCriterio4.doClick();
+                jCBCriterio4.setEnabled(false);
+                botonCriterio4.setEnabled(false);
+                if (gestionAnalisisLab.getUnaOrdenDeCompra() != null)
+                    this.unaOrdenSeleccionada = gestionAnalisisLab.getUnaOrdenDeCompra().getOrdenDeProduccionAsociada();
+                if (gestionAnalisisLab.getUnLote()!= null)
+                    this.unaOrdenSeleccionada = gestionAnalisisLab.getUnLote().getOrdenDeProduccionAsociada();
+                exhibirOrdenDeProduccion();
             
         }
         ParametrosDeInterfaz.configurarVentana(this);

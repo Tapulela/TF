@@ -5,6 +5,7 @@
  */
 package InterfazGrafica;
 
+import InterfazGrafica.Reportes.ReportesEquipamiento;
 import LogicaDeNegocio.Organizacion;
 import java.awt.Color;
 import java.awt.Component;

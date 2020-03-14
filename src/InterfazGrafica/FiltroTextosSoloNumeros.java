@@ -14,7 +14,7 @@ import javax.swing.text.DocumentFilter;
  * @author usuario
  */
 
-class FiltroTextosSoloNumeros extends DocumentFilter {
+public class FiltroTextosSoloNumeros extends DocumentFilter {
    private static final String REMOVE_REGEX = "[^\\d]";
    private boolean filter = true;
 
@@ -31,16 +31,23 @@ class FiltroTextosSoloNumeros extends DocumentFilter {
       if (filter) {
          text = text.replaceAll(REMOVE_REGEX, "");
       }
+      
       super.insertString(fb, offset, text, attr);
+      
 
    }
 
    @Override
    public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-      if (filter) {
-         text = text.replaceAll(REMOVE_REGEX, "");
-      }
-      super.replace(fb, offset, length, text, attrs);
+        if (filter) {
+           text = text.replaceAll(REMOVE_REGEX, "");
+        }
+        actualizarPeso();
+        super.replace(fb, offset, length, text, attrs);
 
+   }
+   
+   public void actualizarPeso(){
+       
    }
 }

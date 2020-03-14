@@ -48,10 +48,10 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
     
     
     
-    private final String criterio2 = "ordenProduccion";
+    private final String criterio1 = "ordenProduccion";
+    private final String criterio2 = "proveedor";
     private final String criterio3 = "estado";
-    private final String criterio4 = "proveedor";
-    private final String criterio5 = "fechaOrigen";
+    private final String criterio4 = "fechaOrigen";
     
     /**
      * Creates new form BuscarProveedor
@@ -82,10 +82,10 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
         
         
         criteriosSeleccionados = new HashMap<String, Boolean>();
-        criteriosSeleccionados.put(criterio2, false);
+        criteriosSeleccionados.put(criterio1, false);
         criteriosSeleccionados.put(criterio3, false);
+        criteriosSeleccionados.put(criterio2, false);
         criteriosSeleccionados.put(criterio4, false);
-        criteriosSeleccionados.put(criterio5, false);
 
         if (ventanaAnterior instanceof GestionIngresoMP || ventanaAnterior instanceof GestionAnalisisLaboratorio){   
             //Si voy a dar registrar un ingreso, solo puedo elegir ordenes de compra activas.
@@ -111,12 +111,12 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
         jBCancelar = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
-        jCBCriterio2 = new javax.swing.JCheckBox();
+        jCBCriterio1 = new javax.swing.JCheckBox();
         jCBCriterio3 = new javax.swing.JCheckBox();
         jButton1 = new javax.swing.JButton();
         datoCriterio3 = new javax.swing.JComboBox<>();
-        jCBCriterio5 = new javax.swing.JCheckBox();
         jCBCriterio4 = new javax.swing.JCheckBox();
+        jCBCriterio2 = new javax.swing.JCheckBox();
         jLEstatico1Criterio5 = new javax.swing.JLabel();
         dato1Criterio5 = new com.toedter.calendar.JDateChooser();
         jLEstatico2Criterio5 = new javax.swing.JLabel();
@@ -158,11 +158,11 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
         jLabel3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLabel3.setText("Criterios de búsqueda");
 
-        jCBCriterio2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jCBCriterio2.setText("Orden de Produccion asociada");
-        jCBCriterio2.addItemListener(new java.awt.event.ItemListener() {
+        jCBCriterio1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCBCriterio1.setText("Orden de Produccion asociada");
+        jCBCriterio1.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                jCBCriterio2ItemStateChanged(evt);
+                jCBCriterio1ItemStateChanged(evt);
             }
         });
 
@@ -186,20 +186,20 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
         datoCriterio3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Regular", "Anulado" }));
         datoCriterio3.setEnabled(false);
 
-        jCBCriterio5.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jCBCriterio5.setText("Fecha de Origen");
-        jCBCriterio5.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                jCBCriterio5ItemStateChanged(evt);
-            }
-        });
-
         jCBCriterio4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jCBCriterio4.setText("Proveedor asociado");
-        jCBCriterio4.setPressedIcon(new javax.swing.ImageIcon(getClass().getResource("/InterfazGrafica/Assets/CheckTic.png"))); // NOI18N
+        jCBCriterio4.setText("Fecha de Origen");
         jCBCriterio4.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jCBCriterio4ItemStateChanged(evt);
+            }
+        });
+
+        jCBCriterio2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jCBCriterio2.setText("Proveedor asociado");
+        jCBCriterio2.setPressedIcon(new javax.swing.ImageIcon(getClass().getResource("/InterfazGrafica/Assets/CheckTic.png"))); // NOI18N
+        jCBCriterio2.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBCriterio2ItemStateChanged(evt);
             }
         });
 
@@ -254,7 +254,7 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jCBCriterio2)
+                        .addComponent(jCBCriterio1)
                         .addGap(18, 18, 18)
                         .addComponent(botonCriterio1))
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -262,7 +262,7 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
                         .addGap(18, 18, 18)
                         .addComponent(jLCriterio1, javax.swing.GroupLayout.PREFERRED_SIZE, 370, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jCBCriterio4)
+                        .addComponent(jCBCriterio2)
                         .addGap(18, 18, 18)
                         .addComponent(botonCriterio4))
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -270,7 +270,7 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
                         .addGap(18, 18, 18)
                         .addComponent(jLCriterio4, javax.swing.GroupLayout.PREFERRED_SIZE, 292, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jCBCriterio5)
+                        .addComponent(jCBCriterio4)
                         .addGap(18, 18, 18)
                         .addComponent(jLEstatico1Criterio5)
                         .addGap(6, 6, 6)
@@ -293,7 +293,7 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
                 .addComponent(jLabel3)
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jCBCriterio2)
+                    .addComponent(jCBCriterio1)
                     .addComponent(botonCriterio1))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -301,7 +301,7 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
                     .addComponent(jLCriterio1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jCBCriterio4)
+                    .addComponent(jCBCriterio2)
                     .addComponent(botonCriterio4))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -313,7 +313,7 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
                     .addComponent(datoCriterio3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jCBCriterio5)
+                    .addComponent(jCBCriterio4)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(dato2Criterio5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLEstatico2Criterio5, javax.swing.GroupLayout.Alignment.TRAILING)
@@ -424,12 +424,12 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
         this.limpiarCampos();
     }//GEN-LAST:event_jBCancelarActionPerformed
 
-    private void jCBCriterio2ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio2ItemStateChanged
+    private void jCBCriterio1ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio1ItemStateChanged
         botonCriterio1.setEnabled(true);
-        jLEstaticoCriterio1.setEnabled(jCBCriterio2.isSelected());
-        jLCriterio1.setEnabled(jCBCriterio2.isSelected());
-        criteriosSeleccionados.put(criterio2, jCBCriterio2.isSelected());
-    }//GEN-LAST:event_jCBCriterio2ItemStateChanged
+        jLEstaticoCriterio1.setEnabled(jCBCriterio1.isSelected());
+        jLCriterio1.setEnabled(jCBCriterio1.isSelected());
+        criteriosSeleccionados.put(criterio1, jCBCriterio1.isSelected());
+    }//GEN-LAST:event_jCBCriterio1ItemStateChanged
 
     private void jCBCriterio3ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio3ItemStateChanged
         datoCriterio3.setEnabled(jCBCriterio3.isSelected());
@@ -468,21 +468,21 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
         
     }//GEN-LAST:event_jTable1MouseClicked
 
-    private void jCBCriterio5ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio5ItemStateChanged
-        jLEstatico1Criterio5.setEnabled(jCBCriterio5.isSelected());
-        dato1Criterio5.setEnabled(jCBCriterio5.isSelected());
-        jLEstatico2Criterio5.setEnabled(jCBCriterio5.isSelected());
-        dato2Criterio5.setEnabled(jCBCriterio5.isSelected());
-        criteriosSeleccionados.put(criterio5, jCBCriterio5.isSelected());
-    }//GEN-LAST:event_jCBCriterio5ItemStateChanged
-
     private void jCBCriterio4ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio4ItemStateChanged
-        botonCriterio4.setEnabled(jCBCriterio4.isSelected());
-        jLEstaticoCriterio4.setEnabled(jCBCriterio4.isSelected());
-        jLCriterio4.setEnabled(jCBCriterio4.isSelected());
+        jLEstatico1Criterio5.setEnabled(jCBCriterio4.isSelected());
+        dato1Criterio5.setEnabled(jCBCriterio4.isSelected());
+        jLEstatico2Criterio5.setEnabled(jCBCriterio4.isSelected());
+        dato2Criterio5.setEnabled(jCBCriterio4.isSelected());
         criteriosSeleccionados.put(criterio4, jCBCriterio4.isSelected());
-        
     }//GEN-LAST:event_jCBCriterio4ItemStateChanged
+
+    private void jCBCriterio2ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio2ItemStateChanged
+        botonCriterio4.setEnabled(jCBCriterio2.isSelected());
+        jLEstaticoCriterio4.setEnabled(jCBCriterio2.isSelected());
+        jLCriterio4.setEnabled(jCBCriterio2.isSelected());
+        criteriosSeleccionados.put(criterio2, jCBCriterio2.isSelected());
+        
+    }//GEN-LAST:event_jCBCriterio2ItemStateChanged
 
     private void botonCriterio4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonCriterio4ActionPerformed
         BuscarProveedor unaVentana = new BuscarProveedor(this.organizacion, this, this.trayectoriaActual);
@@ -548,10 +548,10 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
     private javax.swing.JButton jBCancelar;
     private javax.swing.JButton jBConcretarAccion;
     private javax.swing.JButton jButton1;
+    private javax.swing.JCheckBox jCBCriterio1;
     private javax.swing.JCheckBox jCBCriterio2;
     private javax.swing.JCheckBox jCBCriterio3;
     private javax.swing.JCheckBox jCBCriterio4;
-    private javax.swing.JCheckBox jCBCriterio5;
     private javax.swing.JLabel jLCriterio1;
     private javax.swing.JLabel jLCriterio4;
     private javax.swing.JLabel jLEstatico1Criterio5;

@@ -5,12 +5,12 @@
  */
 package LogicaDeNegocio;
 
+import InterfazGrafica.UtilidadesInterfazGrafica;
 import LogicaDeNegocio.AnalisisLaboratorio;
 import LogicaDeNegocio.OrdenDeProduccion;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Vector;
 
 /**
  *
@@ -25,7 +25,7 @@ public class CriterioAnalisisLaboratorio {
     public static final String ESTADO_RECHAZADO = "RECHAZADO";
     
     public static final String TIPO_YCV = "YCV";
-    public static final String TIPO_YE = "YE";
+    public static final String TIPO_YCE = "YCE";
     public static final String TIPO_YM = "YM";
     
     private int id;
@@ -307,6 +307,7 @@ public class CriterioAnalisisLaboratorio {
 
     public boolean poseeOrdenDeProduccionImplicada(OrdenDeProduccion unaOrdenProduccionSeleccionada) {
         return this.ordenesDeProduccionAsociadas.contains(unaOrdenProduccionSeleccionada);
+        
     }
 
     public boolean poseeEstado(String estadoSeleccionado) {
@@ -358,10 +359,117 @@ public class CriterioAnalisisLaboratorio {
     void removerOrdenDeProduccion(OrdenDeProduccion unaOrdenDeProduccion) {
         this.ordenesDeProduccionAsociadas.remove(unaOrdenDeProduccion);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        boolean sonIguales = true;
+        if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            
+        CriterioAnalisisLaboratorio unCriterio = (CriterioAnalisisLaboratorio)o;
+        sonIguales = unCriterio.getId()== this.id;
+        if (sonIguales)
+            sonIguales = unCriterio.getAroma().equals(unCriterio.getAroma());
+        if (sonIguales)
+            sonIguales = unCriterio.getColor().equals(unCriterio.getColor());
+        if (sonIguales)
+            sonIguales = unCriterio.getDegustacion().equals(unCriterio.getDegustacion());
+        if (sonIguales)
+            sonIguales = unCriterio.getTorrada().equals(unCriterio.getTorrada());
+        if (sonIguales)
+            sonIguales = unCriterio.getDescripcion().equals(unCriterio.getDescripcion());
+        return sonIguales;
+    }
     
+    //Metodos para la carga de datos / pruebas
+    public String generarPorcentajePalo(){
+        String retorno = "";
+        Float porcentajeInferior = porcentajePaloLimiteInferior;
+        Float porcentajeSuperior = porcentajePaloLimiteSuperior;
+        Float holgura = porcentajeSuperior - porcentajeInferior;
+        //Double porcentaje = porcentajeInferior + Math.random()*holgura/32;
+        Double porcentaje = porcentajeInferior + 0d;
+        retorno = UtilidadesInterfazGrafica.formatearFlotante(Float.parseFloat(""+porcentaje));
+        return retorno;
+    }
+    public String generarPorcentajeSemilla(){
+        String retorno = "";
+        Float porcentajeInferior = porcentajeSemillaLimiteInferior;
+        Float porcentajeSuperior = porcentajeSemillaLimiteSuperior;
+        Float holgura = porcentajeSuperior - porcentajeInferior;
+        //Double porcentaje = porcentajeInferior + Math.random()*holgura/32;
+        Double porcentaje = porcentajeInferior + 0d;
+        retorno = UtilidadesInterfazGrafica.formatearFlotante(Float.parseFloat(""+porcentaje));
+        return retorno;
+    }
     
+    public String generarPorcentajePolvo(){
+        String retorno = "";
+        Float porcentajeInferior = porcentajePolvoLimiteInferior;
+        Float porcentajeSuperior = porcentajePolvoLimiteSuperior;
+        Float holgura = porcentajeSuperior - porcentajeInferior;
+        //Double porcentaje = porcentajeInferior + Math.random()*holgura/32;
+        Double porcentaje = porcentajeInferior + 0d;
+        retorno = UtilidadesInterfazGrafica.formatearFlotante(Float.parseFloat(""+porcentaje));
+        return retorno;
+    }
     
+    public String generarPorcentajeHoja(){
+        String retorno = "";
+        Float porcentajeInferior = porcentajeHojaLimiteInferior;
+        Float porcentajeSuperior = porcentajeHojaLimiteSuperior;
+        Float holgura = porcentajeSuperior - porcentajeInferior;
+        //Double porcentaje = porcentajeInferior + Math.random()*holgura/32;
+        Double porcentaje = porcentajeInferior + 0d;
+        retorno = UtilidadesInterfazGrafica.formatearFlotante(Float.parseFloat(""+porcentaje));
+        return retorno;
+    }
+    public String generarPorcentajeHumedad(){
+        String retorno = "";
+        Float porcentajeInferior = porcentajeHumedadLimiteInferior;
+        Float porcentajeSuperior = porcentajeHumedadLimiteSuperior;
+        Float holgura = porcentajeSuperior - porcentajeInferior;
+        //Double porcentaje = porcentajeInferior + Math.random()*holgura/32;
+        Double porcentaje = porcentajeInferior + 0d;
+        retorno = UtilidadesInterfazGrafica.formatearFlotante(Float.parseFloat(""+porcentaje));
+        return retorno;
+    }
     
+    public String generarUnAtributoCuantitativo(int i){
+        String retorno = "10,0";
+        if (i == 0) //Semilla
+            retorno = generarPorcentajeSemilla();
+        if (i == 1) //Palo
+            retorno = generarPorcentajePalo();
+        if (i == 2) //Polvo
+            retorno = generarPorcentajePolvo();
+        if (i == 3) //Hoja
+            retorno = generarPorcentajeHoja();
+        if (i == 4) //Humedad
+            retorno = generarPorcentajeHumedad();
+        return retorno;
+    }
+    
+    public String generarUnAtributoCualitativo(int i){
+        String retorno = "";
+        if (i==0)   //puntos negros
+            retorno = puntosNegros;
+        if (i==1)   //torrada
+            retorno = torrada;
+        if (i==2)   //color
+            retorno = color;
+        if (i==3)   //aroma
+            retorno = aroma;
+        if (i==4)   //tacto
+            retorno = tacto;
+        if (i==5)   //degustacion
+            retorno = degustacion;
+        return retorno;
+    }
     
     
     

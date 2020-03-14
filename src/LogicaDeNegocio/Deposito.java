@@ -7,7 +7,6 @@ package LogicaDeNegocio;
 
 import LogicaDeNegocio.Bascula;
 import LogicaDeNegocio.Equipamiento;
-import java.sql.Date;
 import java.util.Calendar;
 
 /**

@@ -167,6 +167,44 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="jScrollPane2" max="32767" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Group type="102" attributes="0">
+                                      <Component id="jLStaticCampo5" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="jTFCampo5" max="32767" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" attributes="0">
+                                      <Component id="jLStaticCampo1" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="jTFCampo1" max="32767" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" attributes="0">
+                                      <Component id="jLStaticCampo2" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="jTFCampo2" max="32767" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" attributes="0">
+                                      <Component id="jLStaticCampo3" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="jTFCampo3" max="32767" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" attributes="0">
+                                      <Component id="jLStaticCampo4" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                      <Component id="jTFCampo4" max="32767" attributes="0"/>
+                                  </Group>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="jLStaticEtiqueta9" min="-2" max="-2" attributes="0"/>
+                                  <Component id="jLStaticEtiqueta8" min="-2" max="-2" attributes="0"/>
+                                  <Component id="jLStaticEtiqueta7" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="jLStaticEtiqueta10" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="jLStaticEtiqueta11" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace min="-2" pref="1017" max="-2" attributes="0"/>
+                          </Group>
                           <Group type="102" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="0" attributes="0">
@@ -183,41 +221,6 @@
                                       <Component id="jLStaticEtiqueta2" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace type="separate" max="-2" attributes="0"/>
                                       <Component id="jLStaticEtiqueta3" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                                          <Group type="102" alignment="0" attributes="0">
-                                              <Component id="jLStaticCampo5" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace max="-2" attributes="0"/>
-                                              <Component id="jTFCampo5" max="32767" attributes="0"/>
-                                          </Group>
-                                          <Group type="102" alignment="0" attributes="0">
-                                              <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Component id="jLStaticCampo3" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="jLStaticCampo4" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="jLStaticCampo2" alignment="0" min="-2" max="-2" attributes="0"/>
-                                              </Group>
-                                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                              <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                                                  <Component id="jTFCampo3" alignment="0" max="32767" attributes="0"/>
-                                                  <Component id="jTFCampo2" alignment="0" max="32767" attributes="0"/>
-                                                  <Component id="jTFCampo4" min="-2" pref="190" max="-2" attributes="0"/>
-                                              </Group>
-                                          </Group>
-                                          <Group type="102" alignment="0" attributes="0">
-                                              <Component id="jLStaticCampo1" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                              <Component id="jTFCampo1" min="-2" pref="172" max="-2" attributes="0"/>
-                                          </Group>
-                                      </Group>
-                                      <EmptySpace max="-2" attributes="0"/>
-                                      <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="jLStaticEtiqueta7" min="-2" max="-2" attributes="0"/>
-                                          <Component id="jLStaticEtiqueta9" min="-2" max="-2" attributes="0"/>
-                                          <Component id="jLStaticEtiqueta8" min="-2" max="-2" attributes="0"/>
-                                          <Component id="jLStaticEtiqueta11" min="-2" max="-2" attributes="0"/>
-                                          <Component id="jLStaticEtiqueta10" min="-2" max="-2" attributes="0"/>
-                                      </Group>
                                   </Group>
                                   <Group type="102" alignment="0" attributes="0">
                                       <Component id="jLStaticEtiqueta13" min="-2" max="-2" attributes="0"/>
@@ -259,7 +262,7 @@
                                   </Group>
                                   <Component id="jLStaticCampo12" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace min="0" pref="516" max="32767" attributes="0"/>
+                              <EmptySpace min="-2" pref="516" max="-2" attributes="0"/>
                           </Group>
                           <Component id="jPanel2" alignment="0" max="32767" attributes="0"/>
                       </Group>
@@ -518,6 +521,7 @@
             </Component>
             <Component class="javax.swing.JFormattedTextField" name="jTFCampo1">
               <Properties>
+                <Property name="horizontalAlignment" type="int" value="4"/>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="24" style="0"/>
                 </Property>
@@ -529,6 +533,7 @@
             </Component>
             <Component class="javax.swing.JFormattedTextField" name="jTFCampo2">
               <Properties>
+                <Property name="horizontalAlignment" type="int" value="4"/>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="24" style="0"/>
                 </Property>
@@ -540,6 +545,7 @@
             </Component>
             <Component class="javax.swing.JFormattedTextField" name="jTFCampo3">
               <Properties>
+                <Property name="horizontalAlignment" type="int" value="4"/>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="24" style="0"/>
                 </Property>
@@ -551,6 +557,7 @@
             </Component>
             <Component class="javax.swing.JFormattedTextField" name="jTFCampo4">
               <Properties>
+                <Property name="horizontalAlignment" type="int" value="4"/>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="24" style="0"/>
                 </Property>
@@ -562,6 +569,7 @@
             </Component>
             <Component class="javax.swing.JFormattedTextField" name="jTFCampo5">
               <Properties>
+                <Property name="horizontalAlignment" type="int" value="4"/>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="24" style="0"/>
                 </Property>

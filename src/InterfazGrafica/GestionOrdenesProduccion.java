@@ -174,7 +174,7 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         jLUnidadMedida.setEnabled(false);
 
         jCBUnidadMedida.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        jCBUnidadMedida.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Kilogramo", "Tonelada" }));
+        jCBUnidadMedida.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Kilogramo" }));
         jCBUnidadMedida.setEnabled(false);
 
         jTFCantidadAProducir.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
