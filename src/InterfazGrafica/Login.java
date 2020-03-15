@@ -245,6 +245,7 @@ public class Login extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Error con el driver: "+ex.getMessage());
         } catch (SQLException ex) {
             jLError.setText("<html>Error con la conexión: El usuario o la contraseña son incorrectos.</html>");
+            this.pack();
             //ex.printStackTrace();
         } catch (ExcepcionCargaParametros ex) {
             jLError.setText("<html>"+ex.getMessage()+"</html>");

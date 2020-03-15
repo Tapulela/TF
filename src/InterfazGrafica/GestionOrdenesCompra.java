@@ -13,20 +13,15 @@ import LogicaDeNegocio.OrdenDeCompra;
 import LogicaDeNegocio.OrdenDeProduccion;
 import LogicaDeNegocio.Organizacion;
 import LogicaDeNegocio.Proveedor;
-import LogicaDeNegocio.Validaciones;
 import Persistencia.ExcepcionPersistencia;
-import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.event.ItemEvent;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 /**
  *
@@ -134,135 +129,137 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
         jLStaticEtiqueta2 = new javax.swing.JLabel();
         jLProveedorSeleccionado = new javax.swing.JLabel();
         jCBoxProveedorAsociado = new javax.swing.JCheckBox();
+        jCB3 = new javax.swing.JComboBox<>();
+        jLStaticCB3 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(153, 255, 153));
 
-        jLStaticCampo1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLStaticCampo1.setText("Cantidad a Comprar");
         jLStaticCampo1.setEnabled(false);
+        jLStaticCampo1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jTFCampo1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jTFCampo1.setEnabled(false);
+        jTFCampo1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLStaticEtiqueta7.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLStaticEtiqueta7.setText("Pesos Argentinos por unidad");
         jLStaticEtiqueta7.setEnabled(false);
+        jLStaticEtiqueta7.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jBConcretarAccion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jBConcretarAccion.setText("Aceptar");
         jBConcretarAccion.setEnabled(false);
+        jBConcretarAccion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jBConcretarAccion.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jBConcretarAccionActionPerformed(evt);
             }
         });
 
-        jBCancelar.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jBCancelar.setText("Cancelar");
         jBCancelar.setEnabled(false);
+        jBCancelar.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jBCancelar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jBCancelarActionPerformed(evt);
             }
         });
 
-        jLStaticCampo2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLStaticCampo2.setText("Costo de Compra");
         jLStaticCampo2.setEnabled(false);
+        jLStaticCampo2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jTFCampo2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jTFCampo2.setEnabled(false);
+        jTFCampo2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLabel12.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLabel12.setText("Seleccione una operacion");
+        jLabel12.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jCBOperacion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jCBOperacion.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Alta", "Baja", "Modificacion" }));
+        jCBOperacion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jCBOperacion.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jCBOperacionItemStateChanged(evt);
             }
         });
 
-        jBBuscar.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jBBuscar.setText("Buscar una Orden de Compra");
         jBBuscar.setEnabled(false);
+        jBBuscar.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jBBuscar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jBBuscarActionPerformed(evt);
             }
         });
 
-        jLEstaticoEstado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLEstaticoEstado.setText("Estado");
         jLEstaticoEstado.setEnabled(false);
+        jLEstaticoEstado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
         jCB1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Kilogramo" }));
         jCB1.setEnabled(false);
         jCB1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLStaticCB1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLStaticCB1.setText("Unidad de Medida");
         jLStaticCB1.setEnabled(false);
+        jLStaticCB1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
         jLStaticCalendar1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLStaticCalendar1.setText("Fecha de Origen");
         jLStaticCalendar1.setEnabled(false);
 
-        jLOperacionSeleccionada.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLOperacionSeleccionada.setText("Operación sobre un Concepto");
         jLOperacionSeleccionada.setEnabled(false);
+        jLOperacionSeleccionada.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLStaticEtiqueta6.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLStaticEtiqueta6.setText("Orden de Producción seleccionada:");
         jLStaticEtiqueta6.setEnabled(false);
+        jLStaticEtiqueta6.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLStaticEtiqueta4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLStaticEtiqueta4.setText("Orden de Produccion Asociada");
         jLStaticEtiqueta4.setEnabled(false);
+        jLStaticEtiqueta4.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLFechaOrigen.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLFechaOrigen.setText("         ");
         jLFechaOrigen.setEnabled(false);
+        jLFechaOrigen.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLEstado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLEstado.setText("       ");
         jLEstado.setEnabled(false);
+        jLEstado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLOrdenProduccionSeleccionada.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLOrdenProduccionSeleccionada.setText("          ");
         jLOrdenProduccionSeleccionada.setEnabled(false);
+        jLOrdenProduccionSeleccionada.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jBBuscarOrdenProduccion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jBBuscarOrdenProduccion.setText("Buscar una Orden de Producción");
         jBBuscarOrdenProduccion.setEnabled(false);
+        jBBuscarOrdenProduccion.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jBBuscarOrdenProduccion.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jBBuscarOrdenProduccionActionPerformed(evt);
             }
         });
 
-        jLStaticEtiqueta1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLStaticEtiqueta1.setText("Proveedor Asociado");
         jLStaticEtiqueta1.setEnabled(false);
+        jLStaticEtiqueta1.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jBBuscarProveedor.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jBBuscarProveedor.setText("Buscar un Proveedor");
         jBBuscarProveedor.setEnabled(false);
+        jBBuscarProveedor.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jBBuscarProveedor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jBBuscarProveedorActionPerformed(evt);
             }
         });
 
-        jLStaticEtiqueta2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLStaticEtiqueta2.setText("Proveedor Seleccionado");
         jLStaticEtiqueta2.setEnabled(false);
+        jLStaticEtiqueta2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
-        jLProveedorSeleccionado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jLProveedorSeleccionado.setText("          ");
         jLProveedorSeleccionado.setEnabled(false);
+        jLProveedorSeleccionado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -295,14 +292,22 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jCBoxProveedorAsociado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jCBoxProveedorAsociado.setText("Posee proveedor asociado");
         jCBoxProveedorAsociado.setEnabled(false);
+        jCBoxProveedorAsociado.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         jCBoxProveedorAsociado.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jCBoxProveedorAsociadoItemStateChanged(evt);
             }
         });
+
+        jCB3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "YCV", "YCE", "YM" }));
+        jCB3.setEnabled(false);
+        jCB3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+
+        jLStaticCB3.setText("Tipo de lote");
+        jLStaticCB3.setEnabled(false);
+        jLStaticCB3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -362,7 +367,11 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
                                 .addGap(18, 18, 18)
                                 .addComponent(jLEstaticoEstado)
                                 .addGap(18, 18, 18)
-                                .addComponent(jLEstado)))
+                                .addComponent(jLEstado))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLStaticCB3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jCB3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
@@ -408,7 +417,11 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLStaticCalendar1)
                         .addComponent(jLFechaOrigen)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLStaticCB3)
+                    .addComponent(jCB3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jBCancelar)
                     .addComponent(jBConcretarAccion))
@@ -425,9 +438,9 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
             switch ((String)jCBOperacion.getSelectedItem()){
                 case "Alta":
                     if (jCBoxProveedorAsociado.isSelected()){
-                        this.organizacion.registrarOrdenDeCompra(this.ordenProduccionSeleccionada, this.proveedorSeleccionado, (String) jCB1.getSelectedItem(), jTFCampo1.getText(), jTFCampo2.getText());    
+                        this.organizacion.registrarOrdenDeCompra((String) jCB3.getSelectedItem(), this.ordenProduccionSeleccionada, this.proveedorSeleccionado, (String) jCB1.getSelectedItem(), jTFCampo1.getText(), jTFCampo2.getText());    
                     }else{
-                        this.organizacion.registrarOrdenDeCompra(this.ordenProduccionSeleccionada, null, (String) jCB1.getSelectedItem(), jTFCampo1.getText(), jTFCampo2.getText());    
+                        this.organizacion.registrarOrdenDeCompra((String) jCB3.getSelectedItem(), this.ordenProduccionSeleccionada, null, (String) jCB1.getSelectedItem(), jTFCampo1.getText(), jTFCampo2.getText());    
                     }
                         
                     
@@ -533,6 +546,7 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
     private javax.swing.JButton jBCancelar;
     private javax.swing.JButton jBConcretarAccion;
     private javax.swing.JComboBox<String> jCB1;
+    private javax.swing.JComboBox<String> jCB3;
     private javax.swing.JComboBox<String> jCBOperacion;
     private javax.swing.JCheckBox jCBoxProveedorAsociado;
     private javax.swing.JLabel jLEstado;
@@ -542,6 +556,7 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
     private javax.swing.JLabel jLOrdenProduccionSeleccionada;
     private javax.swing.JLabel jLProveedorSeleccionado;
     private javax.swing.JLabel jLStaticCB1;
+    private javax.swing.JLabel jLStaticCB3;
     private javax.swing.JLabel jLStaticCalendar1;
     private javax.swing.JLabel jLStaticCampo1;
     private javax.swing.JLabel jLStaticCampo2;
@@ -690,7 +705,8 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
         
         jBConcretarAccion.setEnabled(true);
         jBCancelar.setEnabled(true);
-        
+        jLStaticCB3.setEnabled(true);
+        jCB3.setEnabled(true);
         
         
     }

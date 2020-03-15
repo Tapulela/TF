@@ -322,6 +322,8 @@ public class Organizacion {
     public void registrarAnalisisDeLaboratorio(String puntosNegros, String torrada, String color, String aroma, String tacto, String degustacion, 
             Calendar fechaOrigen, Lote unLote, Equipamiento unLaboratorio, String porcentajePalo, String porcentajeSemilla, String porcentajePolvo, 
             String porcentajeHumedad, String porcentajeHoja, CriterioAnalisisLaboratorio unCriterio, String unComentario, OrdenDeCompra unaOrdenDeCompra) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+        if (unCriterio == null)
+            throw new ExcepcionCargaParametros("Debe seleccionar un criterio de analisis.");
         if (puntosNegros.equals("Seleccionar"))
             throw new ExcepcionCargaParametros("Debe indicar si la muestra posee puntos negros.");
         if (torrada.equals("Seleccionar"))
@@ -348,6 +350,9 @@ public class Organizacion {
             throw new ExcepcionCargaParametros("La orden de compra seleccionada no se encuentra en estado regular.");
         if (unaOrdenDeCompra != null && !unaOrdenDeCompra.poseeProveedorAsociado())
             throw new ExcepcionCargaParametros("La orden de compra seleccionada no posee un proveedor asociado.");
+        if (unaOrdenDeCompra != null && !unaOrdenDeCompra.poseeTipoLote(unCriterio.getTipoLote()))
+            throw new ExcepcionCargaParametros("La orden de compra seleccionada es de "+unaOrdenDeCompra.getTipoLote()+" pero el criterio de análisis de laboratorio es para "+unCriterio.getTipoLote());
+        
         if (unLote != null && !unLote.estaRegular())
             throw new ExcepcionCargaParametros("El lote seleccionado no se encuentra en estado regular.");
         
@@ -362,12 +367,9 @@ public class Organizacion {
         if (!(unLaboratorio instanceof Laboratorio))
             throw new ExcepcionCargaParametros("Debe seleccionar un laboratorio para registrar un analisis.");
         
-        
-        if (unCriterio == null)
-            throw new ExcepcionCargaParametros("Debe seleccionar un criterio de analisis.");
-
         if (unLote != null && !unLote.getTipo_Lote().equals(unCriterio.getTipoLote()))
             throw new ExcepcionCargaParametros("No se puede registrar un analisis para el lote de tipo: "+unLote.getTipo_Lote()+" ya que el criterio es para lotes de tipo "+unCriterio.getTipoLote()+".");
+        
         
         if (!Validaciones.esUnNumeroFraccionarioValido(porcentajePalo))
             throw new ExcepcionCargaParametros("El porcentaje de palo no posee un formato valido (Utilice solo numeros y una coma)");
@@ -2604,7 +2606,7 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
         }
         return retorno;
     }
-    public void registrarOrdenDeCompra(OrdenDeProduccion ordenProduccionSeleccionada, Proveedor proveedorSeleccionado, String unaUnidadMedida,String unaCantidadAComprar, String unCostoDeCompra) throws ExcepcionCargaParametros, SQLException {
+    public void registrarOrdenDeCompra(String unTipoLote, OrdenDeProduccion ordenProduccionSeleccionada, Proveedor proveedorSeleccionado, String unaUnidadMedida,String unaCantidadAComprar, String unCostoDeCompra) throws ExcepcionCargaParametros, SQLException {
         
         if (ordenProduccionSeleccionada == null)
             throw new ExcepcionCargaParametros("No se ha seleccionado una orden de producción");
@@ -2618,6 +2620,8 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
             throw new ExcepcionCargaParametros("El proveedor asociado no se encuentra activo");
         if (!ordenProduccionSeleccionada.seEncuentraRegular())
             throw new ExcepcionCargaParametros("La orden de producción no se encuentra en estado regular.");
+        if (unTipoLote.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("Debe seleccionar un tipo de lote.");
         
         float cantidadAComprar = Organizacion.convertirAFlotante(unaCantidadAComprar, "cantidad a comprar");
         float costoDeCompra = Organizacion.convertirAFlotante(unCostoDeCompra, "costo de compra");
@@ -2631,7 +2635,7 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
         if (Organizacion.convertirUnidadPeso(ordenProduccionSeleccionada.getUnidadDeMedida(), ordenProduccionSeleccionada.getPesoRestanteAComprar(), unaUnidadMedida)< cantidadAComprar)
             throw new ExcepcionCargaParametros("La orden de producción tiene un remanente a comprar menor al ingresado.");
         
-        OrdenDeCompra unaOrdenDeCompra = new OrdenDeCompra(this.getUsuarioActivo(), cantidadAComprar, unaUnidadMedida, costoDeCompra, proveedorSeleccionado, ordenProduccionSeleccionada);
+        OrdenDeCompra unaOrdenDeCompra = new OrdenDeCompra(this.getUsuarioActivo(), cantidadAComprar, unaUnidadMedida, costoDeCompra, proveedorSeleccionado, ordenProduccionSeleccionada, unTipoLote);
         persistencia.persistirObjeto(unaOrdenDeCompra);
         this.ordenesCompra.put(unaOrdenDeCompra.getId(), unaOrdenDeCompra);
         ordenProduccionSeleccionada.agregarEvento(unaOrdenDeCompra);

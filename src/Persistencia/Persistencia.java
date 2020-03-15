@@ -298,7 +298,10 @@ public class Persistencia {
                 Proveedor unProveedor = unaOrganizacion.getProveedores().get(resultadoDeConsulta.getInt("IdProveedor"));
                 OrdenDeProduccion unaOrdenProduccion = unaOrganizacion.getOrdenesProduccion().get(resultadoDeConsulta.getInt("IdOrdenProduccion"));
                 Usuario unUsuario = unaOrganizacion.getUsuarios().get(resultadoDeConsulta.getInt("IdUsuario"));
-                OrdenDeCompra unaOrdenCompra = new OrdenDeCompra(resultadoDeConsulta.getInt("ID"), unUsuario, resultadoDeConsulta.getDate("Fecha_Origen"), resultadoDeConsulta.getFloat("Cantidad"), resultadoDeConsulta.getString("Unidad_De_Medida"), resultadoDeConsulta.getFloat("Costo_De_Compra_PorUnidad"), resultadoDeConsulta.getString("Estado"), unProveedor, unaOrdenProduccion, resultadoDeConsulta.getInt("ID_Evento"));
+                OrdenDeCompra unaOrdenCompra = new OrdenDeCompra(resultadoDeConsulta.getInt("ID"), unUsuario, resultadoDeConsulta.getDate("Fecha_Origen"), 
+                        resultadoDeConsulta.getFloat("Cantidad"), resultadoDeConsulta.getString("Unidad_De_Medida"), 
+                        resultadoDeConsulta.getFloat("Costo_De_Compra_PorUnidad"), resultadoDeConsulta.getString("Estado"), unProveedor, unaOrdenProduccion,
+                        resultadoDeConsulta.getInt("ID_Evento"), resultadoDeConsulta.getString("Tipo_Lote"));
                 if (unProveedor != null) {
                     unProveedor.agregarOrdenDeCompra(unaOrdenCompra);
                 }
@@ -878,7 +881,7 @@ public class Persistencia {
 
                 //Puede o no tener un proveedor.
                 if (unaOrdenDeCompra.poseeProveedorAsociado()) {
-                    ps = this.conexion.prepareStatement("insert into public.ORDENES_COMPRA (Fecha_Origen, Cantidad, Unidad_De_Medida, Costo_De_Compra_PorUnidad, Estado, IdOrdenProduccion, IdProveedor, IdUsuario) values (?, ?, ?, ?, ?, ?, ?, ?);");
+                    ps = this.conexion.prepareStatement("insert into public.ORDENES_COMPRA (Fecha_Origen, Cantidad, Unidad_De_Medida, Costo_De_Compra_PorUnidad, Estado, IdOrdenProduccion, IdProveedor, IdUsuario, Tipo_Lote) values (?, ?, ?, ?, ?, ?, ?, ?, ?);");
                     ps.setObject(1, unaOrdenDeCompra.getFechaOrigen());
                     ps.setObject(2, unaOrdenDeCompra.getCantidadAComprar());
                     ps.setObject(3, unaOrdenDeCompra.getUnidadDeMedida());
@@ -887,8 +890,9 @@ public class Persistencia {
                     ps.setObject(6, unaOrdenDeCompra.getOrdenDeProduccionAsociada().getId());
                     ps.setObject(7, unaOrdenDeCompra.getProveedorAsociado().getId());
                     ps.setObject(8, unaOrdenDeCompra.getUsuarioAsociado().getId());
+                    ps.setObject(9, unaOrdenDeCompra.getTipoLote());
                 } else {
-                    ps = this.conexion.prepareStatement("insert into public.ORDENES_COMPRA (Fecha_Origen, Cantidad, Unidad_De_Medida, Costo_De_Compra_PorUnidad, Estado, IdOrdenProduccion, IdUsuario) values (?, ?, ?, ?, ?, ?, ?);");
+                    ps = this.conexion.prepareStatement("insert into public.ORDENES_COMPRA (Fecha_Origen, Cantidad, Unidad_De_Medida, Costo_De_Compra_PorUnidad, Estado, IdOrdenProduccion, IdUsuario, Tipo_Lote) values (?, ?, ?, ?, ?, ?, ?, ?);");
                     ps.setObject(1, unaOrdenDeCompra.getFechaOrigen());
                     ps.setObject(2, unaOrdenDeCompra.getCantidadAComprar());
                     ps.setObject(3, unaOrdenDeCompra.getUnidadDeMedida());
@@ -896,6 +900,7 @@ public class Persistencia {
                     ps.setObject(5, unaOrdenDeCompra.getEstadoEvento());
                     ps.setObject(6, unaOrdenDeCompra.getOrdenDeProduccionAsociada().getId());
                     ps.setObject(7, unaOrdenDeCompra.getUsuarioAsociado().getId());
+                    ps.setObject(8, unaOrdenDeCompra.getTipoLote());
                 }
                 ps.execute();
                 sql = "SELECT max(Id) from public.ORDENES_COMPRA;";

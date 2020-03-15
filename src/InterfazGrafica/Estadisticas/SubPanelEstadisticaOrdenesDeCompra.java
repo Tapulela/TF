@@ -492,7 +492,7 @@ public class SubPanelEstadisticaOrdenesDeCompra extends Panel implements Transfe
             int dias = (int) diferenciaDias;
             //System.out.println("diferencia de dias: "+dias);
             System.out.println("dias de diferencia: "+dias);
-            switch (unaOrden.getTipo()){
+            switch (unaOrden.getTipoLote()){
                 case Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE:
                     if (datosPorDia[dias][0] == null)
                         datosPorDia[dias][0] = 0f;
