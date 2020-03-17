@@ -488,9 +488,9 @@ public class Estadistica {
         
         Float espacioTotal = unEquipamientoSeleccionado.getCapacidadMaxima();
         Float espacioTotalSinUtilizar;
-        Float espacioTotalOcupadoYCV = unEquipamientoSeleccionado.getPesoTotalDeYCVKgV2();
-        Float espacioTotalOcupadoYCE = unEquipamientoSeleccionado.getPesoTotalDeYCEKgV2();
-        Float espacioTotalOcupadoYCM = unEquipamientoSeleccionado.getPesoTotalDeYCMKgV2();
+        Float espacioTotalOcupadoYCV = unEquipamientoSeleccionado.getPesoTotalDeYCVKgV4(Calendar.getInstance());
+        Float espacioTotalOcupadoYCE = unEquipamientoSeleccionado.getPesoTotalDeYCEKgV4(Calendar.getInstance());
+        Float espacioTotalOcupadoYCM = unEquipamientoSeleccionado.getPesoTotalDeYCMKgV2(Calendar.getInstance());
         espacioTotalSinUtilizar = Math.max(espacioTotal - espacioTotalOcupadoYCV - espacioTotalOcupadoYCE - espacioTotalOcupadoYCM,0);
         Map <String, Float> partes = new HashMap<String, Float>();
         partes.put(Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE, espacioTotalOcupadoYCV);
@@ -512,9 +512,9 @@ public class Estadistica {
         ArrayList retorno = new ArrayList();
         Float espacioTotal = unEquipamiento.getCapacidadMaxima();
         Float espacioTotalSinUtilizar;
-        Float espacioTotalOcupadoYCV = unEquipamiento.getPesoTotalDeYCVKgV2();
-        Float espacioTotalOcupadoYCE = unEquipamiento.getPesoTotalDeYCEKgV2();
-        Float espacioTotalOcupadoYCM = unEquipamiento.getPesoTotalDeYCMKgV2();
+        Float espacioTotalOcupadoYCV = unEquipamiento.getPesoTotalDeYCVKgV4(Calendar.getInstance());
+        Float espacioTotalOcupadoYCE = unEquipamiento.getPesoTotalDeYCEKgV4(Calendar.getInstance());
+        Float espacioTotalOcupadoYCM = unEquipamiento.getPesoTotalDeYCMKgV2(Calendar.getInstance());
         espacioTotalSinUtilizar = Math.max(espacioTotal - espacioTotalOcupadoYCV - espacioTotalOcupadoYCE - espacioTotalOcupadoYCM,0);
         Map <String, Float> partes = new HashMap<String, Float>();
         partes.put(Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE, espacioTotalOcupadoYCV);
@@ -541,9 +541,9 @@ public class Estadistica {
         ArrayList retorno = new ArrayList();
         Float espacioTotal = unEquipamiento.getCapacidadMaxima();
         Float espacioTotalSinUtilizar;
-        Float espacioTotalOcupadoYCV = unEquipamiento.getPesoTotalDeYCVKgV2();
-        Float espacioTotalOcupadoYCE = unEquipamiento.getPesoTotalDeYCEKgV2();
-        Float espacioTotalOcupadoYCM = unEquipamiento.getPesoTotalDeYCMKgV2();
+        Float espacioTotalOcupadoYCV = unEquipamiento.getPesoTotalDeYCVKgV4(Calendar.getInstance());
+        Float espacioTotalOcupadoYCE = unEquipamiento.getPesoTotalDeYCEKgV4(Calendar.getInstance());
+        Float espacioTotalOcupadoYCM = unEquipamiento.getPesoTotalDeYCMKgV2(Calendar.getInstance());
         espacioTotalSinUtilizar = Math.max(espacioTotal - espacioTotalOcupadoYCV - espacioTotalOcupadoYCE - espacioTotalOcupadoYCM,0);
         Map <String, Float> partes = new HashMap<String, Float>();
         partes.put(Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE, espacioTotalOcupadoYCV);

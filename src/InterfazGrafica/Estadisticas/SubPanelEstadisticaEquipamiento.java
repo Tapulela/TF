@@ -512,9 +512,9 @@ public class SubPanelEstadisticaEquipamiento extends Panel implements Transferen
     private void generarGraficoTortaExistenciaActual() {
         Float espacioTotal = unEquipamientoSeleccionado.getCapacidadMaxima();
         Float espacioTotalSinUtilizar;
-        Float espacioTotalOcupadoYCV = unEquipamientoSeleccionado.getPesoTotalDeYCVKgV2();
-        Float espacioTotalOcupadoYCE = unEquipamientoSeleccionado.getPesoTotalDeYCEKgV2();
-        Float espacioTotalOcupadoYCM = unEquipamientoSeleccionado.getPesoTotalDeYCMKgV2();
+        Float espacioTotalOcupadoYCV = unEquipamientoSeleccionado.getPesoTotalDeYCVKgV4(Calendar.getInstance());
+        Float espacioTotalOcupadoYCE = unEquipamientoSeleccionado.getPesoTotalDeYCEKgV4(Calendar.getInstance());
+        Float espacioTotalOcupadoYCM = unEquipamientoSeleccionado.getPesoTotalDeYCMKgV2(Calendar.getInstance());
         /*while (lotes.hasNext()){
             Lote unLote = (Lote) lotes.next();
             switch (unLote.getTipo_Lote()){

@@ -8,7 +8,6 @@ package LogicaDeNegocio;
 import InterfazGrafica.Consultable;
 import InterfazGrafica.UtilidadesInterfazGrafica;
 import LogicaDeNegocio.GestionUsuariosYRoles.Usuario;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -24,13 +23,14 @@ public class OrdenDeCompra extends Evento implements Reporte, Filtrable, Consult
     private String unidadDeMedida;
     private float costoPorUnidad;
     private String estado;
+    private String tipoLote;
     
     private ArrayList lotesAsociados;
     private Proveedor proveedorAsociado;
     private OrdenDeProduccion ordenDeProduccionAsociada;
     private ArrayList analisisRealizados;
 
-    public OrdenDeCompra(int id, Usuario unUsuario, java.sql.Date fechaOrigen, float cantidadAComprar, String unidadDeMedida, float costoPorUnidad, String estado, Proveedor proveedorAsociado, OrdenDeProduccion unaOrdenDeProduccion, int idEvento) {
+    public OrdenDeCompra(int id, Usuario unUsuario, java.sql.Date fechaOrigen, float cantidadAComprar, String unidadDeMedida, float costoPorUnidad, String estado, Proveedor proveedorAsociado, OrdenDeProduccion unaOrdenDeProduccion, int idEvento, String unTipoLote) {
         super(idEvento, estado, unUsuario, fechaOrigen, id);
         this.cantidadAComprar = cantidadAComprar;
         this.unidadDeMedida = unidadDeMedida;
@@ -40,10 +40,10 @@ public class OrdenDeCompra extends Evento implements Reporte, Filtrable, Consult
         this.ordenDeProduccionAsociada = unaOrdenDeProduccion;
         this.lotesAsociados = new ArrayList();
         this.analisisRealizados = new ArrayList();
-        
+        this.tipoLote = unTipoLote;
     }
     
-    public OrdenDeCompra(Usuario unUsuario, float cantidadComprada, String unidadDeMedida, float costoPorUnidad, Proveedor proveedorAsociado, OrdenDeProduccion ordenDeProduccionAsociada) {
+    public OrdenDeCompra(Usuario unUsuario, float cantidadComprada, String unidadDeMedida, float costoPorUnidad, Proveedor proveedorAsociado, OrdenDeProduccion ordenDeProduccionAsociada, String unTipoLote) {
         super(Evento.ESTADO_REGULAR, unUsuario);
         this.cantidadAComprar = cantidadComprada;
         this.unidadDeMedida = unidadDeMedida;
@@ -53,7 +53,7 @@ public class OrdenDeCompra extends Evento implements Reporte, Filtrable, Consult
         this.ordenDeProduccionAsociada = ordenDeProduccionAsociada;
         this.lotesAsociados = new ArrayList();
         this.analisisRealizados = new ArrayList();
-        
+        this.tipoLote = unTipoLote;
 
     }
 
@@ -259,21 +259,12 @@ public class OrdenDeCompra extends Evento implements Reporte, Filtrable, Consult
         return this.estado.equals(unEstado);
     }
 
-    
-    public String getTipo(){
-        String tipo = Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE;
-        Lote unLote = (Lote) lotesAsociados.get(0);
-        if (unLote != null){
-            if (unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE))
-                return Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE;
-            if (unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_ESTACIONADA))
-                return Lote.TIPO_LOTE_YERBA_CANCHADA_ESTACIONADA;
-            if (unLote.esDeTipo(Lote.TIPO_LOTE_YERBA_CANCHADA_MOLIDA))
-                return Lote.TIPO_LOTE_YERBA_CANCHADA_MOLIDA;
-        }
-            
-        
-        return tipo;
+    public String getTipoLote() {
+        return tipoLote;
+    }
+
+    public boolean poseeTipoLote(String tipoLote) {
+        return this.tipoLote.equals(tipoLote);
     }
     
     

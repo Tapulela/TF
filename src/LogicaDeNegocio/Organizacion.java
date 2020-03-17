@@ -322,6 +322,8 @@ public class Organizacion {
     public void registrarAnalisisDeLaboratorio(String puntosNegros, String torrada, String color, String aroma, String tacto, String degustacion, 
             Calendar fechaOrigen, Lote unLote, Equipamiento unLaboratorio, String porcentajePalo, String porcentajeSemilla, String porcentajePolvo, 
             String porcentajeHumedad, String porcentajeHoja, CriterioAnalisisLaboratorio unCriterio, String unComentario, OrdenDeCompra unaOrdenDeCompra) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+        if (unCriterio == null)
+            throw new ExcepcionCargaParametros("Debe seleccionar un criterio de analisis.");
         if (puntosNegros.equals("Seleccionar"))
             throw new ExcepcionCargaParametros("Debe indicar si la muestra posee puntos negros.");
         if (torrada.equals("Seleccionar"))
@@ -348,6 +350,9 @@ public class Organizacion {
             throw new ExcepcionCargaParametros("La orden de compra seleccionada no se encuentra en estado regular.");
         if (unaOrdenDeCompra != null && !unaOrdenDeCompra.poseeProveedorAsociado())
             throw new ExcepcionCargaParametros("La orden de compra seleccionada no posee un proveedor asociado.");
+        if (unaOrdenDeCompra != null && !unaOrdenDeCompra.poseeTipoLote(unCriterio.getTipoLote()))
+            throw new ExcepcionCargaParametros("La orden de compra seleccionada es de "+unaOrdenDeCompra.getTipoLote()+" pero el criterio de análisis de laboratorio es para "+unCriterio.getTipoLote());
+        
         if (unLote != null && !unLote.estaRegular())
             throw new ExcepcionCargaParametros("El lote seleccionado no se encuentra en estado regular.");
         
@@ -362,12 +367,9 @@ public class Organizacion {
         if (!(unLaboratorio instanceof Laboratorio))
             throw new ExcepcionCargaParametros("Debe seleccionar un laboratorio para registrar un analisis.");
         
-        
-        if (unCriterio == null)
-            throw new ExcepcionCargaParametros("Debe seleccionar un criterio de analisis.");
-
         if (unLote != null && !unLote.getTipo_Lote().equals(unCriterio.getTipoLote()))
             throw new ExcepcionCargaParametros("No se puede registrar un analisis para el lote de tipo: "+unLote.getTipo_Lote()+" ya que el criterio es para lotes de tipo "+unCriterio.getTipoLote()+".");
+        
         
         if (!Validaciones.esUnNumeroFraccionarioValido(porcentajePalo))
             throw new ExcepcionCargaParametros("El porcentaje de palo no posee un formato valido (Utilice solo numeros y una coma)");
@@ -670,7 +672,7 @@ public class Organizacion {
             throw new ExcepcionCargaParametros("El peso de entrada o de salida no pueden ser 0 (cero) o negativos.");
         
         if (Organizacion.convertirUnidadPeso(unidadMedidaPeso, pesoNeto, Lote.UNIDAD_MEDIDA_KILOGRAMO) > Organizacion.convertirUnidadPeso(unaOrdenDeCompraAsociada.getUnidadDeMedida(), unaOrdenDeCompraAsociada.getCantidadRestanteARecibir(), Lote.UNIDAD_MEDIDA_KILOGRAMO))
-            throw new ExcepcionCargaParametros("No se puede registrar un ingreso que supere lo pactado en la orden de compra "+unaOrdenDeCompraAsociada.getId()+". (Ingreso: "+UtilidadesInterfazGrafica.formatearFlotante(pesoNeto)+", Cantidad restante a recibir de la orden de compra: "+UtilidadesInterfazGrafica.formatearFlotante(Organizacion.convertirUnidadPeso(unaOrdenDeCompraAsociada.getUnidadDeMedida(), unaOrdenDeCompraAsociada.getCantidadRestanteARecibir(), unidadMedidaPeso))+" "+unaOrdenDeCompraAsociada.getUnidadDeMedida()+")");
+            throw new ExcepcionCargaParametros("No se puede registrar un ingreso que supere lo pactado en la orden de compra "+unaOrdenDeCompraAsociada.getId()+". (Ingreso: "+UtilidadesInterfazGrafica.formatearFlotante(pesoNeto)+" "+unidadMedidaPeso+"s, Cantidad restante a recibir de la orden de compra: "+UtilidadesInterfazGrafica.formatearFlotante(Organizacion.convertirUnidadPeso(unaOrdenDeCompraAsociada.getUnidadDeMedida(), unaOrdenDeCompraAsociada.getCantidadRestanteARecibir(), unidadMedidaPeso))+" "+unaOrdenDeCompraAsociada.getUnidadDeMedida()+"s)");
         
         if (!destino.puedeAlbergar(pesoNeto, unidadMedidaPeso))
             throw new ExcepcionCargaParametros("El destino donde residirá el lote no posee espacio suficiente.");
@@ -2604,7 +2606,7 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
         }
         return retorno;
     }
-    public void registrarOrdenDeCompra(OrdenDeProduccion ordenProduccionSeleccionada, Proveedor proveedorSeleccionado, String unaUnidadMedida,String unaCantidadAComprar, String unCostoDeCompra) throws ExcepcionCargaParametros, SQLException {
+    public void registrarOrdenDeCompra(String unTipoLote, OrdenDeProduccion ordenProduccionSeleccionada, Proveedor proveedorSeleccionado, String unaUnidadMedida,String unaCantidadAComprar, String unCostoDeCompra) throws ExcepcionCargaParametros, SQLException {
         
         if (ordenProduccionSeleccionada == null)
             throw new ExcepcionCargaParametros("No se ha seleccionado una orden de producción");
@@ -2618,6 +2620,8 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
             throw new ExcepcionCargaParametros("El proveedor asociado no se encuentra activo");
         if (!ordenProduccionSeleccionada.seEncuentraRegular())
             throw new ExcepcionCargaParametros("La orden de producción no se encuentra en estado regular.");
+        if (unTipoLote.equals("Seleccionar"))
+            throw new ExcepcionCargaParametros("Debe seleccionar un tipo de lote.");
         
         float cantidadAComprar = Organizacion.convertirAFlotante(unaCantidadAComprar, "cantidad a comprar");
         float costoDeCompra = Organizacion.convertirAFlotante(unCostoDeCompra, "costo de compra");
@@ -2631,7 +2635,7 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
         if (Organizacion.convertirUnidadPeso(ordenProduccionSeleccionada.getUnidadDeMedida(), ordenProduccionSeleccionada.getPesoRestanteAComprar(), unaUnidadMedida)< cantidadAComprar)
             throw new ExcepcionCargaParametros("La orden de producción tiene un remanente a comprar menor al ingresado.");
         
-        OrdenDeCompra unaOrdenDeCompra = new OrdenDeCompra(this.getUsuarioActivo(), cantidadAComprar, unaUnidadMedida, costoDeCompra, proveedorSeleccionado, ordenProduccionSeleccionada);
+        OrdenDeCompra unaOrdenDeCompra = new OrdenDeCompra(this.getUsuarioActivo(), cantidadAComprar, unaUnidadMedida, costoDeCompra, proveedorSeleccionado, ordenProduccionSeleccionada, unTipoLote);
         persistencia.persistirObjeto(unaOrdenDeCompra);
         this.ordenesCompra.put(unaOrdenDeCompra.getId(), unaOrdenDeCompra);
         ordenProduccionSeleccionada.agregarEvento(unaOrdenDeCompra);
@@ -2832,12 +2836,14 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
     }
     
     public void cargaInicial(){
+        boolean comentariosHabilitados = false;
         if (!this.persistencia.seCargoInicialmenteLosCampos()){
             try {
                 System.out.println("Detectada ausencia de tuplas iniciales, realizando carga...");
                 Calendar unaFechaOrigen; 
                 AnalisisLaboratorio unAnalisis;
                 Lote unLoteAMover;
+                String unTipoLote;
                 String pesoSalida;
                 String pesoEntrada;
                 Float unPorcentajePaloInferior;
@@ -2901,8 +2907,10 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
                 //</editor-fold>
                 //Analisis N° 2: Debe estar aprobado.
                 //<editor-fold defaultstate="collapsed">
+                if (comentariosHabilitados)
+                    System.out.println("Carga de análisis N°2");
                 unLaboratorio = (Laboratorio) this.equipamientos.get(1);
-                unCriterio = (CriterioAnalisisLaboratorio) this.criteriosAnalisisLaboratorio.get(4);
+                unCriterio = (CriterioAnalisisLaboratorio) this.criteriosAnalisisLaboratorio.get(5);
                 unaOrdenDeCompra = this.ordenesCompra.get(2);
                 unaFechaOrigen = Calendar.getInstance();
                 unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -6);
@@ -2935,7 +2943,7 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
                 //Analisis N° 3: Debe estar aprobado.
                 //<editor-fold defaultstate="collapsed">
                 unLaboratorio = (Laboratorio) this.equipamientos.get(1);
-                unCriterio = (CriterioAnalisisLaboratorio) this.criteriosAnalisisLaboratorio.get(4);
+                unCriterio = (CriterioAnalisisLaboratorio) this.criteriosAnalisisLaboratorio.get(5);
                 unaOrdenDeCompra = this.ordenesCompra.get(2);
                 unaFechaOrigen = Calendar.getInstance();
                 unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -6);
@@ -3009,7 +3017,7 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
                 //Analisis N° 6: Debe estar aprobado.
                 //<editor-fold defaultstate="collapsed">
                 unLaboratorio = (Laboratorio) this.equipamientos.get(1);
-                unCriterio = (CriterioAnalisisLaboratorio) this.criteriosAnalisisLaboratorio.get(4);
+                unCriterio = (CriterioAnalisisLaboratorio) this.criteriosAnalisisLaboratorio.get(5);
                 unaOrdenDeCompra = this.ordenesCompra.get(4);
                 unaFechaOrigen = Calendar.getInstance();
                 unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -6);
@@ -3069,7 +3077,8 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
                 registrarAnalisisDeLaboratorio(unCriterio.getPuntosNegros(), unCriterio.getTorrada(), unCriterio.getColor(), unCriterio.getAroma(), unCriterio.getTacto(), unCriterio.getDegustacion(), unaFechaOrigen, null, unLaboratorio, unPorcentajePalo, unPorcentajeSemilla, unPorcentajePolvo, unPorcentajeHumedad, unPorcentajeHoja, unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);
                 //registrarAnalisisDeLaboratorio("SI", "SI", "VERDE OSCURO", "TIPICO", "CRUJIENTE", "SI", unaFechaOrigen, null, unLaboratorio, "5,0", "5,0", "5,0", "15,0", "85,0", unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);
                 unAnalisis = analisisLaboratorio.get(7);
-                System.out.println("carga aleatoria");
+                if (comentariosHabilitados)
+                    System.out.println("carga aleatoria");
                 //</editor-fold>
                 
                 //Carga aleatoria
@@ -3084,6 +3093,11 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
                     
                     int unNumeroOrdenCompra = Math.max((Math.abs(generadorAleatorio.nextInt() % (this.ordenesCompra.keySet().size()))), 1);
                     unaOrdenDeCompra = (OrdenDeCompra) this.ordenesCompra.get(unNumeroOrdenCompra);
+                    
+                    if (!(unCriterio.getTipoLote().equals(unaOrdenDeCompra.getTipoLote()))){
+                        i= i-1;
+                        continue;
+                    }
                     
                     if (Math.random()>0.5){
                         int unAnio = (Math.abs(generadorAleatorio.nextInt() % 10));
@@ -3111,6 +3125,7 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
                                 atrCuan[j] = UtilidadesInterfazGrafica.formatearFlotante(porcentajeTotal);
                             porcentajeTotal = porcentajeTotal - Organizacion.convertirAFlotante(atrCuan[j], "insertor de tuplasss");
                         }
+                        
                         registrarAnalisisDeLaboratorio(atrCual[0], atrCual[1], atrCual[2], atrCual[3], atrCual[4], "SI", unaFechaOrigen, null, unLaboratorio, ""+atrCuan[0], ""+atrCuan[1], ""+atrCuan[2], ""+unPorcentajeHumedad, ""+atrCuan[3], unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);
 //                    unAnalisis = analisisLaboratorio.get(7);    
                     }else{
@@ -3155,13 +3170,14 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
                 
             //</editor-fold>
             //Carga de Ingresos
-            
-            System.out.println("Carga de ingresos");
+            if (comentariosHabilitados)            
+                System.out.println("Carga de ingresos");
             //<editor-fold defaultstate="collapsed">
                 //Ingreso N°1
                 //<editor-fold defaultstate="collapsed">
                 Equipamiento unEquipamientoDestino = equipamientos.get(3);     //El Depósito N°1.
                 unaOrdenDeCompra = ordenesCompra.get(1);
+                unTipoLote = Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE;
                 unAnalisis = analisisLaboratorio.get(1);
                 Proveedor unProveedorServicioTransporte = proveedores.get(3);
                 LocalTime unHorarioEntrada = LocalTime.of(7,00,12);
@@ -3171,12 +3187,13 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
                 unaFechaOrigen.add(Calendar.YEAR, -5);
                 pesoEntrada = "40.000";
                 pesoSalida = "20.000";
-                registrarIngresoMateriaPrima(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, pesoEntrada, pesoSalida, "3545", "3321", "5135", "Pedro Gabriel Gómez", "OMD-418", "IUT-166", unEquipamientoDestino, unaOrdenDeCompra, unProveedorServicioTransporte, unAnalisis, Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE);
+                registrarIngresoMateriaPrima(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, pesoEntrada, pesoSalida, "3545", "3321", "5135", "Pedro Gabriel Gómez", "OMD-418", "IUT-166", unEquipamientoDestino, unaOrdenDeCompra, unProveedorServicioTransporte, unAnalisis, unTipoLote);
                 //</editor-fold>
                 //Ingreso N°2
                 //<editor-fold defaultstate="collapsed">
                 unEquipamientoDestino = equipamientos.get(4);     //La C.E.A. N°1
                 unaOrdenDeCompra = ordenesCompra.get(2);
+                unTipoLote = Lote.TIPO_LOTE_YERBA_CANCHADA_ESTACIONADA;
                 unAnalisis = analisisLaboratorio.get(2);
                 unProveedorServicioTransporte = proveedores.get(4);
                 unHorarioEntrada = LocalTime.of(7,00,12);
@@ -3186,12 +3203,14 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
                 unaFechaOrigen.add(Calendar.YEAR, -5);
                 pesoEntrada = "33.500";
                 pesoSalida = "23.500";
-                registrarIngresoMateriaPrima(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, pesoEntrada, pesoSalida, "3545", "3321", "5135", "Pedro Gabriel Gómez", "OMD-418", "IUT-166", unEquipamientoDestino, unaOrdenDeCompra, unProveedorServicioTransporte, unAnalisis, Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE);
+                
+                registrarIngresoMateriaPrima(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, pesoEntrada, pesoSalida, "3545", "3321", "5135", "Pedro Gabriel Gómez", "OMD-418", "IUT-166", unEquipamientoDestino, unaOrdenDeCompra, unProveedorServicioTransporte, unAnalisis, unTipoLote);
                 //</editor-fold>
                 //Ingreso N°3
                 //<editor-fold defaultstate="collapsed">
                 unEquipamientoDestino = equipamientos.get(4);     //La C.E.A. N°1
                 unaOrdenDeCompra = ordenesCompra.get(2);
+                unTipoLote = Lote.TIPO_LOTE_YERBA_CANCHADA_ESTACIONADA;
                 unAnalisis = analisisLaboratorio.get(3);
                 unProveedorServicioTransporte = proveedores.get(4);
                 unHorarioEntrada = LocalTime.of(7,00,12);
@@ -3201,11 +3220,12 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
                 unaFechaOrigen.add(Calendar.YEAR, -5);
                 pesoEntrada = "39.500";
                 pesoSalida = "34.500";
-                registrarIngresoMateriaPrima(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, pesoEntrada, pesoSalida, "3545", "3321", "5135", "Pedro Gabriel Gómez", "OMD-418", "IUT-166", unEquipamientoDestino, unaOrdenDeCompra, unProveedorServicioTransporte, unAnalisis, Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE);
+                registrarIngresoMateriaPrima(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, pesoEntrada, pesoSalida, "3545", "3321", "5135", "Pedro Gabriel Gómez", "OMD-418", "IUT-166", unEquipamientoDestino, unaOrdenDeCompra, unProveedorServicioTransporte, unAnalisis, unTipoLote);
                 //</editor-fold>                
                 //Ingreso N°4
                 //<editor-fold defaultstate="collapsed">
                 unEquipamientoDestino = equipamientos.get(3);     //DEPOSITO N°1
+                unTipoLote = Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE;
                 unaOrdenDeCompra = ordenesCompra.get(3);
                 unAnalisis = analisisLaboratorio.get(5);
                 unProveedorServicioTransporte = proveedores.get(3);
@@ -3216,12 +3236,13 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
                 unaFechaOrigen.add(Calendar.YEAR, -4);
                 pesoEntrada = "35.000";
                 pesoSalida = "25.000";
-                registrarIngresoMateriaPrima(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, pesoEntrada, pesoSalida, "3545", "3321", "5135", "Pedro Gabriel Gómez", "OMD-418", "INE-487", unEquipamientoDestino, unaOrdenDeCompra, unProveedorServicioTransporte, unAnalisis, Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE);
+                registrarIngresoMateriaPrima(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, pesoEntrada, pesoSalida, "3545", "3321", "5135", "Pedro Gabriel Gómez", "OMD-418", "INE-487", unEquipamientoDestino, unaOrdenDeCompra, unProveedorServicioTransporte, unAnalisis, unTipoLote);
                 //</editor-fold>
                 //Ingreso N°5
                 //<editor-fold defaultstate="collapsed">
                 unEquipamientoDestino = equipamientos.get(3);     //DEPOSITO N°1
                 unaOrdenDeCompra = ordenesCompra.get(4);
+                unTipoLote = Lote.TIPO_LOTE_YERBA_CANCHADA_ESTACIONADA;
                 unAnalisis = analisisLaboratorio.get(6);
                 unProveedorServicioTransporte = proveedores.get(4);
                 unHorarioEntrada = LocalTime.of(7,00,12);
@@ -3231,10 +3252,10 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
                 unaFechaOrigen.add(Calendar.YEAR, -4);
                 pesoEntrada = "35.627";
                 pesoSalida = "25.627";
-                registrarIngresoMateriaPrima(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, pesoEntrada, pesoSalida, "3545", "3321", "5135", "Pedro Gabriel Gómez", "YKE-289", "HIR-873", unEquipamientoDestino, unaOrdenDeCompra, unProveedorServicioTransporte, unAnalisis, Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE);
+                registrarIngresoMateriaPrima(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, pesoEntrada, pesoSalida, "3545", "3321", "5135", "Pedro Gabriel Gómez", "YKE-289", "HIR-873", unEquipamientoDestino, unaOrdenDeCompra, unProveedorServicioTransporte, unAnalisis, unTipoLote);
                 //</editor-fold>
             //</editor-fold>
-            
+            if (comentariosHabilitados)
                 System.out.println("Carga de ingresos completada");
             //Carga Movimientos:
             //<editor-fold defaultstate="collapsed">
@@ -3280,14 +3301,15 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
             
             //ANALISIS DEL LOTE N°1 DE YCE
             //<editor-fold defaultstate="collapsed">
+            if (comentariosHabilitados)    
+                System.out.println("Carga de análisis posterior al estacionamiento");
             unLaboratorio = (Laboratorio) this.equipamientos.get(1);
             unCriterio = (CriterioAnalisisLaboratorio) this.criteriosAnalisisLaboratorio.get(5);
-            unaOrdenDeCompra = this.ordenesCompra.get(1);
+            unaOrdenDeCompra = null;
             unaFechaOrigen = Calendar.getInstance();
             unaFechaOrigen.add(Calendar.DAY_OF_MONTH, -2);
             Lote unLote = (Lote) lotes.get(1);
             registrarAnalisisDeLaboratorio("SI", "SI", "VERDE OSCURO", "TIPICO", "CRUJIENTE", "SI", unaFechaOrigen, unLote, unLaboratorio, "5,0", "5,0", "5,0", "15,0", "85,0", unCriterio, "SIN COMENTARIO", null);
-            unAnalisis = analisisLaboratorio.get(6);
             //</editor-fold>
             
             //MOVIMIENTO A MOLINO DEL LOTE N°1
@@ -3397,8 +3419,8 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
         while (recorredorDeLotes.hasNext()){
             int unId = (int) recorredorDeLotes.next();
             Lote unLote = this.lotes.get(unId);
-            if (unLote.esDeYerbaCancadaVerde(unaFecha) && unLote.estaRegular() && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM))
-                totalYCV = totalYCV + unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(Equipamiento.FECHA_REPORTE_INYM);
+            if (unLote.esDeYerbaCancadaVerde(unaFecha) && unLote.estaRegular() && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(unaFecha))
+                totalYCV = totalYCV + unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(unaFecha);
         }
         return totalYCV;
     }
@@ -3434,8 +3456,8 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
         while (recorredorDeLotes.hasNext()){
             int unId = (int) recorredorDeLotes.next();
             Lote unLote = this.lotes.get(unId);
-            if (unLote.esDeYerbaCancadaEstacionada(unaFecha)&& unLote.estaRegular() && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM))
-                totalYCE = totalYCE + unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(Equipamiento.FECHA_REPORTE_INYM);
+            if (unLote.esDeYerbaCancadaEstacionada(unaFecha)&& unLote.estaRegular() && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(unaFecha))
+                totalYCE = totalYCE + unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(unaFecha);
         }
         return totalYCE;
     }
@@ -3465,15 +3487,15 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
     }
     
     private Float calcularTotalYCMKgV4(Calendar unaFecha) {
-        Float totalYCV = 0f;
+        Float totalYM = 0f;
         Iterator recorredorDeLotes = this.lotes.keySet().iterator();
         while (recorredorDeLotes.hasNext()){
             int unId = (int) recorredorDeLotes.next();
             Lote unLote = this.lotes.get(unId);
-            if (unLote.esDeTipo("YM") && unLote.estaRegular() && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM))
-                totalYCV = totalYCV + unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(Equipamiento.FECHA_REPORTE_INYM);
+            if (unLote.esDeTipo("YM") && unLote.estaRegular() && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(unaFecha))
+                totalYM = totalYM + unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(unaFecha);
         }
-        return totalYCV;
+        return totalYM;
     }
     
     public void darDeAltaUnUsuario (String unNombreUsuario, String unNombre, String unApellido,String unDNI, String unRol) throws ExcepcionCargaParametros, SQLException{
