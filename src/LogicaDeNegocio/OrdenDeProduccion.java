@@ -6,6 +6,7 @@
 package LogicaDeNegocio;
 
 import InterfazGrafica.Consultable;
+import InterfazGrafica.Paneles.LeafImprovisado;
 import InterfazGrafica.Paneles.PanelGestionOrdenesProduccion;
 import InterfazGrafica.UtilidadesInterfazGrafica;
 import LogicaDeNegocio.GestionUsuariosYRoles.Usuario;
@@ -13,6 +14,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  *
@@ -36,6 +38,11 @@ public class OrdenDeProduccion extends Evento implements Reporte, Comparable, Fi
     private ArrayList egresosAsociados;
     private ArrayList mermasAsociadas;
     private ArrayList perdidasAsociadas;
+    
+    public static final String C_ORDEN_COMPRA_TREE = "Ordenes de compra";
+    public static final String C_INFORMACION_GRAL_TREE = "Información general";
+    public static final String C_ESTACIONAMIENTOS_PENDIENTES_TREE = "Estacionamientos pendientes";
+    public static final String C_MOLIENDAS_PENDIENTES_TREE = "Moliendas pendientes";
     
     public OrdenDeProduccion(int id, java.sql.Date fechaOrigen, float cantidadAProducir, String unidadDeMedida, java.sql.Date fechaEntregaProductoTerminado, String estado, String unaDescripcion, int idEvento, Usuario unUsuario) {
         super(idEvento, estado, unUsuario, fechaOrigen, id);
@@ -75,6 +82,9 @@ public class OrdenDeProduccion extends Evento implements Reporte, Comparable, Fi
         this.egresosAsociados = new ArrayList();
         this.mermasAsociadas = new ArrayList();
         this.perdidasAsociadas = new ArrayList();
+        
+        if (ConfiguracionLogicaNegocio.PERMITIR_FECHA_ORIGEN_DISTINTA)
+            setFechaOrigen(fechaOrigen);
     }
 
     public ArrayList getEgresosAsociados() {
@@ -490,6 +500,51 @@ public class OrdenDeProduccion extends Evento implements Reporte, Comparable, Fi
         
         
     }
+    public DefaultMutableTreeNode  exhibirCompromisosPendientesJPanel() throws ExcepcionCargaParametros{
+        DefaultMutableTreeNode  retorno = new DefaultMutableTreeNode("Orden de producción "+getId()) ;
+        retorno.setUserObject(this);
+
+        ArrayList listaOrdenesDeCompra = obtenerOrdenesDeCompraPendientes();
+        DefaultMutableTreeNode informacionGeneral = new DefaultMutableTreeNode(C_INFORMACION_GRAL_TREE);
+        retorno.add(informacionGeneral);
+
+        
+        if (this.obtenerCantidadTotalARecibirDeOrdenesDeCompraPendientesEnKgs()>0){
+            DefaultMutableTreeNode treeOrdenesDeCompra = new DefaultMutableTreeNode(new LeafImprovisado(C_ORDEN_COMPRA_TREE, listaOrdenesDeCompra));
+            retorno.add(treeOrdenesDeCompra);
+            Iterator recorredorOrdenesDeCompra = listaOrdenesDeCompra.iterator();
+            while (recorredorOrdenesDeCompra.hasNext()){
+                OrdenDeCompra unaOrdenDeCompra = (OrdenDeCompra) recorredorOrdenesDeCompra.next();
+                if (unaOrdenDeCompra.seEncuentraRegular()){
+                    DefaultMutableTreeNode leafOrdenDeCompra = new DefaultMutableTreeNode(new LeafImprovisado("Orden de compra "+unaOrdenDeCompra.getId(),unaOrdenDeCompra));
+                    treeOrdenesDeCompra.add(leafOrdenDeCompra);    
+                }
+            }
+        }
+        
+        if (!obtenerLotesRestantesAEstacionar().isEmpty()){
+            DefaultMutableTreeNode treeEstacionamientosPendientes = new DefaultMutableTreeNode(new LeafImprovisado(C_ESTACIONAMIENTOS_PENDIENTES_TREE, obtenerLotesRestantesAEstacionar()));
+            retorno.add(treeEstacionamientosPendientes);    
+            Iterator recorredorLotesAEstacionar = this.obtenerLotesRestantesAEstacionar().iterator();
+            while (recorredorLotesAEstacionar.hasNext()){
+                Lote unLote = (Lote)recorredorLotesAEstacionar.next();
+                DefaultMutableTreeNode leafLoteEstacionable = new DefaultMutableTreeNode (new LeafImprovisado("Lote "+unLote.getEtiqueta(), unLote));
+                treeEstacionamientosPendientes.add(leafLoteEstacionable);
+            }
+        }
+        
+        if (!this.obtenerLotesRestantesAMoler().isEmpty()){
+            Iterator recorredorLotesAMoler = this.obtenerLotesRestantesAMoler().iterator();
+            DefaultMutableTreeNode treeMoliendasPendientes = new DefaultMutableTreeNode(new LeafImprovisado(C_MOLIENDAS_PENDIENTES_TREE,obtenerLotesRestantesAMoler()));
+            retorno.add(treeMoliendasPendientes);
+                while (recorredorLotesAMoler.hasNext()){
+                    Lote unLote = (Lote)recorredorLotesAMoler.next();
+                    DefaultMutableTreeNode leafLoteMolible = new DefaultMutableTreeNode(new LeafImprovisado("Lote "+unLote.getEtiqueta(),unLote));
+                    treeMoliendasPendientes.add(leafLoteMolible);
+                }
+        }
+        return retorno;
+    }
 
     public ArrayList obtenerLotesRestantesAMoler() {
         ArrayList retorno = new ArrayList();
@@ -543,5 +598,14 @@ public class OrdenDeProduccion extends Evento implements Reporte, Comparable, Fi
         }
         return cumpleCriterio;
     }
+    @Override
+    public String toString(){
+      return ""+ getId();
+    }
     
+    public Object[] devolverVectorModuloInteligente() throws ExcepcionCargaParametros {
+        Object[] vec ={this,UtilidadesInterfazGrafica.formatearFlotante(this.calcularProgresoGeneral())+" %",UtilidadesInterfazGrafica.formatearFlotante(  Math.max(Organizacion.convertirUnidadPeso(this.unidadDeMedida, this.getPesoRestanteAComprar(), Lote.UNIDAD_MEDIDA_KILOGRAMO), 0f))+" kgs"/*, UtilidadesInterfazGrafica.formatearFlotante(this.calcularPesoPerdidoKgs())+" Kgs."*/,UtilidadesInterfazGrafica.formatearFlotante(this.obtenerCantidadTotalARecibirDeOrdenesDeCompraPendientesEnKgs())+" kgs",UtilidadesInterfazGrafica.formatearFlotante(this.calcularTotalAEstacionarKgs())+" kgs", UtilidadesInterfazGrafica.formatearFlotante(this.calcularTotalAMolerKgs())+" kgs"};
+        
+        return vec;
+    }
 }

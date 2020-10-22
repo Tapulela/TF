@@ -67,6 +67,8 @@ public class PanelGestionSalidas extends Panel implements TransferenciaInstancia
         jTable1.getColumnModel().getColumn(0).setMaxWidth(60);
         establecerAlineacionDeTabla(jTable1, SwingConstants.CENTER);
         ParametrosDeInterfaz.confeccionarComponentes(this.getComponents());
+        UtilidadesInterfazGrafica.establecerAlineacionDerechaDeTabla(jTable1, 7);
+        UtilidadesInterfazGrafica.establecerAlineacionDerechaDeTabla(jTable1, 8);
     }
     
 

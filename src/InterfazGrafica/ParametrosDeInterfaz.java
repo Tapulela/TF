@@ -45,7 +45,8 @@ public class ParametrosDeInterfaz {
     //Verde pastel: new Color(119, 221, 119);
     //Verde oscuro: new Color(5, 68, 23);
     public static final String rutaIcono = "../InterfazGrafica/Assets/Icono.png";
-    public static final String rutaLogo = "C:\\Users\\usuario\\Documents\\NetBeansProjects\\TrabajoFinal\\src\\InterfazGrafica\\Assets\\Logo.png";
+    //public static final String rutaLogo = "C:\\Users\\usuario\\Documents\\NetBeansProjects\\TrabajoFinal\\src\\InterfazGrafica\\Assets\\Logo.png";
+    public static final String rutaLogo = "C:/Users/usuario/Documents/NetBeansProjects/TrabajoFinal/src/InterfazGrafica/Assets/Logo.png";
     public static Font fuentePorDefecto = new Font("Arial", 0 , 24);
     
     

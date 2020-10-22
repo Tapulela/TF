@@ -65,7 +65,10 @@ public class AnalisisLaboratorio extends Evento implements Reporte, Filtrable, C
     private CriterioAnalisisLaboratorio criterioAsociado;
     private OrdenDeCompra ordenDeCompraImplicada;
 
-    public AnalisisLaboratorio(int id, String estado, String puntosNegros, String torrada, String color, String aroma, String tacto, String degustacion, float porcentajePalo, float porcentajePolvo, float porcentajeSemilla, float porcentajeHoja, float porcentajeHumedad, Lote loteImplicado, OrdenDeCompra unaOrdenDeCompra, Laboratorio laboratorioAsociado, CriterioAnalisisLaboratorio criterioAsociado, int idEvento, Usuario unUsuario, Date fechaOrigen, String unComentario, String unaConclusion) {
+    public AnalisisLaboratorio(int id, String estado, String puntosNegros, String torrada, String color, String aroma, String tacto, String degustacion, 
+            float porcentajePalo, float porcentajePolvo, float porcentajeSemilla, float porcentajeHoja, float porcentajeHumedad, Lote loteImplicado,
+            OrdenDeCompra unaOrdenDeCompra, Laboratorio laboratorioAsociado, CriterioAnalisisLaboratorio criterioAsociado, int idEvento, Usuario unUsuario,
+            Date fechaOrigen, String unComentario, String unaConclusion) {
         super(idEvento, estado, unUsuario, fechaOrigen, id);
         this.estado = estado;
         this.puntosNegros = puntosNegros;
@@ -87,7 +90,9 @@ public class AnalisisLaboratorio extends Evento implements Reporte, Filtrable, C
         this.ordenDeCompraImplicada = unaOrdenDeCompra;
     }
 
-    public AnalisisLaboratorio(String puntosNegros, String torrada, String color, String aroma, String tacto, String degustacion, float porcentajePalo, float porcentajePolvo, float porcentajeSemilla, float porcentajeHoja, float porcentajeHumedad, Lote loteImplicado, Laboratorio laboratorioAsociado, CriterioAnalisisLaboratorio criterioAsociado, Usuario unUsuario, String unComentario) {
+    public AnalisisLaboratorio(String puntosNegros, String torrada, String color, String aroma, String tacto, String degustacion, float porcentajePalo, 
+            float porcentajePolvo, float porcentajeSemilla, float porcentajeHoja, float porcentajeHumedad, Lote loteImplicado, 
+            Laboratorio laboratorioAsociado, CriterioAnalisisLaboratorio criterioAsociado, Usuario unUsuario, String unComentario) {
         //Constructor para los analisis de lotes ya ingresados
         super(AnalisisLaboratorio.ESTADO_REGULAR, unUsuario);
         this.estado = AnalisisLaboratorio.ESTADO_REGULAR;
@@ -109,7 +114,9 @@ public class AnalisisLaboratorio extends Evento implements Reporte, Filtrable, C
         criterioAsociado.evaluarAnalisis(this);
     }
     
-    public AnalisisLaboratorio(String puntosNegros, String torrada, String color, String aroma, String tacto, String degustacion, float porcentajePalo, float porcentajePolvo, float porcentajeSemilla, float porcentajeHoja, float porcentajeHumedad, Laboratorio laboratorioAsociado, CriterioAnalisisLaboratorio criterioAsociado, Usuario unUsuario, String unComentario, OrdenDeCompra unaOrdenDeCompra) {
+    public AnalisisLaboratorio(String puntosNegros, String torrada, String color, String aroma, String tacto, String degustacion, float porcentajePalo, 
+            float porcentajePolvo, float porcentajeSemilla, float porcentajeHoja, float porcentajeHumedad, Laboratorio laboratorioAsociado, 
+            CriterioAnalisisLaboratorio criterioAsociado, Usuario unUsuario, String unComentario, OrdenDeCompra unaOrdenDeCompra) {
         //Constructor para los analisis de lotes que van a ingresar
         super(AnalisisLaboratorio.ESTADO_REGULAR, unUsuario);
         this.estado = AnalisisLaboratorio.ESTADO_REGULAR;

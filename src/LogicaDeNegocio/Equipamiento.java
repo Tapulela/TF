@@ -220,15 +220,15 @@ public class Equipamiento implements Reporte{
     public String getTipo(){    //METODO PARA LA INTERFAZ GRAFICA
         String retorno = null;
         if (this instanceof Molino)
-            retorno = "Molino";
+            retorno = Equipamiento.TIPO_MOLINO;
         if (this instanceof Deposito)
-            retorno = "Deposito";
+            retorno = Equipamiento.TIPO_DEPOSITO;
         if (this instanceof CamaraEstacionamiento)
-            retorno = "Camara Est. Acel.";
+            retorno = Equipamiento.TIPO_CAMARA_ESTACIONAMIENTO;
         if (this instanceof Bascula)
-            retorno = "Bascula";
+            retorno = Equipamiento.TIPO_BASCULA;
         if (this instanceof Laboratorio)
-            retorno = "Laboratorio";
+            retorno = Equipamiento.TIPO_LABORATORIO;
         return retorno;
     }
     
@@ -569,6 +569,7 @@ public class Equipamiento implements Reporte{
         }
         return retorno;
     }
+    
 
 }
 

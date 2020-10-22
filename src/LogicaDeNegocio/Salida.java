@@ -92,6 +92,8 @@ public class Salida extends Evento implements Reporte, Filtrable, Consultable {
         return pesoUtilizdo;
     }
     
+    
+    
     public boolean poseeOrdenDeProduccionImplicada(OrdenDeProduccion unaOrdenDeProduccion){
         if (eventoAsociado instanceof Transformacion){
             Transformacion unaTransformacion = (Transformacion) eventoAsociado;
@@ -220,7 +222,7 @@ public class Salida extends Evento implements Reporte, Filtrable, Consultable {
     @Override
     public String getReporte() {
         String retorno = "";
-            retorno = retorno + "ID: "+this.getId() +"\t\t Fecha: "+Organizacion.expresarCalendario(this.getFechaOrigenC())+"\tTipo de salida: "+this.obtenerTipoS()+"\tCantidad registrada: "+Organizacion.convertirUnidadPeso(this.getUnidadMedidaPeso(), this.getPesoUtilizdo(), Lote.UNIDAD_MEDIDA_KILOGRAMO)+" kg(s)";
+            retorno = retorno + "ID: "+this.getId() +"\t\t Fecha: "+Organizacion.expresarCalendario(this.getFechaOrigenC())+"\tTipo de salida: "+this.obtenerTipoS()+"\tCantidad registrada: "+UtilidadesInterfazGrafica.formatearFlotante(Organizacion.convertirUnidadPeso(this.getUnidadMedidaPeso(), this.getPesoUtilizdo(), Lote.UNIDAD_MEDIDA_KILOGRAMO))+" kg(s)";
             retorno = retorno + "\n";
             retorno = retorno + "\n";
             retorno = retorno + "Lote implicado: "+obtenerLoteS()+ "\t\tEvento asociado: "+this.obtenerEventoS()+", ID: "+this.getEventoAsociado().getId();
@@ -266,6 +268,8 @@ public class Salida extends Evento implements Reporte, Filtrable, Consultable {
     public Object[] devolverVector() {
         return devolverVectorSalida();
     }
+
+    
 
     
     

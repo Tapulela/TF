@@ -22,6 +22,7 @@ import InterfazGrafica.Paneles.PanelGestionSalidas;
 import InterfazGrafica.Paneles.PanelGestionUsuarios;
 import InterfazGrafica.Paneles.PanelInicio;
 import InterfazGrafica.Paneles.PanelModuloInteligente;
+import static LogicaDeNegocio.ConfiguracionLogicaNegocio.NOMBRE_SOFTWARE;
 import LogicaDeNegocio.Organizacion;
 import java.awt.Component;
 import java.awt.Toolkit;
@@ -160,7 +161,7 @@ public class Inicio extends javax.swing.JFrame implements TransferenciaInstancia
         jLabel14.setBackground(new java.awt.Color(255, 255, 255));
         jLabel14.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel14.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel14.setText("YerbaSoft");
+        jLabel14.setText(NOMBRE_SOFTWARE);
 
         jScrollPane1.setBorder(null);
 
@@ -178,7 +179,7 @@ public class Inicio extends javax.swing.JFrame implements TransferenciaInstancia
 
         jLabel6.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel6.setForeground(new java.awt.Color(204, 204, 204));
-        jLabel6.setText("Ingresos demateria prima");
+        jLabel6.setText("Ingresos de materia prima");
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -189,7 +190,7 @@ public class Inicio extends javax.swing.JFrame implements TransferenciaInstancia
                 .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel6)
-                .addContainerGap(53, Short.MAX_VALUE))
+                .addContainerGap(55, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -399,7 +400,7 @@ public class Inicio extends javax.swing.JFrame implements TransferenciaInstancia
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel4)
-                .addContainerGap(190, Short.MAX_VALUE))
+                .addContainerGap(196, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -796,12 +797,12 @@ public class Inicio extends javax.swing.JFrame implements TransferenciaInstancia
                 .addComponent(jLabel13)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel14)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(25, Short.MAX_VALUE))
             .addGroup(sidePanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jSeparator1)
                 .addContainerGap())
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 325, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 331, Short.MAX_VALUE)
         );
         sidePanelLayout.setVerticalGroup(
             sidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -900,7 +901,6 @@ public class Inicio extends javax.swing.JFrame implements TransferenciaInstancia
         bgLayout.setVerticalGroup(
             bgLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(bgLayout.createSequentialGroup()
-                .addGap(0, 0, 0)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1009,7 +1009,7 @@ public class Inicio extends javax.swing.JFrame implements TransferenciaInstancia
 
     private void jPanel20MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel20MouseClicked
         seleccionarBoton((JPanel) evt.getComponent());
-        cargarPanel(new PanelModuloInteligente(this));
+        cargarPanel(new PanelModuloInteligente(this, this.trayectoriaActual, this.organizacion, "Estadísticas"));
     }//GEN-LAST:event_jPanel20MouseClicked
 
     private void jPanel21MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel21MouseClicked

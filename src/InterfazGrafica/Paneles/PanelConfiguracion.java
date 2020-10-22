@@ -8,6 +8,7 @@ package InterfazGrafica.Paneles;
 import InterfazGrafica.FiltroTextosSoloNumeros;
 import InterfazGrafica.ParametrosDeInterfaz;
 import InterfazGrafica.TransferenciaInstancias;
+import LogicaDeNegocio.ConfiguracionLogicaNegocio;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.Organizacion;
 import LogicaDeNegocio.Validaciones;
@@ -15,9 +16,12 @@ import Reportes.GeneradorDeReportes;
 import java.awt.Font;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.PlainDocument;
 
 /**
@@ -73,6 +77,12 @@ public class PanelConfiguracion extends Panel implements TransferenciaInstancias
         jLabel7 = new javax.swing.JLabel();
         jTFCampo1 = new javax.swing.JTextField();
         jButton11 = new javax.swing.JButton();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jButton12 = new javax.swing.JButton();
+        jLabel10 = new javax.swing.JLabel();
+        datoCriterio2 = new javax.swing.JTextField();
+        jButton13 = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(204, 204, 204));
 
@@ -114,6 +124,41 @@ public class PanelConfiguracion extends Panel implements TransferenciaInstancias
             }
         });
 
+        jLabel8.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLabel8.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel8.setText("Ruta de logo de la empresa para reportes");
+
+        jLabel9.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLabel9.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel9.setText("Ruta de logo de empresa");
+
+        jButton12.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jButton12.setIcon(new javax.swing.ImageIcon(getClass().getResource("/InterfazGrafica/Assets/icono-Opcion.png"))); // NOI18N
+        jButton12.setText("Cambiar ruta");
+        jButton12.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jButton12.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton12ActionPerformed(evt);
+            }
+        });
+
+        jLabel10.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jLabel10.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel10.setText("Nombre de la empresa");
+
+        datoCriterio2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        datoCriterio2.setText("Ingrese un nombre");
+
+        jButton13.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        jButton13.setIcon(new javax.swing.ImageIcon(getClass().getResource("/InterfazGrafica/Assets/icono-Opcion.png"))); // NOI18N
+        jButton13.setText("Cambiar nombre");
+        jButton13.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jButton13.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton13ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -133,8 +178,20 @@ public class PanelConfiguracion extends Panel implements TransferenciaInstancias
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jTFCampo1, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton11)))
-                .addContainerGap(837, Short.MAX_VALUE))
+                        .addComponent(jButton11))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel8)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButton12))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel10)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(datoCriterio2, javax.swing.GroupLayout.PREFERRED_SIZE, 479, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton13)))
+                .addContainerGap(641, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -151,7 +208,17 @@ public class PanelConfiguracion extends Panel implements TransferenciaInstancias
                     .addComponent(jLabel7)
                     .addComponent(jTFCampo1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton11))
-                .addContainerGap(621, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(jLabel9)
+                    .addComponent(jButton12))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel10)
+                    .addComponent(datoCriterio2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton13))
+                .addContainerGap(489, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -183,14 +250,47 @@ public class PanelConfiguracion extends Panel implements TransferenciaInstancias
         }
     }//GEN-LAST:event_jButton11ActionPerformed
 
+    private void jButton12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton12ActionPerformed
+        JFileChooser chooser = new JFileChooser(); 
+            chooser.setCurrentDirectory(new java.io.File("."));
+            chooser.setDialogTitle("Ruta de salida de reportes");
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            //
+            // disable the "All files" option.
+            //
+            FileFilter imageFilter = new FileNameExtensionFilter(
+    "Image files", ImageIO.getReaderFileSuffixes());
+            chooser.addChoosableFileFilter(imageFilter);
+            chooser.setAcceptAllFileFilterUsed(false);
+            //    
+            if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) { 
+                ConfiguracionLogicaNegocio.RUTA_LOGO_EMPRESA = chooser.getSelectedFile().getAbsolutePath();
+                
+                actualizarRuta();
+              }
+            else {
+              System.out.println("No se selecciono ninguna imagen");
+              }
+    }//GEN-LAST:event_jButton12ActionPerformed
+
+    private void jButton13ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton13ActionPerformed
+        ConfiguracionLogicaNegocio.NOMBRE_EMPRESA = datoCriterio2.getText();
+    }//GEN-LAST:event_jButton13ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextField datoCriterio2;
     private javax.swing.JButton jButton10;
     private javax.swing.JButton jButton11;
+    private javax.swing.JButton jButton12;
+    private javax.swing.JButton jButton13;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JTextField jTFCampo1;
     // End of variables declaration//GEN-END:variables
 

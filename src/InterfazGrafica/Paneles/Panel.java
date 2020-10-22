@@ -246,11 +246,15 @@ public abstract class Panel extends javax.swing.JPanel {
             generarObjetos();
             listaFiltrada = (this.organizacion.filtrarGenerico(this.criterios, this.criteriosSeleccionados, this.objetosAsociadosACriterios, objetosAEvaluar));
             ((DefaultTableModel)unaTabla.getModel()).setRowCount(0);
-            Iterator tuplas = listaFiltrada.iterator();
+            for (int j = listaFiltrada.size() - 1; j >= 0; j--) {
+                Consultable unaTupla = (Consultable) listaFiltrada.get(j);
+                ((DefaultTableModel)unaTabla.getModel()).addRow(unaTupla.devolverVector());
+            }
+            /*Iterator tuplas = listaFiltrada.iterator();
             while (tuplas.hasNext()){
                 Consultable unaTupla = (Consultable) tuplas.next();
                 ((DefaultTableModel)unaTabla.getModel()).addRow(unaTupla.devolverVector());
-            }
+            }*/
         } catch (ExcepcionCargaParametros ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage());
         }

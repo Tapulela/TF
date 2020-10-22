@@ -11,6 +11,7 @@ import LogicaDeNegocio.GestionUsuariosYRoles.Usuario;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
+import java.util.Vector;
 
 /**
  *
@@ -265,6 +266,11 @@ public class OrdenDeCompra extends Evento implements Reporte, Filtrable, Consult
 
     public boolean poseeTipoLote(String tipoLote) {
         return this.tipoLote.equals(tipoLote);
+    }
+
+    public Object[] devolverVectorModuloInteligente() {
+        Object[] vec ={this.getId(), Organizacion.convertirUnidadPeso(this.unidadDeMedida, this.getCantidadRestanteARecibir(), Lote.UNIDAD_MEDIDA_KILOGRAMO)+" kg(s)"};
+        return vec;
     }
     
     

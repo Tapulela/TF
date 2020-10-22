@@ -507,7 +507,7 @@ public class GestionOrdenesProduccion extends javax.swing.JFrame implements Tran
         try {
             switch ((String)jCBOperacion.getSelectedItem()){
                 case "Registrar":
-                    this.organizacion.registrarOrdenDeProduccion(Calendar.getInstance(),Float.parseFloat(jTFCantidadAProducir.getText()), (String) jCBUnidadMedida.getSelectedItem(), jCFechaEntrega.getCalendar(), jTADescripcion.getText(), criteriosTabla2);
+                    this.organizacion.registrarOrdenDeProduccion(Calendar.getInstance(),jTFCantidadAProducir.getText(), (String) jCBUnidadMedida.getSelectedItem(), jCFechaEntrega.getCalendar(), jTADescripcion.getText(), criteriosTabla2);
                     break;
                 case "Anular":
                     this.organizacion.anularOrdenDeProduccion(unaOrdenDeProduccionSeleccionada);

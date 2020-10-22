@@ -238,16 +238,17 @@ public class Organizacion {
         this.persistencia.modificarObjeto(unaOrdenDeProduccion);
     }
     
-    public void registrarOrdenDeProduccion(Calendar unaFechaOrigen, float cantidadAProducir, String unidadDeMedida, Calendar fechaEntregaProductoTerminado, String unaDescripcion, ArrayList criterios) throws ExcepcionCargaParametros, SQLException {
+    public void registrarOrdenDeProduccion(Calendar unaFechaOrigen, String cantidadAProducir, String unidadDeMedida, Calendar fechaEntregaProductoTerminado, String unaDescripcion, ArrayList criterios) throws ExcepcionCargaParametros, SQLException {
         if (unaFechaOrigen == null)
             throw new ExcepcionCargaParametros("Se requiere especificar una fecha de origen.");
         if (fechaEntregaProductoTerminado == null)
             throw new ExcepcionCargaParametros("Se requiere especificar una fecha de entrega de producto terminado.");
         if (fechaEntregaProductoTerminado.before(Calendar.getInstance()))
             throw new ExcepcionCargaParametros("La fecha de entrega del producto terminado no puede anteceder la fecha actual.");
-        if (cantidadAProducir <= 0)
+        float unaCantidad = Organizacion.convertirAFlotante(cantidadAProducir, "cantidad a producir");
+        if (unaCantidad <= 0)
             throw new ExcepcionCargaParametros("Por favor, ingrese una cantidad a Producir positiva.");
-        OrdenDeProduccion unaOrdenDeProduccion = new OrdenDeProduccion(unaFechaOrigen, cantidadAProducir, unidadDeMedida, fechaEntregaProductoTerminado, unaDescripcion, this.usuarioActivo);
+        OrdenDeProduccion unaOrdenDeProduccion = new OrdenDeProduccion(unaFechaOrigen, unaCantidad, unidadDeMedida, fechaEntregaProductoTerminado, unaDescripcion, this.usuarioActivo);
         Iterator criteriosImplicados = criterios.iterator();
         while (criteriosImplicados.hasNext()){
             CriterioAnalisisLaboratorio unCriterio = (CriterioAnalisisLaboratorio) criteriosImplicados.next();
@@ -324,6 +325,8 @@ public class Organizacion {
             String porcentajeHumedad, String porcentajeHoja, CriterioAnalisisLaboratorio unCriterio, String unComentario, OrdenDeCompra unaOrdenDeCompra) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
         if (unCriterio == null)
             throw new ExcepcionCargaParametros("Debe seleccionar un criterio de analisis.");
+        if (!unCriterio.seEncuentraActivo())
+            throw new ExcepcionCargaParametros("Debe seleccionar un criterio de analisis activo para realizar un analisis de laboratorio.");
         if (puntosNegros.equals("Seleccionar"))
             throw new ExcepcionCargaParametros("Debe indicar si la muestra posee puntos negros.");
         if (torrada.equals("Seleccionar"))
@@ -416,11 +419,13 @@ public class Organizacion {
         
         AnalisisLaboratorio unAnalisis = null;
         if (unLote != null){
-        unAnalisis = new AnalisisLaboratorio(puntosNegros, torrada, color, aroma, tacto, degustacion, unPorcentajePalo, unPorcentajePolvo, unPorcentajeSemilla, unPorcentajeHoja, unPorcentajeHumedad, unLote, (Laboratorio) unLaboratorio, unCriterio, usuarioActivo, unComentario.toUpperCase());
-        unLote.agregarAnalisis(unAnalisis);
-        unLote.getOrdenDeProduccionAsociada().agregarEvento(unAnalisis);
+            unAnalisis = new AnalisisLaboratorio(puntosNegros, torrada, color, aroma, tacto, degustacion, unPorcentajePalo, unPorcentajePolvo, unPorcentajeSemilla, unPorcentajeHoja, unPorcentajeHumedad, unLote, (Laboratorio) unLaboratorio, unCriterio, usuarioActivo, unComentario.toUpperCase());
+            unLote.agregarAnalisis(unAnalisis);
+            unLote.getOrdenDeProduccionAsociada().agregarEvento(unAnalisis);
         }else if (unaOrdenDeCompra != null){
-            unAnalisis = new AnalisisLaboratorio(puntosNegros, torrada, color, aroma, tacto, degustacion, unPorcentajePalo, unPorcentajePolvo, unPorcentajeSemilla, unPorcentajeHoja, unPorcentajeHumedad, (Laboratorio) unLaboratorio, unCriterio, usuarioActivo, unComentario.toUpperCase(), unaOrdenDeCompra);
+            unAnalisis = new AnalisisLaboratorio(puntosNegros, torrada, color, aroma, tacto, degustacion, unPorcentajePalo, unPorcentajePolvo, 
+                    unPorcentajeSemilla, unPorcentajeHoja, unPorcentajeHumedad, (Laboratorio) unLaboratorio, unCriterio, usuarioActivo, 
+                    unComentario.toUpperCase(), unaOrdenDeCompra);
             unaOrdenDeCompra.getProveedorAsociado().agregarAnalisis(unAnalisis);
             unaOrdenDeCompra.agregarAnalisisDeLaboratorio(unAnalisis);
             unaOrdenDeCompra.getOrdenDeProduccionAsociada().agregarEvento(unAnalisis);
@@ -579,22 +584,22 @@ public class Organizacion {
             throw new ExcepcionCargaParametros("Debe ingresar al sistema con un usuario valido.");
         
         if (unTipoDeLote.equals("Seleccionar"))
-            throw new ExcepcionCargaParametros("Debe seleccionar un tipo de lote.");
+            throw new ExcepcionCargaParametros("Debe seleccionar un tipo de lote para el ingreso de materia prima.");
         
         if (fechaOrigen == null)
-            throw new ExcepcionCargaParametros("No se ha seleccionado una fecha de origen valida.");
+            throw new ExcepcionCargaParametros("No se ha seleccionado una fecha de origen valida para el ingreso de materia prima.");
         if (fechaOrigen.after(Calendar.getInstance()))
-            throw new ExcepcionCargaParametros("La fecha origen no puede exceder la fecha actual.");
+            throw new ExcepcionCargaParametros("La fecha origen de un ingreso de materia prima no puede exceder la fecha actual.");
         
         if (!Validaciones.esUnNumeroEnteroValido(cantidadUnidades))
-            throw new ExcepcionCargaParametros("Verifique la cantidad de unidades ingresadas.");
+            throw new ExcepcionCargaParametros("Verifique la cantidad de unidades ingresadas en el ingreso de materia prima.");
         
         if (unaOrdenDeCompraAsociada == null)
-            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de compra asociada.");
+            throw new ExcepcionCargaParametros("No se ha seleccionado una orden de compra asociada para el ingreso de materia prima.");
         if (!unaOrdenDeCompraAsociada.seEncuentraRegular())
-            throw new ExcepcionCargaParametros("La orden de compra seleccionada no se encuentra en estado regular.");
+            throw new ExcepcionCargaParametros("La orden de compra seleccionada no se encuentra en estado regular para el ingreso de materia prima.");
         if (!unaOrdenDeCompraAsociada.poseeProveedorAsociado())
-            throw new ExcepcionCargaParametros("La orden de compra seleccionada no posee un proveedor asociado.");
+            throw new ExcepcionCargaParametros("La orden de compra seleccionada no posee un proveedor asociado para el ingreso de materia prima.");
         
         if (unProveedorDeServicioDeTransporte == null)
             throw new ExcepcionCargaParametros("No se ha seleccionado un proveedor de servicio de transporte.");
@@ -952,6 +957,14 @@ public void registrarMovimimiento(Calendar fechaOrigen, LocalTime horaEntrada, L
         unaMolienda.getOrdenDeProduccionAsociada().agregarEvento(unEgreso);
         this.salidas.put(unEgreso.getId(), unEgreso);
         this.egresos.put(unEgreso.getId(), unEgreso);
+  
+        //agregar egreso a los lotes
+        Iterator detalles = unaMolienda.getDetallesAsociados().iterator();
+        while (detalles.hasNext()){
+            DetalleTransformacion unDetalle = (DetalleTransformacion) detalles.next();
+            Lote unLote = unDetalle.getLoteImplicado();
+            unLote.agregarEgreso(unEgreso);
+        }
     }
 
     public void registrarEstacionamiento (ArrayList lotesAsociados, Equipamiento unEquipamiento, Calendar unaFechaOrigen, String duracion) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
@@ -2066,7 +2079,7 @@ public void registrarMovimimiento(Calendar fechaOrigen, LocalTime horaEntrada, L
             
             if (sePuedeAgregar)
                 sePuedeAgregar = unaMolienda.getPesoDisponibleAEgresarKg()>0;
-            if (sePuedeAgregar)
+            if (sePuedeAgregar) 
                 retorno.add(unaMolienda);
         }
         return retorno;
@@ -2186,6 +2199,9 @@ public ArrayList filtrarEventosDeOrdenDeProduccion(Map<String, Boolean> criterio
                         break;
                     case "Perdidas":
                         sePuedeAgregar = unEvento instanceof Perdida;
+                        break;
+                    case "Compras":
+                        sePuedeAgregar = unEvento instanceof OrdenDeCompra;
                         break;
                 }
                 
@@ -2836,9 +2852,10 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
     }
     
     public void cargaInicial(){
-        boolean comentariosHabilitados = false;
+        boolean comentariosHabilitados = true;
         if (!this.persistencia.seCargoInicialmenteLosCampos()){
             try {
+                
                 System.out.println("Detectada ausencia de tuplas iniciales, realizando carga...");
                 Calendar unaFechaOrigen; 
                 AnalisisLaboratorio unAnalisis;
@@ -2869,7 +2886,10 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
             //<editor-fold defaultstate="collapsed">
                 //Analisis N° 1: Debe estar aprobado.
                 //<editor-fold defaultstate="collapsed">
-                
+                if (comentariosHabilitados){
+                    System.out.println("carga de analisis de laboratorio");
+                    System.out.println("Analisis N° 1");
+                }
                 Laboratorio unLaboratorio = (Laboratorio) this.equipamientos.get(1);
                 CriterioAnalisisLaboratorio unCriterio = (CriterioAnalisisLaboratorio) this.criteriosAnalisisLaboratorio.get(4);
                 OrdenDeCompra unaOrdenDeCompra = this.ordenesCompra.get(1);
@@ -3123,7 +3143,7 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
                                 atrCuan[j] = UtilidadesInterfazGrafica.formatearFlotante((generadorAleatorio.nextFloat()*10000) % porcentajeTotal);
                             else
                                 atrCuan[j] = UtilidadesInterfazGrafica.formatearFlotante(porcentajeTotal);
-                            porcentajeTotal = porcentajeTotal - Organizacion.convertirAFlotante(atrCuan[j], "insertor de tuplasss");
+                            porcentajeTotal = porcentajeTotal - Organizacion.convertirAFlotante(atrCuan[j], "insertor de tuplas de anlisis de laboratorio");
                         }
                         
                         registrarAnalisisDeLaboratorio(atrCual[0], atrCual[1], atrCual[2], atrCual[3], atrCual[4], "SI", unaFechaOrigen, null, unLaboratorio, ""+atrCuan[0], ""+atrCuan[1], ""+atrCuan[2], ""+unPorcentajeHumedad, ""+atrCuan[3], unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);
@@ -3323,6 +3343,10 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
             unLoteAMover = lotes.get(1);
             registrarMovimimiento(unaFechaOrigen, unHorarioEntrada, unHorarioSalida, Lote.UNIDAD_MEDIDA_Tranporte, "150", Lote.UNIDAD_MEDIDA_KILOGRAMO, "35.000", "15.600", "4235", "6015", "6785", "Abel Gomez", "FIU-196", "MAQ-453", unLoteAMover, unEquipamientoDestino, unProveedorServicioTransporte);
             //</editor-fold>
+                
+            //cargarDatosAleatorios(5);
+
+            
             
             } catch (ExcepcionCargaParametros ex) {
                 System.err.println("Error en la carga de parametros en la pre-carga de tuplas: "+ex.getMessage());
@@ -3475,15 +3499,15 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
     }
     
     private Float calcularTotalYCMKgV3() {
-        Float totalYCV = 0f;
+        Float totalYM = 0f;
         Iterator recorredorDeLotes = this.lotes.keySet().iterator();
         while (recorredorDeLotes.hasNext()){
             int unId = (int) recorredorDeLotes.next();
             Lote unLote = this.lotes.get(unId);
             if (unLote.esDeTipo("YM") && unLote.estaRegular() && unLote.getMovimientoDeIngreso().esAnteriorOIgualA(Equipamiento.FECHA_REPORTE_INYM))
-                totalYCV = totalYCV + unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(Equipamiento.FECHA_REPORTE_INYM);
+                totalYM = totalYM + unLote.obtenerPesoIngresadoConPerdidasIncluidasKg(Equipamiento.FECHA_REPORTE_INYM);
         }
-        return totalYCV;
+        return totalYM;
     }
     
     private Float calcularTotalYCMKgV4(Calendar unaFecha) {
@@ -3583,6 +3607,215 @@ public ArrayList filtrarLotesOmitiendoLotes(Map<String, Boolean> criterios, Equi
         return retorno;
     }
     
+    private void cargarDatosAleatorios(int unaCantidadOrdenesProduccion) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+        for (int i = 0; i<unaCantidadOrdenesProduccion; i++){
+            
+            Calendar unaFechaOrigenOrdenDeProduccion;
+            float unaCantidadAProducir;
+            String unaUnidadDeMedida;
+            Calendar unaFechaEntregaProductoTerminado;
+            String unaDescripcion;
+            ArrayList criteriosAnalisisLaboratorio;
+            
+            //determinar cantidad a producir
+            {
+                float max=14;
+                float min=8;
+                unaCantidadAProducir = (500)*(int) (((Math.random())*(max-min)+1)+min);
+            }
+            //determinar fecha de origen
+            {
+                int max = 24;
+                int min = 1;
+                int unaDiferenciaMeses =   (int)((Math.random())*(max-min)+1)+min;
+                unaFechaOrigenOrdenDeProduccion = Calendar.getInstance();
+                unaFechaOrigenOrdenDeProduccion.add(Calendar.MONTH, -unaDiferenciaMeses);
+            }
+            unaUnidadDeMedida = Lote.UNIDAD_MEDIDA_KILOGRAMO;
+            unaDescripcion = "Orden de producción";
+            
+            unaFechaEntregaProductoTerminado = (Calendar) unaFechaOrigenOrdenDeProduccion.clone();
+            unaFechaEntregaProductoTerminado.add(Calendar.YEAR, 3);
+            criteriosAnalisisLaboratorio = new ArrayList();
+            {
+                for (int j = 1; j<=3; j++){
+                    CriterioAnalisisLaboratorio unCriterio = this.getCriteriosAnalisisLaboratorio().get(j);
+                    criteriosAnalisisLaboratorio.add(unCriterio);
+                }
+            }
+            registrarOrdenDeProduccion(unaFechaOrigenOrdenDeProduccion, UtilidadesInterfazGrafica.formatearFlotante(unaCantidadAProducir), unaUnidadDeMedida, unaFechaEntregaProductoTerminado, unaDescripcion, criteriosAnalisisLaboratorio);
+            
+            OrdenDeProduccion unaOrdenDeProduccion;
+            Proveedor unProveedor = getCualquierProveedorActivo();
+            
+            int unIdOrdenProduccion = (int) getOrdenesProduccion().keySet().toArray()[getOrdenesProduccion().size()-1];
+            unaOrdenDeProduccion = getOrdenesProduccion().get(unIdOrdenProduccion);
+            System.out.println("registrada orden de produccion");
+
+            ArrayList ordenesDeCompraIngresadas = new ArrayList();
+            
+            while (unaOrdenDeProduccion.getPesoRestanteAComprar() >0){
+                float unaCantidadAComprar;
+                {
+                    float max=unaOrdenDeProduccion.getPesoRestanteAComprar()/500;
+                    float min=1;
+                    unaCantidadAComprar = Math.min((500)*(int) (((Math.random())*(max-min)+1)+min), unaOrdenDeProduccion.getPesoRestanteAComprar());
+                }
+                float unCostoDeCompra;
+                {
+                    float max=5;
+                    float min=1;
+                    unCostoDeCompra = (150)*(int) (((Math.random())*(max-min)+1)+min);
+                }
+                
+                registrarOrdenDeCompra(Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE, unaOrdenDeProduccion, unProveedor, unaUnidadDeMedida, 
+                        UtilidadesInterfazGrafica.formatearFlotante(unaCantidadAComprar), UtilidadesInterfazGrafica.formatearFlotante(unCostoDeCompra));
+                System.out.println("registrada orden de compra");
+
+                int unIdOrdenCompra = (int) getOrdenesCompra().keySet().toArray()[getOrdenesCompra().size()-1];
+                OrdenDeCompra unaOrdenDeCompra = getOrdenesCompra().get(unIdOrdenCompra);
+                ordenesDeCompraIngresadas.add(unaOrdenDeCompra);
+            }
+            
+            //Por cada orden de compra, genero hasta 4 ingresos para completarlos
+            System.out.println("registro de ingreso de materia prima");
+            // <editor-fold defaultstate="collapsed">
+            Iterator recorredorOrdenesDeCompra = ordenesDeCompraIngresadas.iterator();
+            while (recorredorOrdenesDeCompra.hasNext()){
+                OrdenDeCompra unaOrdenDeCompra = (OrdenDeCompra) recorredorOrdenesDeCompra.next();
+                AnalisisLaboratorio unAnalisis = registrarUnAnalisisLaboratorioAprobadoCargaAleatoria(unaOrdenDeCompra);
+                //Generar la cantidad a ingresar
+                Float cantidadAIngresar = unaOrdenDeCompra.getCantidadAComprar();
+                String pesoEntrada = ""+ UtilidadesInterfazGrafica.formatearFlotante(10000+cantidadAIngresar);
+                String pesoSalida = ""+ UtilidadesInterfazGrafica.formatearFlotante(10000f);
+
+                Calendar unaFechaOrigenIngreso = (Calendar) unaOrdenDeProduccion.getFechaOrigenC().clone();
+                unaFechaOrigenIngreso.add(Calendar.DAY_OF_YEAR, -2);
+
+                String unaUnidadMedidaTransporte = Lote.UNIDAD_MEDIDA_Tranporte;
+                String cantidadBolsas = "100";
+
+                //Generar hoja de ruta y n de remito y nº precinto
+                String nHojaRuta;
+                String nRemito;
+                String unNumeroDePrecinto;
+                {
+                    float max=100000;
+                    float min=1;
+                    nHojaRuta = ""+(int) (((Math.random())*(max-min)+1)+min);
+                    nRemito = ""+(int) (((Math.random())*(max-min)+1)+min);
+                    unNumeroDePrecinto = ""+(int) (((Math.random())*(max-min)+1)+min);
+                }
+
+                Equipamiento destino = getUnEquipamientoDestinoCargaAleatoria();
+                registrarIngresoMateriaPrima(unaFechaOrigenIngreso, LocalTime.MIN, LocalTime.NOON, unaUnidadMedidaTransporte, cantidadBolsas, 
+                        unaUnidadDeMedida, pesoEntrada, pesoSalida, nHojaRuta, nRemito, unNumeroDePrecinto, "Sergio Ifran", 
+                        "ASK-658", "TER-703", destino, unaOrdenDeCompra, unProveedor, unAnalisis, Lote.TIPO_LOTE_YERBA_CANCHADA_VERDE);
+            //carga de un analisis de laboratorio aprobado
+            // <editor-fold defaultstate="collapsed">
+
+
+
+        // </editor-fold>
+            }
+            // </editor-fold>
+            
+            
+            
+            
+            // <editor-fold defaultstate="collapsed">
+            // </editor-fold>
+            
+            // <editor-fold defaultstate="collapsed">
+            // </editor-fold>
+        }
+    }
+
+    private Proveedor getCualquierProveedorActivo() {
+        Proveedor retorno = null;
+        while (retorno == null){
+            int max = this.getProveedores().keySet().size()-1;
+            int min = 0;
+            int unIdAProbar = (int)((Math.random())*(max-min)+1)+min;
+            Proveedor unProveedor = this.getProveedores().get(unIdAProbar);
+            if (unProveedor.seEncuentraActivo())
+                retorno = unProveedor;
+        }
+        return retorno;
+    }
+    
+    private AnalisisLaboratorio registrarUnAnalisisLaboratorioAprobadoCargaAleatoria(OrdenDeCompra unaOrdenDeCompra) throws ExcepcionCargaParametros, SQLException, ExcepcionPersistencia{
+        AnalisisLaboratorio retorno = null;
+        
+        Calendar unaFechaOrigen;
+        
+        Float unPorcentajePaloInferior;
+        Float unPorcentajePaloSuperior;
+        String unPorcentajePalo;        
+        
+        Float unPorcentajeSemillaInferior;
+        Float unPorcentajeSemillaSuperior;
+        String unPorcentajeSemilla;
+
+        Float unPorcentajePolvoInferior;
+        Float unPorcentajePolvoSuperior;
+        String unPorcentajePolvo;
+
+        Float unPorcentajeHumedadInferior;
+        Float unPorcentajeHumedadSuperior;
+        String unPorcentajeHumedad;
+
+        Float unPorcentajeHojaInferior;
+        Float unPorcentajeHojaSuperior;
+        String unPorcentajeHoja;
+        
+        Laboratorio unLaboratorio = (Laboratorio) this.equipamientos.get(1);
+        OrdenDeProduccion unaOrdenDeProduccion = unaOrdenDeCompra.getOrdenDeProduccionAsociada();
+        CriterioAnalisisLaboratorio unCriterio = (CriterioAnalisisLaboratorio) unaOrdenDeProduccion.getCriteriosDeAnalisisAsociados().get(0);
+        unaFechaOrigen = (Calendar) unaOrdenDeCompra.getFechaOrigenC().clone();
+        unaFechaOrigen.add(Calendar.DAY_OF_YEAR, -1);
+        
+        unPorcentajePaloInferior = unCriterio.getPorcentajePaloLimiteInferior();
+        unPorcentajePaloSuperior = unCriterio.getPorcentajePaloLimiteSuperior();
+        unPorcentajePalo = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajePaloInferior+(Float)(unPorcentajePaloSuperior-unPorcentajePaloInferior)/2);
+
+        unPorcentajeSemillaInferior = unCriterio.getPorcentajeSemillaLimiteInferior();
+        unPorcentajeSemillaSuperior = unCriterio.getPorcentajeSemillaLimiteSuperior();
+        unPorcentajeSemilla = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeSemillaInferior+(Float)(unPorcentajeSemillaSuperior-unPorcentajeSemillaInferior)/2);
+
+        unPorcentajePolvoInferior = unCriterio.getPorcentajePolvoLimiteInferior();
+        unPorcentajePolvoSuperior = unCriterio.getPorcentajePolvoLimiteSuperior();
+        unPorcentajePolvo = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajePolvoInferior+(Float)(unPorcentajePolvoSuperior-unPorcentajePolvoInferior)/2);
+
+        unPorcentajeHumedadInferior = unCriterio.getPorcentajeHumedadLimiteInferior();
+        unPorcentajeHumedadSuperior = unCriterio.getPorcentajeHumedadLimiteSuperior();
+        unPorcentajeHumedad = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeHumedadInferior+(Float)(unPorcentajeHumedadSuperior-unPorcentajeHumedadInferior)/2);
+
+        unPorcentajeHojaInferior = unCriterio.getPorcentajeHojaLimiteInferior();
+        unPorcentajeHojaSuperior = unCriterio.getPorcentajeHojaLimiteSuperior();
+        unPorcentajeHoja = UtilidadesInterfazGrafica.formatearFlotante(unPorcentajeHojaInferior+(Float)(unPorcentajeHojaSuperior-unPorcentajeHojaInferior)/2);
+
+        registrarAnalisisDeLaboratorio(unCriterio.getPuntosNegros(), unCriterio.getTorrada(), unCriterio.getColor(), unCriterio.getAroma(), unCriterio.getTacto(), unCriterio.getDegustacion(), unaFechaOrigen, null, unLaboratorio, unPorcentajePalo, unPorcentajeSemilla, unPorcentajePolvo, unPorcentajeHumedad, unPorcentajeHoja, unCriterio, "SIN COMENTARIO", unaOrdenDeCompra);
+        
+        int unIdAnalisis = (int) this.getAnalisisLaboratorio().keySet().toArray()[this.getAnalisisLaboratorio().keySet().size()-1];
+        AnalisisLaboratorio unAnalisis = analisisLaboratorio.get(unIdAnalisis);
+        retorno = unAnalisis;
+        
+        return retorno;
+    }
+
+    private Equipamiento getUnEquipamientoDestinoCargaAleatoria() {
+        Equipamiento retorno = null;
+        while (retorno == null){
+            int max = this.getEquipamientos().keySet().size()-1;
+            int min = 0;
+            int unIdAProbar = (int)((Math.random())*(max-min)+1)+min;
+            Equipamiento unEquipamiento = getEquipamientos().get(unIdAProbar);
+            if (unEquipamiento.estaActivo() && (unEquipamiento.getTipo().equals(Equipamiento.TIPO_DEPOSITO)|| unEquipamiento.getTipo().equals(Equipamiento.TIPO_CAMARA_ESTACIONAMIENTO)))
+                retorno = unEquipamiento;    
+        }
+        return retorno;
+    }
 
 }
 

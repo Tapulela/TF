@@ -499,11 +499,10 @@ public class Persistencia {
                 if (resultadoDeConsulta.getInt("IdLote") != 0) {
                     unLote = (Lote) unaOrganizacion.getLotes().get(resultadoDeConsulta.getInt("IdLote"));
                     unaOrdenDeProduccion = unLote.getOrdenDeProduccionAsociada();
-                } else {
-                    if (resultadoDeConsulta.getInt("IdOrdenDeCompra") != 0){
-                        unaOrdenDeCompra = (OrdenDeCompra) unaOrganizacion.getOrdenesCompra().get(resultadoDeConsulta.getInt("IdOrdenDeCompra"));
-                        unaOrdenDeProduccion = unaOrdenDeCompra.getOrdenDeProduccionAsociada();
-                    }
+                }
+                if (resultadoDeConsulta.getInt("IdOrdenDeCompra") != 0){
+                    unaOrdenDeCompra = (OrdenDeCompra) unaOrganizacion.getOrdenesCompra().get(resultadoDeConsulta.getInt("IdOrdenDeCompra"));
+                    unaOrdenDeProduccion = unaOrdenDeCompra.getOrdenDeProduccionAsociada();
                 }
                 CriterioAnalisisLaboratorio unCriterio = (CriterioAnalisisLaboratorio) unaOrganizacion.getCriteriosAnalisisLaboratorio().get(resultadoDeConsulta.getInt("IdCriterio"));
 
@@ -578,6 +577,14 @@ public class Persistencia {
                 unaOrganizacion.getEventos().put(unEgreso.getIdEvento(), unEgreso);
                 unaOrganizacion.getSalidas().put(unEgreso.getId(), unEgreso);
                 unaOrganizacion.getEgresos().put(unEgreso.getId(), unEgreso);
+                
+                //Agregar a los lotes el egreso
+                Iterator detalles = unaMolienda.getDetallesAsociados().iterator();
+                while (detalles.hasNext()){
+                    DetalleTransformacion unDetalle = (DetalleTransformacion) detalles.next();
+                    Lote unLote = unDetalle.getLoteImplicado();
+                    unLote.agregarEgreso(unEgreso);
+                }
             }
         } catch (SQLException e) {
             System.err.println(e.getMessage());

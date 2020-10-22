@@ -36,6 +36,7 @@ public class UtilidadesInterfazGrafica {
     
     public static void configurarTabla(JTable table){
         table.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        table.setGridColor(ParametrosDeInterfaz.colorFondo);
         table.setRowHeight(28);
         table.setSelectionBackground(ParametrosDeInterfaz.COLOR_BARRA_SUPERIOR);
         table.setSelectionForeground(new java.awt.Color(255, 255, 255));

@@ -6,8 +6,6 @@
 package LogicaDeNegocio;
 
 import InterfazGrafica.UtilidadesInterfazGrafica;
-import LogicaDeNegocio.AnalisisLaboratorio;
-import LogicaDeNegocio.OrdenDeProduccion;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -253,7 +251,7 @@ public class CriterioAnalisisLaboratorio {
         if (!unAnalisis.getTorrada().equals(this.getTorrada()))
             resultado = resultado+"No cumple con el criterio de torrada: "+this.getTorrada()+" (Valor registrado: "+unAnalisis.getTorrada()+")\n";
         if (!unAnalisis.getColor().equals(this.getColor()))
-            resultado = resultado+"No cumple con el criterio de torrada: "+this.getColor()+" (Valor registrado: "+unAnalisis.getColor()+")\n";
+            resultado = resultado+"No cumple con el criterio de color: "+this.getColor()+" (Valor registrado: "+unAnalisis.getColor()+")\n";
         if (!unAnalisis.getAroma().equals(this.getAroma()))
             resultado = resultado+"No cumple con el criterio de aroma: "+this.getAroma()+" (Valor registrado: "+unAnalisis.getAroma()+")\n";
         if (!unAnalisis.getTacto().equals(this.getTacto()))
@@ -261,15 +259,15 @@ public class CriterioAnalisisLaboratorio {
         if (!unAnalisis.getDegustacion().equals(this.getDegustacion()))
             resultado = resultado+"No cumple con el criterio de degustacion: "+this.getDegustacion()+" (Valor registrado: "+unAnalisis.getDegustacion()+")\n";
         if (!(this.getPorcentajePolvoLimiteInferior() <= unAnalisis.getPorcentajePolvo() && unAnalisis.getPorcentajePolvo() <= this.getPorcentajePolvoLimiteSuperior()))
-            resultado = resultado+"No cumple con el criterio de porcentaje de polvo: ["+this.getPorcentajePolvoLimiteInferior()+" - " +this.getPorcentajePolvoLimiteSuperior() +"] (Valor registrado: "+unAnalisis.getPorcentajePolvo()+")\n";
+            resultado = resultado+"No cumple con el criterio de porcentaje de polvo: ["+UtilidadesInterfazGrafica.formatearFlotante(this.getPorcentajePolvoLimiteInferior())+" - " +UtilidadesInterfazGrafica.formatearFlotante(this.getPorcentajePolvoLimiteSuperior()) +"] (Valor registrado: "+UtilidadesInterfazGrafica.formatearFlotante(unAnalisis.getPorcentajePolvo())+")\n";
         if (!(this.getPorcentajePaloLimiteInferior()<= unAnalisis.getPorcentajePalo()&& unAnalisis.getPorcentajePalo()<= this.getPorcentajePaloLimiteSuperior()))
-            resultado = resultado+"No cumple con el criterio de porcentaje de palo: ["+this.getPorcentajePaloLimiteInferior()+" - " +this.getPorcentajePaloLimiteSuperior() +"] (Valor registrado: "+unAnalisis.getPorcentajePalo()+")\n";
+            resultado = resultado+"No cumple con el criterio de porcentaje de palo: ["+UtilidadesInterfazGrafica.formatearFlotante(this.getPorcentajePaloLimiteInferior())+" - " +UtilidadesInterfazGrafica.formatearFlotante(this.getPorcentajePaloLimiteSuperior()) +"] (Valor registrado: "+UtilidadesInterfazGrafica.formatearFlotante(unAnalisis.getPorcentajePalo())+")\n";
         if (!(this.getPorcentajeHojaLimiteInferior()<= unAnalisis.getPorcentajeHoja()&& unAnalisis.getPorcentajeHoja()<= this.getPorcentajeHojaLimiteSuperior()))
-            resultado = resultado+"No cumple con el criterio de porcentaje de hoja: ["+this.getPorcentajeHojaLimiteInferior()+" - " +this.getPorcentajeHojaLimiteSuperior() +"] (Valor registrado: "+unAnalisis.getPorcentajeHoja()+")\n";
+            resultado = resultado+"No cumple con el criterio de porcentaje de hoja: ["+UtilidadesInterfazGrafica.formatearFlotante(this.getPorcentajeHojaLimiteInferior())+" - " +UtilidadesInterfazGrafica.formatearFlotante(this.getPorcentajeHojaLimiteSuperior()) +"] (Valor registrado: "+UtilidadesInterfazGrafica.formatearFlotante(unAnalisis.getPorcentajeHoja())+")\n";
         if (!(this.getPorcentajeHumedadLimiteInferior()<= unAnalisis.getPorcentajeHumedad()&& unAnalisis.getPorcentajeHumedad()<= this.getPorcentajeHumedadLimiteSuperior()))
-            resultado = resultado+"No cumple con el criterio de porcentaje de humedad: ["+this.getPorcentajeHumedadLimiteInferior()+" - " +this.getPorcentajeHumedadLimiteSuperior() +"] (Valor registrado: "+unAnalisis.getPorcentajeHumedad()+")\n";
+            resultado = resultado+"No cumple con el criterio de porcentaje de humedad: ["+UtilidadesInterfazGrafica.formatearFlotante(this.getPorcentajeHumedadLimiteInferior())+" - " +UtilidadesInterfazGrafica.formatearFlotante(this.getPorcentajeHumedadLimiteSuperior()) +"] (Valor registrado: "+UtilidadesInterfazGrafica.formatearFlotante(unAnalisis.getPorcentajeHumedad())+")\n";
         if (!(this.getPorcentajeSemillaLimiteInferior()<= unAnalisis.getPorcentajeSemilla()&& unAnalisis.getPorcentajeSemilla()<= this.getPorcentajeSemillaLimiteSuperior()))
-            resultado = resultado+"No cumple con el criterio de porcentaje de semilla: ["+this.getPorcentajeSemillaLimiteInferior()+" - " +this.getPorcentajeSemillaLimiteSuperior() +"] (Valor registrado: "+unAnalisis.getPorcentajeSemilla()+")\n";
+            resultado = resultado+"No cumple con el criterio de porcentaje de semilla: ["+UtilidadesInterfazGrafica.formatearFlotante(this.getPorcentajeSemillaLimiteInferior())+" - " +UtilidadesInterfazGrafica.formatearFlotante(this.getPorcentajeSemillaLimiteSuperior()) +"] (Valor registrado: "+UtilidadesInterfazGrafica.formatearFlotante(unAnalisis.getPorcentajeSemilla())+")\n";
         
         return resultado;
     }

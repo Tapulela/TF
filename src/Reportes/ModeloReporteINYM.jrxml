@@ -6,6 +6,9 @@
 	<parameter name="reportLogo" class="java.lang.String"/>
 	<parameter name="Cabecera" class="java.lang.String"/>
 	<parameter name="unResumen" class="java.lang.String"/>
+	<parameter name="logoEmpresa" class="java.lang.String"/>
+	<parameter name="NombreSoftware" class="java.lang.String"/>
+	<parameter name="NombreEmpresa" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
@@ -24,16 +27,12 @@
 		</band>
 	</title>
 	<pageHeader>
-		<band height="125" splitType="Stretch">
+		<band height="146" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<textField evaluationTime="Report">
-				<reportElement x="0" y="69" width="420" height="51" uuid="d1b54138-aab4-416d-ab43-1ed110f4f523"/>
+				<reportElement x="0" y="90" width="420" height="51" uuid="d1b54138-aab4-416d-ab43-1ed110f4f523"/>
 				<textFieldExpression><![CDATA[$P{unResumen}]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement x="70" y="39" width="280" height="21" uuid="f53d788a-b867-44da-9a77-a3f1a1fa94c5"/>
-				<text><![CDATA[YerbaSoft - Sistema de Gestión de Producción de Yerba]]></text>
-			</staticText>
 			<staticText>
 				<reportElement x="70" y="-1" width="130" height="41" uuid="e7399d39-6bd5-483c-9644-d765c421a31e"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -51,6 +50,17 @@
 					<font size="24"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{ReporteDe}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="0" y="60" width="500" height="20" uuid="30dffb3f-92d0-4c73-9121-9f34a93ceb5a"/>
+				<textFieldExpression><![CDATA[$P{NombreEmpresa}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="70" y="40" width="355" height="15" uuid="1016f8c2-2521-49ad-a432-7c8e75d29e60"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{NombreSoftware}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
@@ -85,7 +95,7 @@
 		<band splitType="Stretch"/>
 	</columnFooter>
 	<pageFooter>
-		<band height="66" splitType="Stretch">
+		<band height="79" splitType="Stretch">
 			<textField evaluationTime="Master">
 				<reportElement x="450" y="36" width="104" height="30" uuid="754ddb27-a454-4472-8c61-cf66c0b67128"/>
 				<textFieldExpression><![CDATA["Pagina "+ $V{MASTER_CURRENT_PAGE}+ " de "+ $V{MASTER_TOTAL_PAGES}]]></textFieldExpression>
@@ -95,10 +105,21 @@
 				<textElement textAlignment="Right"/>
 				<textFieldExpression><![CDATA[$P{Cabecera}]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement x="0" y="4" width="273" height="21" uuid="381427a7-5ce1-4a4b-99ab-fc7e8f404194"/>
-				<text><![CDATA[YerbaSoft - Sistema de Gestión de Producción de Yerba]]></text>
-			</staticText>
+			<image>
+				<reportElement x="0" y="23" width="60" height="56" uuid="d5d494e2-0051-475c-9d18-92ecde0d80e7"/>
+				<imageExpression><![CDATA[$P{logoEmpresa}]]></imageExpression>
+			</image>
+			<textField evaluationTime="Report">
+				<reportElement x="60" y="25" width="370" height="54" uuid="e9978bf4-b8da-4a70-ba94-0aa5b21d9cba"/>
+				<textFieldExpression><![CDATA[$P{NombreEmpresa}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="355" height="15" uuid="4ecf091f-dd9b-49e2-b0dd-0d61d859f55e"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{NombreSoftware}]]></textFieldExpression>
+			</textField>
 		</band>
 	</pageFooter>
 	<summary>

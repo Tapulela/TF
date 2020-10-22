@@ -10,24 +10,21 @@ import InterfazGrafica.GestionAnalisisLaboratorio;
 import InterfazGrafica.GestionIngresoMP;
 import InterfazGrafica.ParametrosDeInterfaz;
 import InterfazGrafica.TransferenciaInstancias;
+import InterfazGrafica.UtilidadesInterfazGrafica;
 import static InterfazGrafica.UtilidadesInterfazGrafica.establecerAlineacionDeTabla;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.OrdenDeCompra;
 import LogicaDeNegocio.OrdenDeProduccion;
 import LogicaDeNegocio.Organizacion;
 import LogicaDeNegocio.Proveedor;
-import java.awt.Component;
 import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
@@ -74,7 +71,7 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
         this.trayectoriaActual = trayectoriaAnterior + " - Busqueda de Ordenes de Compra";
         
         cabeceraDeVentana.configurarCabecera(ventanaAnterior, this, "Busqueda de una Orden de Compra", this.trayectoriaActual, organizacion.getUsuarioActivo().getApellido()+", "+organizacion.getUsuarioActivo().getNombre());
-        jTable1.setRowHeight(30);
+        
         setIconImage(new ImageIcon(getClass().getResource("../"+ParametrosDeInterfaz.rutaIcono)).getImage());
         this.getContentPane().setBackground(ParametrosDeInterfaz.colorFondo);
         
@@ -96,6 +93,8 @@ public class BuscarOrdenCompra extends javax.swing.JFrame implements Transferenc
         }        
         establecerAlineacionDeTabla(jTable1, SwingConstants.CENTER);
         ParametrosDeInterfaz.configurarVentana(this);
+        UtilidadesInterfazGrafica.establecerAlineacionDerechaDeTabla(jTable1, 2);
+        UtilidadesInterfazGrafica.establecerAlineacionDerechaDeTabla(jTable1, 4);
     }
 
     /**

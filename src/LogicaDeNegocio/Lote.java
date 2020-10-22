@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
+import java.util.Vector;
 
 /**
  *
@@ -614,8 +615,10 @@ public class Lote {
         Iterator recorredorSalidas = this.salidasAsociadas.iterator();
         while (recorredorSalidas.hasNext()){
             Salida unaSalida = (Salida) recorredorSalidas.next();
-            if (unaSalida.estaRegular())
+            if (unaSalida.estaRegular() && !(unaSalida instanceof Egreso))
                 retorno = retorno - Organizacion.convertirUnidadPeso(unaSalida.getUnidadMedidaPeso(), unaSalida.getPesoUtilizdo(), UNIDAD_MEDIDA_KILOGRAMO);
+            if (unaSalida.estaRegular() && unaSalida instanceof Egreso)
+                retorno = retorno - Organizacion.convertirUnidadPeso(unaSalida.getUnidadMedidaPeso(), ((Egreso)unaSalida).getPesoUtilizdo(this), UNIDAD_MEDIDA_KILOGRAMO);
         }
         return Math.max(retorno, 0);
     }
@@ -626,8 +629,10 @@ public class Lote {
         Iterator recorredorSalidas = this.salidasAsociadas.iterator();
         while (recorredorSalidas.hasNext()){
             Salida unaSalida = (Salida) recorredorSalidas.next();
-            if (unaSalida.estaRegular() && unaSalida.esAnteriorOIgualA(unaFecha))
+            if (unaSalida.estaRegular() && unaSalida.esAnteriorOIgualA(unaFecha) && !(unaSalida instanceof Egreso))
                 retorno = retorno - Organizacion.convertirUnidadPeso(unaSalida.getUnidadMedidaPeso(), unaSalida.getPesoUtilizdo(), UNIDAD_MEDIDA_KILOGRAMO);
+            if (unaSalida.estaRegular() && unaSalida.esAnteriorOIgualA(unaFecha) && unaSalida instanceof Egreso)
+                retorno = retorno - Organizacion.convertirUnidadPeso(unaSalida.getUnidadMedidaPeso(), ((Egreso)unaSalida).getPesoUtilizdo(this), UNIDAD_MEDIDA_KILOGRAMO);
         }
         return Math.max(retorno, 0);
     }
@@ -699,6 +704,14 @@ public class Lote {
         return (seEncontroEstacionamiento && !seEncontroMolienda);
     }
     
-    
+    @Override
+    public String toString(){
+        return this.etiqueta;
+    }
+
+    public Object[] devolverVectorModuloInteligente() throws ExcepcionCargaParametros {
+        Object[] vec ={this, UtilidadesInterfazGrafica.formatearFlotante(getCantidadDisponibleParaTransformarKg())+" Kg(s).", this.obtenerSituacion(), this.getEquipamientoDondeReside().getNombre()};
+        return vec;
+    }   
     
 }

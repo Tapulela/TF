@@ -9,6 +9,7 @@ package InterfazGrafica.Busqueda;
 import InterfazGrafica.ABMProveedor;
 import InterfazGrafica.ParametrosDeInterfaz;
 import InterfazGrafica.TransferenciaInstancias;
+import InterfazGrafica.UtilidadesInterfazGrafica;
 import static InterfazGrafica.UtilidadesInterfazGrafica.establecerAlineacionDeTabla;
 import LogicaDeNegocio.Equipamiento;
 import LogicaDeNegocio.ExcepcionCargaParametros;
@@ -104,9 +105,8 @@ public class BuscarIngresoMateriaPrima extends javax.swing.JFrame implements Tra
         if (ventanaAnterior instanceof ABMProveedor){   //EJEMPLO GENERICO, ESTO DEBERIA CAMBIARSE
             //INSERTAR CODIGO SI ES QUE HAY UN TRATAMIENTO PARTICULAR
         }
-        
-        establecerAlineacionDeTabla(jTable1, SwingConstants.CENTER);
         ParametrosDeInterfaz.configurarVentana(this);
+        UtilidadesInterfazGrafica.establecerAlineacionDerechaDeTabla(jTable1, 2);
         
     }
     

@@ -5,10 +5,9 @@
  */
 package Reportes;
 
-import InterfazGrafica.Estadisticas.Estadistica;
 import InterfazGrafica.ParametrosDeInterfaz;
-import LogicaDeNegocio.AnalisisLaboratorio;
 import LogicaDeNegocio.CamaraEstacionamiento;
+import LogicaDeNegocio.ConfiguracionLogicaNegocio;
 import LogicaDeNegocio.Deposito;
 import LogicaDeNegocio.Equipamiento;
 import LogicaDeNegocio.ExcepcionCargaParametros;
@@ -210,6 +209,9 @@ public class GeneradorDeReportes {
         
         String rutaLogo = ParametrosDeInterfaz.rutaLogo;
         parametros.put("reportLogo", rutaLogo);
+        parametros.put("NombreEmpresa", ConfiguracionLogicaNegocio.NOMBRE_EMPRESA);
+        parametros.put("NombreSoftware", ConfiguracionLogicaNegocio.NOMBRE_SOFTWARE+" - Sistema de gestión de producción de yerba");
+        parametros.put("logoEmpresa", ConfiguracionLogicaNegocio.RUTA_LOGO_EMPRESA);
         parametros.put("Cabecera", cabecera);
         
         parametros.put("criterios", criteriosDeFiltracion);
@@ -244,12 +246,15 @@ public class GeneradorDeReportes {
         Map<String, Object> parametros = new HashMap<String, Object>();
         parametros.put("ReporteDe", tituloReporte);
         String cabecera = GeneradorDeReportes.armarCabecera(unEmisor);
-        parametros.put("Cabecera", cabecera);
+        
         
         String rutaLogo = ParametrosDeInterfaz.rutaLogo;
         parametros.put("reportLogo", rutaLogo);
         parametros.put("Cabecera", cabecera);
         
+        parametros.put("NombreEmpresa", ConfiguracionLogicaNegocio.NOMBRE_EMPRESA);
+        parametros.put("logoEmpresa", ConfiguracionLogicaNegocio.RUTA_LOGO_EMPRESA);
+        parametros.put("NombreSoftware", ConfiguracionLogicaNegocio.NOMBRE_SOFTWARE+" - Sistema de gestión de producción de yerba");
         parametros.put("criterios", criteriosDeFiltracion);
         JasperPrint jasperPrint = JasperFillManager.fillReport(reporte, parametros, new JRBeanCollectionDataSource(lista));
         Exporter exporter  = new JRPdfExporter();
@@ -295,6 +300,9 @@ public class GeneradorDeReportes {
         String rutaLogo = ParametrosDeInterfaz.rutaLogo;
         parametros.put("reportLogo", rutaLogo);
         parametros.put("Cabecera", GeneradorDeReportes.armarCabecera(unUsuario.getApellido()+", "+unUsuario.getNombre()));
+        parametros.put("NombreEmpresa", ConfiguracionLogicaNegocio.NOMBRE_EMPRESA);
+        parametros.put("logoEmpresa", ConfiguracionLogicaNegocio.RUTA_LOGO_EMPRESA);
+        parametros.put("NombreSoftware", ConfiguracionLogicaNegocio.NOMBRE_SOFTWARE+" - Sistema de gestión de producción de yerba");
         
         JasperReport reporte = GeneradorDeReportes.generarReporteINYM();
         JasperPrint jasperPrint = JasperFillManager.fillReport(reporte, parametros, new JRBeanCollectionDataSource(datos));

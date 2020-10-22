@@ -46,6 +46,11 @@ public class Egreso extends Salida{
         Object[] vec ={this.getId(),this.getMoliendaImplicada().getEquipamientoAsociado().getNombre(), this.getEstado(), Organizacion.expresarCalendario(this.getFechaOrigenC()), this.getMoliendaImplicada().getId(), UtilidadesInterfazGrafica.formatearFlotante(Organizacion.convertirUnidadPeso(this.getUnidadMedidaPeso(), this.getPesoUtilizdo(), Lote.UNIDAD_MEDIDA_KILOGRAMO))};
         return vec;
     }
-
+    public float getPesoUtilizdo(Lote unLote) {
+        float retorno = 0f;
+        DetalleTransformacion unDetalle = moliendaImplicada.getDetalleAsociadoALote(unLote);
+        retorno = unDetalle.getPesoUtilizdo();
+        return retorno;
+    }
     
 }

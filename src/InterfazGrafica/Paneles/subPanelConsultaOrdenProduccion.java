@@ -140,7 +140,7 @@ public class subPanelConsultaOrdenProduccion extends javax.swing.JPanel implemen
         });
 
         datoCriterio2.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-        datoCriterio2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Analisis de laboratorios", "Egresos", "Estacionamientos", "Ingresos", "Mermas", "Moliendas", "Movimientos", "Perdidas", "Transformaciones", "Salidas" }));
+        datoCriterio2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Seleccionar", "Analisis de laboratorios", "Compras", "Egresos", "Estacionamientos", "Ingresos", "Mermas", "Moliendas", "Movimientos", "Perdidas", "Transformaciones", "Salidas" }));
         datoCriterio2.setEnabled(false);
 
         jLEstatico1Criterio3.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N

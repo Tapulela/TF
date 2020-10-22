@@ -12,7 +12,6 @@ import InterfazGrafica.UtilidadesInterfazGrafica;
 import static InterfazGrafica.UtilidadesInterfazGrafica.establecerAlineacionDeTabla;
 import LogicaDeNegocio.OrdenDeProduccion;
 import LogicaDeNegocio.Organizacion;
-import java.util.Map;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.SwingConstants;
@@ -51,6 +50,7 @@ public class PanelGestionOrdenesProduccion extends Panel {
         UtilidadesInterfazGrafica.configurarTabla(jTable1);
         this.organizacion = ((Inicio)this.ventanaContenedora).getOrganizacion();
         ParametrosDeInterfaz.confeccionarComponentes(this.getComponents());
+        UtilidadesInterfazGrafica.establecerAlineacionDerechaDeTabla(jTable1, 1);
     }
     
 
@@ -276,18 +276,18 @@ public class PanelGestionOrdenesProduccion extends Panel {
                             .addComponent(jCBEstado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                            .addComponent(dato2Criterio3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(dato2Criterio3, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel8)
-                            .addComponent(dato1Criterio3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(dato1Criterio3, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel7)
                             .addComponent(jCBCriterio3))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                            .addComponent(jCBCriterio4)
-                            .addComponent(jLabel9)
-                            .addComponent(dato1Criterio4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(dato2Criterio4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel10)
-                            .addComponent(dato2Criterio4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(dato1Criterio4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel9)
+                            .addComponent(jCBCriterio4))
                         .addGap(78, 78, 78))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -424,7 +424,8 @@ public class PanelGestionOrdenesProduccion extends Panel {
     private void jCBCriterio3ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio3ItemStateChanged
         jLabel4.setEnabled(jCBCriterio3.isSelected());
         dato1Criterio3.setEnabled(jCBCriterio3.isSelected());
-        jLabel5.setEnabled(jCBCriterio3.isSelected());
+        jLabel7.setEnabled(jCBCriterio3.isSelected());
+        jLabel8.setEnabled(jCBCriterio3.isSelected());
         dato2Criterio3.setEnabled(jCBCriterio3.isSelected());
         asignarCriterio(2, (JCheckBox) evt.getSource());
         //criteriosSeleccionados.put("fechaOrigen", jCBCriterio3.isSelected());
@@ -433,7 +434,8 @@ public class PanelGestionOrdenesProduccion extends Panel {
     private void jCBCriterio4ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBCriterio4ItemStateChanged
         jLabel6.setEnabled(jCBCriterio4.isSelected());
         dato1Criterio4.setEnabled(jCBCriterio4.isSelected());
-        jLabel7.setEnabled(jCBCriterio4.isSelected());
+        jLabel9.setEnabled(jCBCriterio4.isSelected());
+        jLabel10.setEnabled(jCBCriterio4.isSelected());
         dato2Criterio4.setEnabled(jCBCriterio4.isSelected());
         //criteriosSeleccionados.put("fechaEntrega", jCBCriterio4.isSelected());
         asignarCriterio(3, (JCheckBox) evt.getSource());

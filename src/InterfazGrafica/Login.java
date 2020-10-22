@@ -5,18 +5,14 @@
  */
 package InterfazGrafica;
 
+import static LogicaDeNegocio.ConfiguracionLogicaNegocio.NOMBRE_SOFTWARE;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.Organizacion;
 import Persistencia.Persistencia;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import static java.lang.Thread.sleep;
+import java.net.InetAddress;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -50,6 +46,18 @@ public class Login extends javax.swing.JFrame {
         
         
         this.setLocationRelativeTo(null);
+        
+        /*String ip = "10.0.0.33";
+        System.out.println("ping a "+ip);
+        try{
+            InetAddress address = InetAddress.getByName(ip);
+            boolean reachable = address.isReachable(10000);
+
+            System.out.println("Is host reachable? " + reachable);
+        } catch (Exception e){
+            e.printStackTrace();
+        }*/
+        
     }
 
     /**
@@ -86,7 +94,7 @@ public class Login extends javax.swing.JFrame {
         jLabel15.setBackground(new java.awt.Color(255, 255, 255));
         jLabel15.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel15.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel15.setText("YerbaSoft - Sistema de Gestión de Yerbatera");
+        jLabel15.setText(NOMBRE_SOFTWARE+" - Sistema de Gestión de Yerbatera");
 
         jLabel18.setBackground(new java.awt.Color(0, 153, 51));
         jLabel18.setFont(new java.awt.Font("Segoe UI", 1, 30)); // NOI18N

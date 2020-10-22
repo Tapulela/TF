@@ -16,12 +16,10 @@ import LogicaDeNegocio.DetalleTransformacion;
 import LogicaDeNegocio.Equipamiento;
 import LogicaDeNegocio.ExcepcionCargaParametros;
 import LogicaDeNegocio.Lote;
-import LogicaDeNegocio.MovimientoInternoMateriaPrima;
 import LogicaDeNegocio.OrdenDeCompra;
 import LogicaDeNegocio.OrdenDeProduccion;
 import LogicaDeNegocio.Organizacion;
 import LogicaDeNegocio.Proveedor;
-import java.awt.Component;
 import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -132,7 +130,6 @@ public class BuscarLote extends javax.swing.JFrame implements TransferenciaInsta
             jCB3.setEnabled(false);
         }
         
-        establecerAlineacionDeTabla(jTable1, SwingConstants.CENTER);
         
         ParametrosDeInterfaz.configurarVentana(this);
         establecerAlineacionDerechaDeTabla(jTable1, 9);

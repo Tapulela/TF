@@ -24,7 +24,7 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jLabel14" min="-2" max="-2" attributes="0"/>
-              <EmptySpace pref="468" max="32767" attributes="0"/>
+              <EmptySpace pref="1127" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -50,7 +50,9 @@
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="0" green="0" red="0" type="rgb"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Bienvenido al sistema de gesti&#xf3;n de la producci&#xf3;n de Yerba, YerbaSoft"/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="&quot;Bienvenido al sistema de gesti&#xf3;n de la producci&#xf3;n de Yerba, &quot;+NOMBRE_SOFTWARE" type="code"/>
+        </Property>
       </Properties>
     </Component>
   </SubComponents>

@@ -614,7 +614,8 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
         jBBuscar.setEnabled(false);
         jBConcretarAccion.setEnabled(false);
         jBCancelar.setEnabled(false);
-        
+        jCB3.setEnabled(false);
+        jLStaticCB3.setEnabled(false);
     }
     
     private void limpiarCampos() {
@@ -823,11 +824,9 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
 
     private void habilitarSeleccionProveedor() {
         jBBuscarProveedor.setEnabled(true);
-        if (proveedorSeleccionado != null){
-            jLStaticEtiqueta1.setEnabled(true);
-            jLStaticEtiqueta2.setEnabled(true);
-            jLProveedorSeleccionado.setEnabled(true);
-        }
+        jLStaticEtiqueta1.setEnabled(true);
+        jLStaticEtiqueta2.setEnabled(true);
+        jLProveedorSeleccionado.setEnabled(true);
     }
 
     private void deshabilitarSeleccionProveedor() {
@@ -836,7 +835,6 @@ public class GestionOrdenesCompra extends javax.swing.JFrame implements Transfer
         jLStaticEtiqueta2.setEnabled(false);
         jLProveedorSeleccionado.setEnabled(false);
         jBBuscarProveedor.setEnabled(false);
-
     }
 
     private void cargarOrdenDeCompra() {
